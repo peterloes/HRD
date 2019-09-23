@@ -9,7 +9,7 @@ Supported:
 /*-	Texas Instruments bq40z50-R1*/
 -	ATMEL ATmega32HVB 
 
-![My image](https://github.com/peterloes/HRD/blob/master/1_Getting_Started_Tutorial/2_Electronic_board.jpg)
+![My image](https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/2_Electronic_board.jpg)
 
 Rechargeable batteries are more and more dominating our modern life.
 We find them in our smartphones and notebooks, in e-bikes and e-cars but also in many toys and
@@ -30,7 +30,7 @@ whether the device could be repaired or needs to be replaced.
 The efficient use of batteries is especially important, as batteries are difficult to recycle and thus constitute a
 burden for the environment. Unfortunately, common BMSs do not display the stored data by default.
 
-![My image](https://github.com/peterloes/HRD/blob/master/1_Getting_Started_Tutorial/2_Mechanik_HRD.JPG)
+![My image](https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/2_Mechanik_HRD.JPG)
 
 The standalone HRD features EFM32 ...the world´s most energy friendly microcontrollers
 
