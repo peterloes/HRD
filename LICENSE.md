@@ -7,7 +7,7 @@ This is the MaxPlanckSienceLicense - MPSL Agreement which applies to all softwar
 MPSL licensed Software is licensed free of charge (Freeware) for non-commercial academic and academic-research purposes only.
 
 The licensed Software / Product:
-We grant the above rights to Mr Loës without source code, provided that the following conditions are met.
+We grant the above rights to Mr Loës, provided that the following conditions are met.
 
 Short description of the software: Handheld Readout Device(HRD) for Battery Management Systems
 (Monitoring Battery Quality)
