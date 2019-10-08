@@ -1,0 +1,984 @@
+ARM GAS  /tmp/cc4S7iji.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"em_rtc.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.BITBAND_Peripheral,"ax",%progbits
+  19              		.align	2
+  20              		.thumb
+  21              		.thumb_func
+  23              	BITBAND_Peripheral:
+  24              	.LFB63:
+  25              		.file 1 "../emlib/inc/em_bitband.h"
+   1:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+   2:../emlib/inc/em_bitband.h ****  * @file
+   3:../emlib/inc/em_bitband.h ****  * @brief Bitband Peripheral API
+   4:../emlib/inc/em_bitband.h ****  * @author Energy Micro AS
+   5:../emlib/inc/em_bitband.h ****  * @version 3.20.2
+   6:../emlib/inc/em_bitband.h ****  *******************************************************************************
+   7:../emlib/inc/em_bitband.h ****  * @section License
+   8:../emlib/inc/em_bitband.h ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/inc/em_bitband.h ****  *******************************************************************************
+  10:../emlib/inc/em_bitband.h ****  *
+  11:../emlib/inc/em_bitband.h ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/inc/em_bitband.h ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/inc/em_bitband.h ****  * freely, subject to the following restrictions:
+  14:../emlib/inc/em_bitband.h ****  *
+  15:../emlib/inc/em_bitband.h ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/inc/em_bitband.h ****  *    claim that you wrote the original software.
+  17:../emlib/inc/em_bitband.h ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/inc/em_bitband.h ****  *    misrepresented as being the original software.
+  19:../emlib/inc/em_bitband.h ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/inc/em_bitband.h ****  *
+  21:../emlib/inc/em_bitband.h ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/inc/em_bitband.h ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/inc/em_bitband.h ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/inc/em_bitband.h ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/inc/em_bitband.h ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/inc/em_bitband.h ****  * of any proprietary rights of a third party.
+  27:../emlib/inc/em_bitband.h ****  *
+  28:../emlib/inc/em_bitband.h ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/inc/em_bitband.h ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/inc/em_bitband.h ****  * arising from your use of this Software.
+  31:../emlib/inc/em_bitband.h ****  *
+  32:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  33:../emlib/inc/em_bitband.h **** #ifndef __EM_BITBAND_H
+ARM GAS  /tmp/cc4S7iji.s 			page 2
+
+
+  34:../emlib/inc/em_bitband.h **** #define __EM_BITBAND_H
+  35:../emlib/inc/em_bitband.h **** 
+  36:../emlib/inc/em_bitband.h **** #include "em_device.h"
+  37:../emlib/inc/em_bitband.h **** #ifdef __cplusplus
+  38:../emlib/inc/em_bitband.h **** extern "C" {
+  39:../emlib/inc/em_bitband.h **** #endif
+  40:../emlib/inc/em_bitband.h **** 
+  41:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+  42:../emlib/inc/em_bitband.h ****  * @addtogroup EM_Library
+  43:../emlib/inc/em_bitband.h ****  * @{
+  44:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  45:../emlib/inc/em_bitband.h **** 
+  46:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+  47:../emlib/inc/em_bitband.h ****  * @addtogroup BITBAND
+  48:../emlib/inc/em_bitband.h ****  * @brief BITBAND Peripheral API
+  49:../emlib/inc/em_bitband.h ****  * @{
+  50:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  51:../emlib/inc/em_bitband.h **** 
+  52:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+  53:../emlib/inc/em_bitband.h ****  * @brief
+  54:../emlib/inc/em_bitband.h ****  *   Perform bit-band operation on peripheral memory location.
+  55:../emlib/inc/em_bitband.h ****  *
+  56:../emlib/inc/em_bitband.h ****  * @details
+  57:../emlib/inc/em_bitband.h ****  *   Bit-banding provides atomic read-modify-write cycle for single bit
+  58:../emlib/inc/em_bitband.h ****  *   modification. Please refer to the reference manual for further details
+  59:../emlib/inc/em_bitband.h ****  *   about bit-banding.
+  60:../emlib/inc/em_bitband.h ****  *
+  61:../emlib/inc/em_bitband.h ****  * @note
+  62:../emlib/inc/em_bitband.h ****  *   This function is only atomic on cores which fully support bitbanding.
+  63:../emlib/inc/em_bitband.h ****  *
+  64:../emlib/inc/em_bitband.h ****  * @param[in] addr Peripheral address location to modify bit in.
+  65:../emlib/inc/em_bitband.h ****  *
+  66:../emlib/inc/em_bitband.h ****  * @param[in] bit Bit position to modify, 0-31.
+  67:../emlib/inc/em_bitband.h ****  *
+  68:../emlib/inc/em_bitband.h ****  * @param[in] val Value to set bit to, 0 or 1.
+  69:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  70:../emlib/inc/em_bitband.h **** __STATIC_INLINE void BITBAND_Peripheral(volatile uint32_t *addr,
+  71:../emlib/inc/em_bitband.h ****                                         uint32_t bit,
+  72:../emlib/inc/em_bitband.h ****                                         uint32_t val)
+  73:../emlib/inc/em_bitband.h **** {
+  26              		.loc 1 73 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 24
+  29              		@ frame_needed = 0, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 86B0     		sub	sp, sp, #24
+  32              		.cfi_def_cfa_offset 24
+  33 0002 0390     		str	r0, [sp, #12]
+  34 0004 0291     		str	r1, [sp, #8]
+  35 0006 0192     		str	r2, [sp, #4]
+  74:../emlib/inc/em_bitband.h **** #if defined(BITBAND_PER_BASE)
+  75:../emlib/inc/em_bitband.h ****   uint32_t tmp =
+  76:../emlib/inc/em_bitband.h ****     BITBAND_PER_BASE + (((uint32_t)addr - PER_MEM_BASE) * 32) + (bit * 4);
+  36              		.loc 1 76 0
+  37 0008 039B     		ldr	r3, [sp, #12]
+  38 000a 03F10473 		add	r3, r3, #34603008
+  39 000e DA00     		lsls	r2, r3, #3
+ARM GAS  /tmp/cc4S7iji.s 			page 3
+
+
+  40 0010 029B     		ldr	r3, [sp, #8]
+  41 0012 1344     		add	r3, r3, r2
+  75:../emlib/inc/em_bitband.h ****   uint32_t tmp =
+  42              		.loc 1 75 0
+  43 0014 9B00     		lsls	r3, r3, #2
+  44 0016 0593     		str	r3, [sp, #20]
+  77:../emlib/inc/em_bitband.h **** 
+  78:../emlib/inc/em_bitband.h ****   *((volatile uint32_t *)tmp) = (uint32_t)val;
+  45              		.loc 1 78 0
+  46 0018 059B     		ldr	r3, [sp, #20]
+  47 001a 019A     		ldr	r2, [sp, #4]
+  48 001c 1A60     		str	r2, [r3]
+  79:../emlib/inc/em_bitband.h **** #else
+  80:../emlib/inc/em_bitband.h ****   uint32_t tmp = *addr;
+  81:../emlib/inc/em_bitband.h ****   /* Make sure val is not more than 1, because we only want to set one bit. */
+  82:../emlib/inc/em_bitband.h ****   val &= 0x1;
+  83:../emlib/inc/em_bitband.h ****   *addr = (tmp & ~(1 << bit)) | (val << bit);
+  84:../emlib/inc/em_bitband.h **** #endif /* defined(BITBAND_PER_BASE) */
+  85:../emlib/inc/em_bitband.h **** }
+  49              		.loc 1 85 0
+  50 001e 06B0     		add	sp, sp, #24
+  51              		@ sp needed
+  52 0020 7047     		bx	lr
+  53              		.cfi_endproc
+  54              	.LFE63:
+  56 0022 00BF     		.section	.text.RTC_Sync,"ax",%progbits
+  57              		.align	2
+  58              		.thumb
+  59              		.thumb_func
+  61              	RTC_Sync:
+  62              	.LFB67:
+  63              		.file 2 "../emlib/src/em_rtc.c"
+   1:../emlib/src/em_rtc.c **** /***************************************************************************//**
+   2:../emlib/src/em_rtc.c ****  * @file
+   3:../emlib/src/em_rtc.c ****  * @brief Real Time Counter (RTC) Peripheral API
+   4:../emlib/src/em_rtc.c ****  * @author Energy Micro AS
+   5:../emlib/src/em_rtc.c ****  * @version 3.20.2
+   6:../emlib/src/em_rtc.c ****  *******************************************************************************
+   7:../emlib/src/em_rtc.c ****  * @section License
+   8:../emlib/src/em_rtc.c ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/src/em_rtc.c ****  *******************************************************************************
+  10:../emlib/src/em_rtc.c ****  *
+  11:../emlib/src/em_rtc.c ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/src/em_rtc.c ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/src/em_rtc.c ****  * freely, subject to the following restrictions:
+  14:../emlib/src/em_rtc.c ****  *
+  15:../emlib/src/em_rtc.c ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/src/em_rtc.c ****  *    claim that you wrote the original software.
+  17:../emlib/src/em_rtc.c ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/src/em_rtc.c ****  *    misrepresented as being the original software.
+  19:../emlib/src/em_rtc.c ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/src/em_rtc.c ****  *
+  21:../emlib/src/em_rtc.c ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/src/em_rtc.c ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/src/em_rtc.c ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/src/em_rtc.c ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/src/em_rtc.c ****  * or fitness for any particular purpose or warranties against infringement
+ARM GAS  /tmp/cc4S7iji.s 			page 4
+
+
+  26:../emlib/src/em_rtc.c ****  * of any proprietary rights of a third party.
+  27:../emlib/src/em_rtc.c ****  *
+  28:../emlib/src/em_rtc.c ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/src/em_rtc.c ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/src/em_rtc.c ****  * arising from your use of this Software.
+  31:../emlib/src/em_rtc.c ****  *
+  32:../emlib/src/em_rtc.c ****  ******************************************************************************/
+  33:../emlib/src/em_rtc.c **** #include "em_rtc.h"
+  34:../emlib/src/em_rtc.c **** #if defined(RTC_COUNT) && (RTC_COUNT > 0)
+  35:../emlib/src/em_rtc.c **** 
+  36:../emlib/src/em_rtc.c **** #include "em_assert.h"
+  37:../emlib/src/em_rtc.c **** #include "em_bitband.h"
+  38:../emlib/src/em_rtc.c **** 
+  39:../emlib/src/em_rtc.c **** /***************************************************************************//**
+  40:../emlib/src/em_rtc.c ****  * @addtogroup EM_Library
+  41:../emlib/src/em_rtc.c ****  * @{
+  42:../emlib/src/em_rtc.c ****  ******************************************************************************/
+  43:../emlib/src/em_rtc.c **** 
+  44:../emlib/src/em_rtc.c **** /***************************************************************************//**
+  45:../emlib/src/em_rtc.c ****  * @addtogroup RTC
+  46:../emlib/src/em_rtc.c ****  * @brief Real Time Counter (RTC) Peripheral API
+  47:../emlib/src/em_rtc.c ****  * @{
+  48:../emlib/src/em_rtc.c ****  ******************************************************************************/
+  49:../emlib/src/em_rtc.c **** 
+  50:../emlib/src/em_rtc.c **** /*******************************************************************************
+  51:../emlib/src/em_rtc.c ****  *******************************   DEFINES   ***********************************
+  52:../emlib/src/em_rtc.c ****  ******************************************************************************/
+  53:../emlib/src/em_rtc.c **** 
+  54:../emlib/src/em_rtc.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  55:../emlib/src/em_rtc.c **** 
+  56:../emlib/src/em_rtc.c **** /** Validation of valid comparator register for assert statements. */
+  57:../emlib/src/em_rtc.c **** #define RTC_COMP_REG_VALID(reg)    (((reg) <= 1))
+  58:../emlib/src/em_rtc.c **** 
+  59:../emlib/src/em_rtc.c **** /** @endcond */
+  60:../emlib/src/em_rtc.c **** 
+  61:../emlib/src/em_rtc.c **** 
+  62:../emlib/src/em_rtc.c **** /*******************************************************************************
+  63:../emlib/src/em_rtc.c ****  **************************   LOCAL FUNCTIONS   ********************************
+  64:../emlib/src/em_rtc.c ****  ******************************************************************************/
+  65:../emlib/src/em_rtc.c **** 
+  66:../emlib/src/em_rtc.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  67:../emlib/src/em_rtc.c **** 
+  68:../emlib/src/em_rtc.c **** #if defined(_EFM32_GECKO_FAMILY)
+  69:../emlib/src/em_rtc.c **** /***************************************************************************//**
+  70:../emlib/src/em_rtc.c ****  * @brief
+  71:../emlib/src/em_rtc.c ****  *   Wait for ongoing sync of register(s) to low frequency domain to complete.
+  72:../emlib/src/em_rtc.c ****  *
+  73:../emlib/src/em_rtc.c ****  * @note
+  74:../emlib/src/em_rtc.c ****  *   This only applies to the Gecko Family, see the reference manual
+  75:../emlib/src/em_rtc.c ****  *   chapter about Access to Low Energy Peripherals (Asynchronos Registers)
+  76:../emlib/src/em_rtc.c ****  *   for details. For Tiny Gecko and Giant Gecko, the RTC supports immediate
+  77:../emlib/src/em_rtc.c ****  *   updates of registers, and will automatically hold the bus until the
+  78:../emlib/src/em_rtc.c ****  *   register has been updated.
+  79:../emlib/src/em_rtc.c ****  *
+  80:../emlib/src/em_rtc.c ****  * @param[in] mask
+  81:../emlib/src/em_rtc.c ****  *   Bitmask corresponding to SYNCBUSY register defined bits, indicating
+  82:../emlib/src/em_rtc.c ****  *   registers that must complete any ongoing synchronization.
+ARM GAS  /tmp/cc4S7iji.s 			page 5
+
+
+  83:../emlib/src/em_rtc.c ****  ******************************************************************************/
+  84:../emlib/src/em_rtc.c **** __STATIC_INLINE void RTC_Sync(uint32_t mask)
+  85:../emlib/src/em_rtc.c **** {
+  64              		.loc 2 85 0
+  65              		.cfi_startproc
+  66              		@ args = 0, pretend = 0, frame = 8
+  67              		@ frame_needed = 0, uses_anonymous_args = 0
+  68              		@ link register save eliminated.
+  69 0000 82B0     		sub	sp, sp, #8
+  70              		.cfi_def_cfa_offset 8
+  71 0002 0190     		str	r0, [sp, #4]
+  86:../emlib/src/em_rtc.c ****   /* Avoid deadlock if modifying the same register twice when freeze mode is */
+  87:../emlib/src/em_rtc.c ****   /* activated. */
+  88:../emlib/src/em_rtc.c ****   if (RTC->FREEZE & RTC_FREEZE_REGFREEZE)
+  72              		.loc 2 88 0
+  73 0004 074B     		ldr	r3, .L6
+  74 0006 1B6A     		ldr	r3, [r3, #32]
+  75 0008 03F00103 		and	r3, r3, #1
+  76 000c 002B     		cmp	r3, #0
+  77 000e 00D0     		beq	.L3
+  89:../emlib/src/em_rtc.c ****     return;
+  78              		.loc 2 89 0
+  79 0010 06E0     		b	.L2
+  80              	.L3:
+  90:../emlib/src/em_rtc.c **** 
+  91:../emlib/src/em_rtc.c ****   /* Wait for any pending previous write operation to have been completed */
+  92:../emlib/src/em_rtc.c ****   /* in low frequency domain. This is only required for the Gecko Family */
+  93:../emlib/src/em_rtc.c ****   while (RTC->SYNCBUSY & mask)
+  81              		.loc 2 93 0
+  82 0012 00BF     		nop
+  83              	.L5:
+  84              		.loc 2 93 0 is_stmt 0 discriminator 1
+  85 0014 034B     		ldr	r3, .L6
+  86 0016 5A6A     		ldr	r2, [r3, #36]
+  87 0018 019B     		ldr	r3, [sp, #4]
+  88 001a 1340     		ands	r3, r3, r2
+  89 001c 002B     		cmp	r3, #0
+  90 001e F9D1     		bne	.L5
+  91              	.L2:
+  94:../emlib/src/em_rtc.c ****     ;
+  95:../emlib/src/em_rtc.c **** }
+  92              		.loc 2 95 0 is_stmt 1
+  93 0020 02B0     		add	sp, sp, #8
+  94              		@ sp needed
+  95 0022 7047     		bx	lr
+  96              	.L7:
+  97              		.align	2
+  98              	.L6:
+  99 0024 00000840 		.word	1074266112
+ 100              		.cfi_endproc
+ 101              	.LFE67:
+ 103              		.section	.rodata
+ 104              		.align	2
+ 105              	.LC0:
+ 106 0000 2E2E2F65 		.ascii	"../emlib/src/em_rtc.c\000"
+ 106      6D6C6962 
+ 106      2F737263 
+ARM GAS  /tmp/cc4S7iji.s 			page 6
+
+
+ 106      2F656D5F 
+ 106      7274632E 
+ 107 0016 0000     		.section	.text.RTC_CompareGet,"ax",%progbits
+ 108              		.align	2
+ 109              		.global	RTC_CompareGet
+ 110              		.thumb
+ 111              		.thumb_func
+ 113              	RTC_CompareGet:
+ 114              	.LFB68:
+  96:../emlib/src/em_rtc.c **** #endif
+  97:../emlib/src/em_rtc.c **** 
+  98:../emlib/src/em_rtc.c **** /** @endcond */
+  99:../emlib/src/em_rtc.c **** 
+ 100:../emlib/src/em_rtc.c **** /*******************************************************************************
+ 101:../emlib/src/em_rtc.c ****  **************************   GLOBAL FUNCTIONS   *******************************
+ 102:../emlib/src/em_rtc.c ****  ******************************************************************************/
+ 103:../emlib/src/em_rtc.c **** 
+ 104:../emlib/src/em_rtc.c **** /***************************************************************************//**
+ 105:../emlib/src/em_rtc.c ****  * @brief
+ 106:../emlib/src/em_rtc.c ****  *   Get RTC compare register value.
+ 107:../emlib/src/em_rtc.c ****  *
+ 108:../emlib/src/em_rtc.c ****  * @param[in] comp
+ 109:../emlib/src/em_rtc.c ****  *   Compare register to get, either 0 or 1
+ 110:../emlib/src/em_rtc.c ****  *
+ 111:../emlib/src/em_rtc.c ****  * @return
+ 112:../emlib/src/em_rtc.c ****  *   Compare register value, 0 if invalid register selected.
+ 113:../emlib/src/em_rtc.c ****  ******************************************************************************/
+ 114:../emlib/src/em_rtc.c **** uint32_t RTC_CompareGet(unsigned int comp)
+ 115:../emlib/src/em_rtc.c **** {
+ 115              		.loc 2 115 0
+ 116              		.cfi_startproc
+ 117              		@ args = 0, pretend = 0, frame = 16
+ 118              		@ frame_needed = 0, uses_anonymous_args = 0
+ 119 0000 00B5     		push	{lr}
+ 120              		.cfi_def_cfa_offset 4
+ 121              		.cfi_offset 14, -4
+ 122 0002 85B0     		sub	sp, sp, #20
+ 123              		.cfi_def_cfa_offset 24
+ 124 0004 0190     		str	r0, [sp, #4]
+ 116:../emlib/src/em_rtc.c ****   uint32_t ret;
+ 117:../emlib/src/em_rtc.c **** 
+ 118:../emlib/src/em_rtc.c ****   EFM_ASSERT(RTC_COMP_REG_VALID(comp));
+ 125              		.loc 2 118 0
+ 126 0006 019B     		ldr	r3, [sp, #4]
+ 127 0008 012B     		cmp	r3, #1
+ 128 000a 03D9     		bls	.L9
+ 129              		.loc 2 118 0 is_stmt 0 discriminator 1
+ 130 000c 0C48     		ldr	r0, .L16
+ 131 000e 7621     		movs	r1, #118
+ 132 0010 FFF7FEFF 		bl	assertEFM
+ 133              	.L9:
+ 119:../emlib/src/em_rtc.c **** 
+ 120:../emlib/src/em_rtc.c ****   /* Initialize selected compare value */
+ 121:../emlib/src/em_rtc.c ****   switch (comp)
+ 134              		.loc 2 121 0 is_stmt 1
+ 135 0014 019B     		ldr	r3, [sp, #4]
+ 136 0016 002B     		cmp	r3, #0
+ARM GAS  /tmp/cc4S7iji.s 			page 7
+
+
+ 137 0018 02D0     		beq	.L11
+ 138 001a 012B     		cmp	r3, #1
+ 139 001c 04D0     		beq	.L12
+ 140 001e 07E0     		b	.L15
+ 141              	.L11:
+ 122:../emlib/src/em_rtc.c ****   {
+ 123:../emlib/src/em_rtc.c ****   case 0:
+ 124:../emlib/src/em_rtc.c ****     ret = RTC->COMP0;
+ 142              		.loc 2 124 0
+ 143 0020 084B     		ldr	r3, .L16+4
+ 144 0022 9B68     		ldr	r3, [r3, #8]
+ 145 0024 0393     		str	r3, [sp, #12]
+ 125:../emlib/src/em_rtc.c ****     break;
+ 146              		.loc 2 125 0
+ 147 0026 06E0     		b	.L13
+ 148              	.L12:
+ 126:../emlib/src/em_rtc.c **** 
+ 127:../emlib/src/em_rtc.c ****   case 1:
+ 128:../emlib/src/em_rtc.c ****     ret = RTC->COMP1;
+ 149              		.loc 2 128 0
+ 150 0028 064B     		ldr	r3, .L16+4
+ 151 002a DB68     		ldr	r3, [r3, #12]
+ 152 002c 0393     		str	r3, [sp, #12]
+ 129:../emlib/src/em_rtc.c ****     break;
+ 153              		.loc 2 129 0
+ 154 002e 02E0     		b	.L13
+ 155              	.L15:
+ 130:../emlib/src/em_rtc.c **** 
+ 131:../emlib/src/em_rtc.c ****   default:
+ 132:../emlib/src/em_rtc.c ****     /* Unknown compare register selected */
+ 133:../emlib/src/em_rtc.c ****     ret = 0;
+ 156              		.loc 2 133 0
+ 157 0030 0023     		movs	r3, #0
+ 158 0032 0393     		str	r3, [sp, #12]
+ 134:../emlib/src/em_rtc.c ****     break;
+ 159              		.loc 2 134 0
+ 160 0034 00BF     		nop
+ 161              	.L13:
+ 135:../emlib/src/em_rtc.c ****   }
+ 136:../emlib/src/em_rtc.c **** 
+ 137:../emlib/src/em_rtc.c ****   return ret;
+ 162              		.loc 2 137 0
+ 163 0036 039B     		ldr	r3, [sp, #12]
+ 138:../emlib/src/em_rtc.c **** }
+ 164              		.loc 2 138 0
+ 165 0038 1846     		mov	r0, r3
+ 166 003a 05B0     		add	sp, sp, #20
+ 167              		@ sp needed
+ 168 003c 5DF804FB 		ldr	pc, [sp], #4
+ 169              	.L17:
+ 170              		.align	2
+ 171              	.L16:
+ 172 0040 00000000 		.word	.LC0
+ 173 0044 00000840 		.word	1074266112
+ 174              		.cfi_endproc
+ 175              	.LFE68:
+ 177              		.section	.text.RTC_CompareSet,"ax",%progbits
+ARM GAS  /tmp/cc4S7iji.s 			page 8
+
+
+ 178              		.align	2
+ 179              		.global	RTC_CompareSet
+ 180              		.thumb
+ 181              		.thumb_func
+ 183              	RTC_CompareSet:
+ 184              	.LFB69:
+ 139:../emlib/src/em_rtc.c **** 
+ 140:../emlib/src/em_rtc.c **** 
+ 141:../emlib/src/em_rtc.c **** /***************************************************************************//**
+ 142:../emlib/src/em_rtc.c ****  * @brief
+ 143:../emlib/src/em_rtc.c ****  *   Set RTC compare register value.
+ 144:../emlib/src/em_rtc.c ****  *
+ 145:../emlib/src/em_rtc.c ****  * @note
+ 146:../emlib/src/em_rtc.c ****  *   The setting of a compare register requires synchronization into the
+ 147:../emlib/src/em_rtc.c ****  *   low frequency domain. If the same register is modified before a previous
+ 148:../emlib/src/em_rtc.c ****  *   update has completed, this function will stall until the previous
+ 149:../emlib/src/em_rtc.c ****  *   synchronization has completed. This only applies to the Gecko Family, see
+ 150:../emlib/src/em_rtc.c ****  *   comment in the RTC_Sync() internal function call.
+ 151:../emlib/src/em_rtc.c ****  *
+ 152:../emlib/src/em_rtc.c ****  * @param[in] comp
+ 153:../emlib/src/em_rtc.c ****  *   Compare register to set, either 0 or 1
+ 154:../emlib/src/em_rtc.c ****  *
+ 155:../emlib/src/em_rtc.c ****  * @param[in] value
+ 156:../emlib/src/em_rtc.c ****  *   Initialization value (<= 0x00ffffff)
+ 157:../emlib/src/em_rtc.c ****  ******************************************************************************/
+ 158:../emlib/src/em_rtc.c **** void RTC_CompareSet(unsigned int comp, uint32_t value)
+ 159:../emlib/src/em_rtc.c **** {
+ 185              		.loc 2 159 0
+ 186              		.cfi_startproc
+ 187              		@ args = 0, pretend = 0, frame = 16
+ 188              		@ frame_needed = 0, uses_anonymous_args = 0
+ 189 0000 00B5     		push	{lr}
+ 190              		.cfi_def_cfa_offset 4
+ 191              		.cfi_offset 14, -4
+ 192 0002 85B0     		sub	sp, sp, #20
+ 193              		.cfi_def_cfa_offset 24
+ 194 0004 0190     		str	r0, [sp, #4]
+ 195 0006 0091     		str	r1, [sp]
+ 160:../emlib/src/em_rtc.c ****   volatile uint32_t *compReg;
+ 161:../emlib/src/em_rtc.c **** #if defined(_EFM32_GECKO_FAMILY)
+ 162:../emlib/src/em_rtc.c ****   uint32_t          syncbusy;
+ 163:../emlib/src/em_rtc.c **** #endif
+ 164:../emlib/src/em_rtc.c **** 
+ 165:../emlib/src/em_rtc.c ****   EFM_ASSERT(RTC_COMP_REG_VALID(comp) &&
+ 196              		.loc 2 165 0
+ 197 0008 019B     		ldr	r3, [sp, #4]
+ 198 000a 012B     		cmp	r3, #1
+ 199 000c 04D8     		bhi	.L19
+ 200              		.loc 2 165 0 is_stmt 0 discriminator 2
+ 201 000e 009B     		ldr	r3, [sp]
+ 202 0010 03F07F43 		and	r3, r3, #-16777216
+ 203 0014 002B     		cmp	r3, #0
+ 204 0016 03D0     		beq	.L20
+ 205              	.L19:
+ 206              		.loc 2 165 0 discriminator 1
+ 207 0018 0E48     		ldr	r0, .L26
+ 208 001a A621     		movs	r1, #166
+ARM GAS  /tmp/cc4S7iji.s 			page 9
+
+
+ 209 001c FFF7FEFF 		bl	assertEFM
+ 210              	.L20:
+ 166:../emlib/src/em_rtc.c ****              ((value & ~(_RTC_COMP0_COMP0_MASK >> _RTC_COMP0_COMP0_SHIFT)) == 0));
+ 167:../emlib/src/em_rtc.c **** 
+ 168:../emlib/src/em_rtc.c ****   /* Initialize selected compare value */
+ 169:../emlib/src/em_rtc.c ****   switch (comp)
+ 211              		.loc 2 169 0 is_stmt 1
+ 212 0020 019B     		ldr	r3, [sp, #4]
+ 213 0022 002B     		cmp	r3, #0
+ 214 0024 02D0     		beq	.L22
+ 215 0026 012B     		cmp	r3, #1
+ 216 0028 05D0     		beq	.L23
+ 170:../emlib/src/em_rtc.c ****   {
+ 171:../emlib/src/em_rtc.c ****   case 0:
+ 172:../emlib/src/em_rtc.c ****     compReg = &(RTC->COMP0);
+ 173:../emlib/src/em_rtc.c **** #if defined(_EFM32_GECKO_FAMILY)
+ 174:../emlib/src/em_rtc.c ****     syncbusy = RTC_SYNCBUSY_COMP0;
+ 175:../emlib/src/em_rtc.c **** #endif
+ 176:../emlib/src/em_rtc.c ****     break;
+ 177:../emlib/src/em_rtc.c **** 
+ 178:../emlib/src/em_rtc.c ****   case 1:
+ 179:../emlib/src/em_rtc.c ****     compReg = &(RTC->COMP1);
+ 180:../emlib/src/em_rtc.c **** #if defined(_EFM32_GECKO_FAMILY)
+ 181:../emlib/src/em_rtc.c ****     syncbusy = RTC_SYNCBUSY_COMP1;
+ 182:../emlib/src/em_rtc.c **** #endif
+ 183:../emlib/src/em_rtc.c ****     break;
+ 184:../emlib/src/em_rtc.c **** 
+ 185:../emlib/src/em_rtc.c ****   default:
+ 186:../emlib/src/em_rtc.c ****     /* Unknown compare register selected, abort */
+ 187:../emlib/src/em_rtc.c ****     return;
+ 217              		.loc 2 187 0
+ 218 002a 0FE0     		b	.L18
+ 219              	.L22:
+ 172:../emlib/src/em_rtc.c ****     compReg = &(RTC->COMP0);
+ 220              		.loc 2 172 0
+ 221 002c 0A4B     		ldr	r3, .L26+4
+ 222 002e 0393     		str	r3, [sp, #12]
+ 174:../emlib/src/em_rtc.c ****     syncbusy = RTC_SYNCBUSY_COMP0;
+ 223              		.loc 2 174 0
+ 224 0030 0223     		movs	r3, #2
+ 225 0032 0293     		str	r3, [sp, #8]
+ 176:../emlib/src/em_rtc.c ****     break;
+ 226              		.loc 2 176 0
+ 227 0034 04E0     		b	.L24
+ 228              	.L23:
+ 179:../emlib/src/em_rtc.c ****     compReg = &(RTC->COMP1);
+ 229              		.loc 2 179 0
+ 230 0036 094B     		ldr	r3, .L26+8
+ 231 0038 0393     		str	r3, [sp, #12]
+ 181:../emlib/src/em_rtc.c ****     syncbusy = RTC_SYNCBUSY_COMP1;
+ 232              		.loc 2 181 0
+ 233 003a 0423     		movs	r3, #4
+ 234 003c 0293     		str	r3, [sp, #8]
+ 183:../emlib/src/em_rtc.c ****     break;
+ 235              		.loc 2 183 0
+ 236 003e 00BF     		nop
+ 237              	.L24:
+ARM GAS  /tmp/cc4S7iji.s 			page 10
+
+
+ 188:../emlib/src/em_rtc.c ****   }
+ 189:../emlib/src/em_rtc.c **** #if defined(_EFM32_GECKO_FAMILY)
+ 190:../emlib/src/em_rtc.c ****   /* LF register about to be modified require sync. busy check */
+ 191:../emlib/src/em_rtc.c ****   RTC_Sync(syncbusy);
+ 238              		.loc 2 191 0
+ 239 0040 0298     		ldr	r0, [sp, #8]
+ 240 0042 FFF7FEFF 		bl	RTC_Sync
+ 192:../emlib/src/em_rtc.c **** #endif
+ 193:../emlib/src/em_rtc.c **** 
+ 194:../emlib/src/em_rtc.c ****   *compReg = value;
+ 241              		.loc 2 194 0
+ 242 0046 039B     		ldr	r3, [sp, #12]
+ 243 0048 009A     		ldr	r2, [sp]
+ 244 004a 1A60     		str	r2, [r3]
+ 245              	.L18:
+ 195:../emlib/src/em_rtc.c **** }
+ 246              		.loc 2 195 0
+ 247 004c 05B0     		add	sp, sp, #20
+ 248              		@ sp needed
+ 249 004e 5DF804FB 		ldr	pc, [sp], #4
+ 250              	.L27:
+ 251 0052 00BF     		.align	2
+ 252              	.L26:
+ 253 0054 00000000 		.word	.LC0
+ 254 0058 08000840 		.word	1074266120
+ 255 005c 0C000840 		.word	1074266124
+ 256              		.cfi_endproc
+ 257              	.LFE69:
+ 259              		.section	.text.RTC_Enable,"ax",%progbits
+ 260              		.align	2
+ 261              		.global	RTC_Enable
+ 262              		.thumb
+ 263              		.thumb_func
+ 265              	RTC_Enable:
+ 266              	.LFB70:
+ 196:../emlib/src/em_rtc.c **** 
+ 197:../emlib/src/em_rtc.c **** 
+ 198:../emlib/src/em_rtc.c **** /***************************************************************************//**
+ 199:../emlib/src/em_rtc.c ****  * @brief
+ 200:../emlib/src/em_rtc.c ****  *   Enable/disable RTC.
+ 201:../emlib/src/em_rtc.c ****  *
+ 202:../emlib/src/em_rtc.c ****  * @note
+ 203:../emlib/src/em_rtc.c ****  *   The enabling/disabling of the RTC modifies the RTC CTRL register which
+ 204:../emlib/src/em_rtc.c ****  *   requires synchronization into the low frequency domain. If this register is
+ 205:../emlib/src/em_rtc.c ****  *   modified before a previous update to the same register has completed, this
+ 206:../emlib/src/em_rtc.c ****  *   function will stall until the previous synchronization has completed. This
+ 207:../emlib/src/em_rtc.c ****  *   only applies to the Gecko Family, see comment in the RTC_Sync() internal
+ 208:../emlib/src/em_rtc.c ****  *   function call.
+ 209:../emlib/src/em_rtc.c ****  *
+ 210:../emlib/src/em_rtc.c ****  * @param[in] enable
+ 211:../emlib/src/em_rtc.c ****  *   true to enable counting, false to disable.
+ 212:../emlib/src/em_rtc.c ****  ******************************************************************************/
+ 213:../emlib/src/em_rtc.c **** void RTC_Enable(bool enable)
+ 214:../emlib/src/em_rtc.c **** {
+ 267              		.loc 2 214 0
+ 268              		.cfi_startproc
+ 269              		@ args = 0, pretend = 0, frame = 8
+ARM GAS  /tmp/cc4S7iji.s 			page 11
+
+
+ 270              		@ frame_needed = 0, uses_anonymous_args = 0
+ 271 0000 00B5     		push	{lr}
+ 272              		.cfi_def_cfa_offset 4
+ 273              		.cfi_offset 14, -4
+ 274 0002 83B0     		sub	sp, sp, #12
+ 275              		.cfi_def_cfa_offset 16
+ 276 0004 0346     		mov	r3, r0
+ 277 0006 8DF80730 		strb	r3, [sp, #7]
+ 215:../emlib/src/em_rtc.c **** #if defined(_EFM32_GECKO_FAMILY)
+ 216:../emlib/src/em_rtc.c ****   /* LF register about to be modified require sync. busy check */
+ 217:../emlib/src/em_rtc.c ****   RTC_Sync(RTC_SYNCBUSY_CTRL);
+ 278              		.loc 2 217 0
+ 279 000a 0120     		movs	r0, #1
+ 280 000c FFF7FEFF 		bl	RTC_Sync
+ 218:../emlib/src/em_rtc.c **** #endif
+ 219:../emlib/src/em_rtc.c **** 
+ 220:../emlib/src/em_rtc.c ****   BITBAND_Peripheral(&(RTC->CTRL), _RTC_CTRL_EN_SHIFT, (unsigned int) enable);
+ 281              		.loc 2 220 0
+ 282 0010 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 283 0014 0348     		ldr	r0, .L29
+ 284 0016 0021     		movs	r1, #0
+ 285 0018 1A46     		mov	r2, r3
+ 286 001a FFF7FEFF 		bl	BITBAND_Peripheral
+ 221:../emlib/src/em_rtc.c **** }
+ 287              		.loc 2 221 0
+ 288 001e 03B0     		add	sp, sp, #12
+ 289              		@ sp needed
+ 290 0020 5DF804FB 		ldr	pc, [sp], #4
+ 291              	.L30:
+ 292              		.align	2
+ 293              	.L29:
+ 294 0024 00000840 		.word	1074266112
+ 295              		.cfi_endproc
+ 296              	.LFE70:
+ 298              		.section	.text.RTC_FreezeEnable,"ax",%progbits
+ 299              		.align	2
+ 300              		.global	RTC_FreezeEnable
+ 301              		.thumb
+ 302              		.thumb_func
+ 304              	RTC_FreezeEnable:
+ 305              	.LFB71:
+ 222:../emlib/src/em_rtc.c **** 
+ 223:../emlib/src/em_rtc.c **** 
+ 224:../emlib/src/em_rtc.c **** /***************************************************************************//**
+ 225:../emlib/src/em_rtc.c ****  * @brief
+ 226:../emlib/src/em_rtc.c ****  *   RTC register synchronization freeze control.
+ 227:../emlib/src/em_rtc.c ****  *
+ 228:../emlib/src/em_rtc.c ****  * @details
+ 229:../emlib/src/em_rtc.c ****  *   Some RTC registers require synchronization into the low frequency (LF)
+ 230:../emlib/src/em_rtc.c ****  *   domain. The freeze feature allows for several such registers to be
+ 231:../emlib/src/em_rtc.c ****  *   modified before passing them to the LF domain simultaneously (which
+ 232:../emlib/src/em_rtc.c ****  *   takes place when the freeze mode is disabled).
+ 233:../emlib/src/em_rtc.c ****  *
+ 234:../emlib/src/em_rtc.c ****  * @note
+ 235:../emlib/src/em_rtc.c ****  *   When enabling freeze mode, this function will wait for all current
+ 236:../emlib/src/em_rtc.c ****  *   ongoing RTC synchronization to LF domain to complete (Normally
+ 237:../emlib/src/em_rtc.c ****  *   synchronization will not be in progress.) However for this reason, when
+ARM GAS  /tmp/cc4S7iji.s 			page 12
+
+
+ 238:../emlib/src/em_rtc.c ****  *   using freeze mode, modifications of registers requiring LF synchronization
+ 239:../emlib/src/em_rtc.c ****  *   should be done within one freeze enable/disable block to avoid unecessary
+ 240:../emlib/src/em_rtc.c ****  *   stalling. This only applies to the Gecko Family, see the reference manual
+ 241:../emlib/src/em_rtc.c ****  *   chapter about Access to Low Energy Peripherals (Asynchronos Registers)
+ 242:../emlib/src/em_rtc.c ****  *   for details.
+ 243:../emlib/src/em_rtc.c ****  *
+ 244:../emlib/src/em_rtc.c ****  * @param[in] enable
+ 245:../emlib/src/em_rtc.c ****  *   @li true - enable freeze, modified registers are not propagated to the
+ 246:../emlib/src/em_rtc.c ****  *       LF domain
+ 247:../emlib/src/em_rtc.c ****  *   @li false - disables freeze, modified registers are propagated to LF
+ 248:../emlib/src/em_rtc.c ****  *       domain
+ 249:../emlib/src/em_rtc.c ****  ******************************************************************************/
+ 250:../emlib/src/em_rtc.c **** void RTC_FreezeEnable(bool enable)
+ 251:../emlib/src/em_rtc.c **** {
+ 306              		.loc 2 251 0
+ 307              		.cfi_startproc
+ 308              		@ args = 0, pretend = 0, frame = 8
+ 309              		@ frame_needed = 0, uses_anonymous_args = 0
+ 310              		@ link register save eliminated.
+ 311 0000 82B0     		sub	sp, sp, #8
+ 312              		.cfi_def_cfa_offset 8
+ 313 0002 0346     		mov	r3, r0
+ 314 0004 8DF80730 		strb	r3, [sp, #7]
+ 252:../emlib/src/em_rtc.c ****   if (enable)
+ 315              		.loc 2 252 0
+ 316 0008 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 317 000c 002B     		cmp	r3, #0
+ 318 000e 08D0     		beq	.L32
+ 253:../emlib/src/em_rtc.c ****   {
+ 254:../emlib/src/em_rtc.c **** #if defined(_EFM32_GECKO_FAMILY)
+ 255:../emlib/src/em_rtc.c ****     /* Wait for any ongoing LF synchronization to complete. This is just to */
+ 256:../emlib/src/em_rtc.c ****     /* protect against the rare case when a user                            */
+ 257:../emlib/src/em_rtc.c ****     /* - modifies a register requiring LF sync                              */
+ 258:../emlib/src/em_rtc.c ****     /* - then enables freeze before LF sync completed                       */
+ 259:../emlib/src/em_rtc.c ****     /* - then modifies the same register again                              */
+ 260:../emlib/src/em_rtc.c ****     /* since modifying a register while it is in sync progress should be    */
+ 261:../emlib/src/em_rtc.c ****     /* avoided.                                                             */
+ 262:../emlib/src/em_rtc.c ****     while (RTC->SYNCBUSY)
+ 319              		.loc 2 262 0
+ 320 0010 00BF     		nop
+ 321              	.L33:
+ 322              		.loc 2 262 0 is_stmt 0 discriminator 1
+ 323 0012 064B     		ldr	r3, .L35
+ 324 0014 5B6A     		ldr	r3, [r3, #36]
+ 325 0016 002B     		cmp	r3, #0
+ 326 0018 FBD1     		bne	.L33
+ 263:../emlib/src/em_rtc.c ****       ;
+ 264:../emlib/src/em_rtc.c **** #endif
+ 265:../emlib/src/em_rtc.c ****     RTC->FREEZE = RTC_FREEZE_REGFREEZE;
+ 327              		.loc 2 265 0 is_stmt 1
+ 328 001a 044B     		ldr	r3, .L35
+ 329 001c 0122     		movs	r2, #1
+ 330 001e 1A62     		str	r2, [r3, #32]
+ 331 0020 02E0     		b	.L31
+ 332              	.L32:
+ 266:../emlib/src/em_rtc.c ****   }
+ 267:../emlib/src/em_rtc.c ****   else
+ARM GAS  /tmp/cc4S7iji.s 			page 13
+
+
+ 268:../emlib/src/em_rtc.c ****   {
+ 269:../emlib/src/em_rtc.c ****     RTC->FREEZE = 0;
+ 333              		.loc 2 269 0
+ 334 0022 024B     		ldr	r3, .L35
+ 335 0024 0022     		movs	r2, #0
+ 336 0026 1A62     		str	r2, [r3, #32]
+ 337              	.L31:
+ 270:../emlib/src/em_rtc.c ****   }
+ 271:../emlib/src/em_rtc.c **** }
+ 338              		.loc 2 271 0
+ 339 0028 02B0     		add	sp, sp, #8
+ 340              		@ sp needed
+ 341 002a 7047     		bx	lr
+ 342              	.L36:
+ 343              		.align	2
+ 344              	.L35:
+ 345 002c 00000840 		.word	1074266112
+ 346              		.cfi_endproc
+ 347              	.LFE71:
+ 349              		.section	.text.RTC_Init,"ax",%progbits
+ 350              		.align	2
+ 351              		.global	RTC_Init
+ 352              		.thumb
+ 353              		.thumb_func
+ 355              	RTC_Init:
+ 356              	.LFB72:
+ 272:../emlib/src/em_rtc.c **** 
+ 273:../emlib/src/em_rtc.c **** 
+ 274:../emlib/src/em_rtc.c **** /***************************************************************************//**
+ 275:../emlib/src/em_rtc.c ****  * @brief
+ 276:../emlib/src/em_rtc.c ****  *   Initialize RTC.
+ 277:../emlib/src/em_rtc.c ****  *
+ 278:../emlib/src/em_rtc.c ****  * @details
+ 279:../emlib/src/em_rtc.c ****  *   Note that the compare values must be set separately with RTC_CompareSet().
+ 280:../emlib/src/em_rtc.c ****  *   That should probably be done prior to the use of this function if
+ 281:../emlib/src/em_rtc.c ****  *   configuring the RTC to start when initialization is completed.
+ 282:../emlib/src/em_rtc.c ****  *
+ 283:../emlib/src/em_rtc.c ****  * @note
+ 284:../emlib/src/em_rtc.c ****  *   The initialization of the RTC modifies the RTC CTRL register which requires
+ 285:../emlib/src/em_rtc.c ****  *   synchronization into the low frequency domain. If this register is
+ 286:../emlib/src/em_rtc.c ****  *   modified before a previous update to the same register has completed, this
+ 287:../emlib/src/em_rtc.c ****  *   function will stall until the previous synchronization has completed. This
+ 288:../emlib/src/em_rtc.c ****  *   only applies to the Gecko Family, see comment in the RTC_Sync() internal
+ 289:../emlib/src/em_rtc.c ****  *   function call.
+ 290:../emlib/src/em_rtc.c ****  *
+ 291:../emlib/src/em_rtc.c ****  * @param[in] init
+ 292:../emlib/src/em_rtc.c ****  *   Pointer to RTC initialization structure.
+ 293:../emlib/src/em_rtc.c ****  ******************************************************************************/
+ 294:../emlib/src/em_rtc.c **** void RTC_Init(const RTC_Init_TypeDef *init)
+ 295:../emlib/src/em_rtc.c **** {
+ 357              		.loc 2 295 0
+ 358              		.cfi_startproc
+ 359              		@ args = 0, pretend = 0, frame = 16
+ 360              		@ frame_needed = 0, uses_anonymous_args = 0
+ 361 0000 00B5     		push	{lr}
+ 362              		.cfi_def_cfa_offset 4
+ 363              		.cfi_offset 14, -4
+ARM GAS  /tmp/cc4S7iji.s 			page 14
+
+
+ 364 0002 85B0     		sub	sp, sp, #20
+ 365              		.cfi_def_cfa_offset 24
+ 366 0004 0190     		str	r0, [sp, #4]
+ 296:../emlib/src/em_rtc.c ****   uint32_t tmp;
+ 297:../emlib/src/em_rtc.c **** 
+ 298:../emlib/src/em_rtc.c ****   if (init->enable)
+ 367              		.loc 2 298 0
+ 368 0006 019B     		ldr	r3, [sp, #4]
+ 369 0008 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 370 000a 002B     		cmp	r3, #0
+ 371 000c 02D0     		beq	.L38
+ 299:../emlib/src/em_rtc.c ****   {
+ 300:../emlib/src/em_rtc.c ****     tmp = RTC_CTRL_EN;
+ 372              		.loc 2 300 0
+ 373 000e 0123     		movs	r3, #1
+ 374 0010 0393     		str	r3, [sp, #12]
+ 375 0012 01E0     		b	.L39
+ 376              	.L38:
+ 301:../emlib/src/em_rtc.c ****   }
+ 302:../emlib/src/em_rtc.c ****   else
+ 303:../emlib/src/em_rtc.c ****   {
+ 304:../emlib/src/em_rtc.c ****     tmp = 0;
+ 377              		.loc 2 304 0
+ 378 0014 0023     		movs	r3, #0
+ 379 0016 0393     		str	r3, [sp, #12]
+ 380              	.L39:
+ 305:../emlib/src/em_rtc.c ****   }
+ 306:../emlib/src/em_rtc.c **** 
+ 307:../emlib/src/em_rtc.c ****   /* Configure DEBUGRUN flag, sets whether or not counter should be
+ 308:../emlib/src/em_rtc.c ****    * updated when debugger is active */
+ 309:../emlib/src/em_rtc.c ****   if (init->debugRun)
+ 381              		.loc 2 309 0
+ 382 0018 019B     		ldr	r3, [sp, #4]
+ 383 001a 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 384 001c 002B     		cmp	r3, #0
+ 385 001e 03D0     		beq	.L40
+ 310:../emlib/src/em_rtc.c ****   {
+ 311:../emlib/src/em_rtc.c ****     tmp |= RTC_CTRL_DEBUGRUN;
+ 386              		.loc 2 311 0
+ 387 0020 039B     		ldr	r3, [sp, #12]
+ 388 0022 43F00203 		orr	r3, r3, #2
+ 389 0026 0393     		str	r3, [sp, #12]
+ 390              	.L40:
+ 312:../emlib/src/em_rtc.c ****   }
+ 313:../emlib/src/em_rtc.c **** 
+ 314:../emlib/src/em_rtc.c ****   /* Configure COMP0TOP, this will use the COMP0 compare value as an
+ 315:../emlib/src/em_rtc.c ****    * overflow value, instead of default 24-bit 0x00ffffff */
+ 316:../emlib/src/em_rtc.c ****   if (init->comp0Top)
+ 391              		.loc 2 316 0
+ 392 0028 019B     		ldr	r3, [sp, #4]
+ 393 002a 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 394 002c 002B     		cmp	r3, #0
+ 395 002e 03D0     		beq	.L41
+ 317:../emlib/src/em_rtc.c ****   {
+ 318:../emlib/src/em_rtc.c ****     tmp |= RTC_CTRL_COMP0TOP;
+ 396              		.loc 2 318 0
+ 397 0030 039B     		ldr	r3, [sp, #12]
+ARM GAS  /tmp/cc4S7iji.s 			page 15
+
+
+ 398 0032 43F00403 		orr	r3, r3, #4
+ 399 0036 0393     		str	r3, [sp, #12]
+ 400              	.L41:
+ 319:../emlib/src/em_rtc.c ****   }
+ 320:../emlib/src/em_rtc.c **** 
+ 321:../emlib/src/em_rtc.c **** #if defined(_EFM32_GECKO_FAMILY)
+ 322:../emlib/src/em_rtc.c ****   /* LF register about to be modified require sync. busy check */
+ 323:../emlib/src/em_rtc.c ****   RTC_Sync(RTC_SYNCBUSY_CTRL);
+ 401              		.loc 2 323 0
+ 402 0038 0120     		movs	r0, #1
+ 403 003a FFF7FEFF 		bl	RTC_Sync
+ 324:../emlib/src/em_rtc.c **** #endif
+ 325:../emlib/src/em_rtc.c **** 
+ 326:../emlib/src/em_rtc.c ****   RTC->CTRL = tmp;
+ 404              		.loc 2 326 0
+ 405 003e 034B     		ldr	r3, .L42
+ 406 0040 039A     		ldr	r2, [sp, #12]
+ 407 0042 1A60     		str	r2, [r3]
+ 327:../emlib/src/em_rtc.c **** }
+ 408              		.loc 2 327 0
+ 409 0044 05B0     		add	sp, sp, #20
+ 410              		@ sp needed
+ 411 0046 5DF804FB 		ldr	pc, [sp], #4
+ 412              	.L43:
+ 413 004a 00BF     		.align	2
+ 414              	.L42:
+ 415 004c 00000840 		.word	1074266112
+ 416              		.cfi_endproc
+ 417              	.LFE72:
+ 419              		.section	.text.RTC_Reset,"ax",%progbits
+ 420              		.align	2
+ 421              		.global	RTC_Reset
+ 422              		.thumb
+ 423              		.thumb_func
+ 425              	RTC_Reset:
+ 426              	.LFB73:
+ 328:../emlib/src/em_rtc.c **** 
+ 329:../emlib/src/em_rtc.c **** 
+ 330:../emlib/src/em_rtc.c **** 
+ 331:../emlib/src/em_rtc.c **** /***************************************************************************//**
+ 332:../emlib/src/em_rtc.c ****  * @brief
+ 333:../emlib/src/em_rtc.c ****  *   Restore RTC to reset state
+ 334:../emlib/src/em_rtc.c ****  ******************************************************************************/
+ 335:../emlib/src/em_rtc.c **** void RTC_Reset(void)
+ 336:../emlib/src/em_rtc.c **** {
+ 427              		.loc 2 336 0
+ 428              		.cfi_startproc
+ 429              		@ args = 0, pretend = 0, frame = 0
+ 430              		@ frame_needed = 0, uses_anonymous_args = 0
+ 431              		@ link register save eliminated.
+ 337:../emlib/src/em_rtc.c ****   /* Restore all essential RTC register to default config */
+ 338:../emlib/src/em_rtc.c ****   RTC->FREEZE = _RTC_FREEZE_RESETVALUE;
+ 432              		.loc 2 338 0
+ 433 0000 094B     		ldr	r3, .L45
+ 434 0002 0022     		movs	r2, #0
+ 435 0004 1A62     		str	r2, [r3, #32]
+ 339:../emlib/src/em_rtc.c ****   RTC->CTRL   = _RTC_CTRL_RESETVALUE;
+ARM GAS  /tmp/cc4S7iji.s 			page 16
+
+
+ 436              		.loc 2 339 0
+ 437 0006 084B     		ldr	r3, .L45
+ 438 0008 0022     		movs	r2, #0
+ 439 000a 1A60     		str	r2, [r3]
+ 340:../emlib/src/em_rtc.c ****   RTC->COMP0  = _RTC_COMP0_RESETVALUE;
+ 440              		.loc 2 340 0
+ 441 000c 064B     		ldr	r3, .L45
+ 442 000e 0022     		movs	r2, #0
+ 443 0010 9A60     		str	r2, [r3, #8]
+ 341:../emlib/src/em_rtc.c ****   RTC->COMP1  = _RTC_COMP1_RESETVALUE;
+ 444              		.loc 2 341 0
+ 445 0012 054B     		ldr	r3, .L45
+ 446 0014 0022     		movs	r2, #0
+ 447 0016 DA60     		str	r2, [r3, #12]
+ 342:../emlib/src/em_rtc.c ****   RTC->IEN    = _RTC_IEN_RESETVALUE;
+ 448              		.loc 2 342 0
+ 449 0018 034B     		ldr	r3, .L45
+ 450 001a 0022     		movs	r2, #0
+ 451 001c DA61     		str	r2, [r3, #28]
+ 343:../emlib/src/em_rtc.c ****   RTC->IFC    = _RTC_IFC_RESETVALUE;
+ 452              		.loc 2 343 0
+ 453 001e 024B     		ldr	r3, .L45
+ 454 0020 0022     		movs	r2, #0
+ 455 0022 9A61     		str	r2, [r3, #24]
+ 344:../emlib/src/em_rtc.c **** }
+ 456              		.loc 2 344 0
+ 457 0024 7047     		bx	lr
+ 458              	.L46:
+ 459 0026 00BF     		.align	2
+ 460              	.L45:
+ 461 0028 00000840 		.word	1074266112
+ 462              		.cfi_endproc
+ 463              	.LFE73:
+ 465              		.section	.text.RTC_CounterReset,"ax",%progbits
+ 466              		.align	2
+ 467              		.global	RTC_CounterReset
+ 468              		.thumb
+ 469              		.thumb_func
+ 471              	RTC_CounterReset:
+ 472              	.LFB74:
+ 345:../emlib/src/em_rtc.c **** 
+ 346:../emlib/src/em_rtc.c **** 
+ 347:../emlib/src/em_rtc.c **** 
+ 348:../emlib/src/em_rtc.c **** /***************************************************************************//**
+ 349:../emlib/src/em_rtc.c ****  * @brief
+ 350:../emlib/src/em_rtc.c ****  *   Restart RTC counter from zero
+ 351:../emlib/src/em_rtc.c ****  ******************************************************************************/
+ 352:../emlib/src/em_rtc.c **** void RTC_CounterReset(void)
+ 353:../emlib/src/em_rtc.c **** {
+ 473              		.loc 2 353 0
+ 474              		.cfi_startproc
+ 475              		@ args = 0, pretend = 0, frame = 0
+ 476              		@ frame_needed = 0, uses_anonymous_args = 0
+ 477 0000 08B5     		push	{r3, lr}
+ 478              		.cfi_def_cfa_offset 8
+ 479              		.cfi_offset 3, -8
+ 480              		.cfi_offset 14, -4
+ARM GAS  /tmp/cc4S7iji.s 			page 17
+
+
+ 354:../emlib/src/em_rtc.c ****   /* A disable/enable sequnce will start the counter at zero */
+ 355:../emlib/src/em_rtc.c ****   RTC_Enable(false);
+ 481              		.loc 2 355 0
+ 482 0002 0020     		movs	r0, #0
+ 483 0004 FFF7FEFF 		bl	RTC_Enable
+ 356:../emlib/src/em_rtc.c ****   RTC_Enable(true);
+ 484              		.loc 2 356 0
+ 485 0008 0120     		movs	r0, #1
+ 486 000a FFF7FEFF 		bl	RTC_Enable
+ 357:../emlib/src/em_rtc.c **** }
+ 487              		.loc 2 357 0
+ 488 000e 08BD     		pop	{r3, pc}
+ 489              		.cfi_endproc
+ 490              	.LFE74:
+ 492              		.text
+ 493              	.Letext0:
+ 494              		.file 3 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 495              		.file 4 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 496              		.file 5 "../Device/EnergyMicro/EFM32G/Include/efm32g_rtc.h"
+ 497              		.file 6 "../emlib/inc/em_rtc.h"
+ 498              		.file 7 "../CMSIS/Include/core_cm3.h"

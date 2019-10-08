@@ -1,0 +1,2571 @@
+ARM GAS  /tmp/ccSHpvpe.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"Display.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.bss.l_pItemList,"aw",%nobits
+  19              		.align	2
+  22              	l_pItemList:
+  23 0000 00000000 		.space	4
+  24              		.section	.bss.l_ItemCnt,"aw",%nobits
+  25              		.align	2
+  28              	l_ItemCnt:
+  29 0000 00000000 		.space	4
+  30              		.section	.bss.l_ItemIdx,"aw",%nobits
+  31              		.align	2
+  34              	l_ItemIdx:
+  35 0000 00000000 		.space	4
+  36              		.section	.data.l_hdlLCD_Off,"aw",%progbits
+  37              		.align	2
+  40              	l_hdlLCD_Off:
+  41 0000 FFFFFFFF 		.word	-1
+  42              		.section	.data.l_hdlPowerOff,"aw",%progbits
+  43              		.align	2
+  46              	l_hdlPowerOff:
+  47 0000 FFFFFFFF 		.word	-1
+  48              		.section	.data.l_hdlDispNext,"aw",%progbits
+  49              		.align	2
+  52              	l_hdlDispNext:
+  53 0000 FFFFFFFF 		.word	-1
+  54              		.section	.bss.l_flgDisplayIsOn,"aw",%nobits
+  57              	l_flgDisplayIsOn:
+  58 0000 00       		.space	1
+  59              		.comm	l_bitMaskFieldUpd,2,2
+  60              		.comm	l_bitMaskFieldActive,2,2
+  61              		.section	.data.l_flgDisplayUpdEnabled,"aw",%progbits
+  64              	l_flgDisplayUpdEnabled:
+  65 0000 01       		.byte	1
+  66              		.section	.bss.l_DispNextFctTrigger,"aw",%nobits
+  69              	l_DispNextFctTrigger:
+  70 0000 00       		.space	1
+  71              		.section	.bss.l_DispNextFct,"aw",%nobits
+  72              		.align	2
+  75              	l_DispNextFct:
+  76 0000 00000000 		.space	4
+  77              		.section	.bss.l_DispNextUserParm,"aw",%nobits
+ARM GAS  /tmp/ccSHpvpe.s 			page 2
+
+
+  78              		.align	2
+  81              	l_DispNextUserParm:
+  82 0000 00000000 		.space	4
+  83              		.section	.rodata
+  84              		.align	2
+  85              	.LC0:
+  86 0000 2E2E2F64 		.ascii	"../drivers/Display.c\000"
+  86      72697665 
+  86      72732F44 
+  86      6973706C 
+  86      61792E63 
+  87              		.section	.text.DisplayInit,"ax",%progbits
+  88              		.align	2
+  89              		.global	DisplayInit
+  90              		.thumb
+  91              		.thumb_func
+  93              	DisplayInit:
+  94              	.LFB90:
+  95              		.file 1 "../drivers/Display.c"
+   1:../drivers/Display.c **** /***************************************************************************//**
+   2:../drivers/Display.c ****  * @file
+   3:../drivers/Display.c ****  * @brief	Display Manager
+   4:../drivers/Display.c ****  * @author	Ralf Gerhauser
+   5:../drivers/Display.c ****  * @version	2016-11-22
+   6:../drivers/Display.c ****  *
+   7:../drivers/Display.c ****  * This is the Display Manager module.  It controls all the information on
+   8:../drivers/Display.c ****  * the LC-Display.  The keys S5 and S4 are used to select the next or previous
+   9:../drivers/Display.c ****  * item respectively:
+  10:../drivers/Display.c ****  * - When <b>S5</b> <b>NEXT</b> is asserted, the display moves to the next
+  11:../drivers/Display.c ****  *   information.
+  12:../drivers/Display.c ****  * - When <b>S4</b> <b>PREV</b> is asserted, the display moves to the previous
+  13:../drivers/Display.c ****  *   information.
+  14:../drivers/Display.c ****  * - When none of the keys is asserted, the LCD is powered-off after 30 seconds.
+  15:../drivers/Display.c ****  *
+  16:../drivers/Display.c ****  * The low-level display routines can be found in LCD_DOGM162.c.
+  17:../drivers/Display.c ****  *
+  18:../drivers/Display.c ****  ****************************************************************************//*
+  19:../drivers/Display.c **** Revision History:
+  20:../drivers/Display.c **** 2016-11-22,rage	Asserting Power-Key returns to the first item to be displayed.
+  21:../drivers/Display.c **** 		Calculate temperature and manufacturing date from raw values.
+  22:../drivers/Display.c **** 2015-10-12,rage	Added functionality to automatically power-off the device
+  23:../drivers/Display.c **** 		when inactive for more than POWER_OFF_TIMEOUT seconds.
+  24:../drivers/Display.c **** 2015-06-22,rage	Initial version, derived from SNB_Heaven.
+  25:../drivers/Display.c **** */
+  26:../drivers/Display.c **** 
+  27:../drivers/Display.c **** /*=============================== Header Files ===============================*/
+  28:../drivers/Display.c **** 
+  29:../drivers/Display.c **** #include <stdio.h>
+  30:../drivers/Display.c **** #include <ctype.h>
+  31:../drivers/Display.c **** #include <string.h>
+  32:../drivers/Display.c **** #include "em_device.h"
+  33:../drivers/Display.c **** #include "em_assert.h"
+  34:../drivers/Display.c **** #include "Keys.h"
+  35:../drivers/Display.c **** #include "AlarmClock.h"
+  36:../drivers/Display.c **** #include "Display.h"
+  37:../drivers/Display.c **** #include "LCD_DOGM162.h"
+  38:../drivers/Display.c **** #include "BatteryMon.h"
+ARM GAS  /tmp/ccSHpvpe.s 			page 3
+
+
+  39:../drivers/Display.c **** 
+  40:../drivers/Display.c **** /*=============================== Definitions ================================*/
+  41:../drivers/Display.c **** 
+  42:../drivers/Display.c ****     //@brief Set level of the power enable pin.
+  43:../drivers/Display.c **** #define SET_POWER_PIN(level)  IO_Bit(GPIO->P[HOLD_POWER_PORT].DOUT,	\
+  44:../drivers/Display.c **** 				     HOLD_POWER_PIN) = (level)
+  45:../drivers/Display.c **** 
+  46:../drivers/Display.c **** /*=============================== External Data ==============================*/
+  47:../drivers/Display.c **** 
+  48:../drivers/Display.c **** extern char const prjVersion[];
+  49:../drivers/Display.c **** extern char const prjDate[];
+  50:../drivers/Display.c **** extern char const prjTime[];
+  51:../drivers/Display.c **** 
+  52:../drivers/Display.c **** /*================================ Local Data ================================*/
+  53:../drivers/Display.c **** 
+  54:../drivers/Display.c ****     /*!@brief Pointer to the display item list. */
+  55:../drivers/Display.c **** static const ITEM	*l_pItemList;
+  56:../drivers/Display.c **** 
+  57:../drivers/Display.c ****     /*!@brief Number of elements in item list. */
+  58:../drivers/Display.c **** static int		 l_ItemCnt;
+  59:../drivers/Display.c **** 
+  60:../drivers/Display.c ****     /*!@brief Index of the current item to be displayed. */
+  61:../drivers/Display.c **** static int		 l_ItemIdx;
+  62:../drivers/Display.c **** 
+  63:../drivers/Display.c ****     /*!@brief Timer handle for switching the display off after a time. */
+  64:../drivers/Display.c **** static TIM_HDL		 l_hdlLCD_Off = NONE;
+  65:../drivers/Display.c **** 
+  66:../drivers/Display.c ****     /*!@brief Timer handle for switching the who;e device off after a time. */
+  67:../drivers/Display.c **** static TIM_HDL		 l_hdlPowerOff = NONE;
+  68:../drivers/Display.c **** 
+  69:../drivers/Display.c ****     /*!@brief Timer handle for Display Next callback routine. */
+  70:../drivers/Display.c **** static TIM_HDL		 l_hdlDispNext = NONE;
+  71:../drivers/Display.c **** 
+  72:../drivers/Display.c ****     /*!@brief Flag if Display is currently powered on. */
+  73:../drivers/Display.c **** static volatile bool	 l_flgDisplayIsOn;
+  74:../drivers/Display.c **** 
+  75:../drivers/Display.c ****     /*!@brief Bit mask variable specifies which fields must be updated, each
+  76:../drivers/Display.c ****      * bit refers to another field, see @ref LCD_FIELD_ID.
+  77:../drivers/Display.c ****      */
+  78:../drivers/Display.c **** uint16_t		 l_bitMaskFieldUpd;
+  79:../drivers/Display.c **** 
+  80:../drivers/Display.c ****     /*!@brief Bit mask variable, containing the currently active fields, i.e.
+  81:../drivers/Display.c ****      * the fields should be displayed on the LCD, see @ref l_bitMaskFieldUpd.
+  82:../drivers/Display.c ****      */
+  83:../drivers/Display.c **** uint16_t		 l_bitMaskFieldActive;
+  84:../drivers/Display.c **** 
+  85:../drivers/Display.c ****     /*!@brief Flag is always set in this project due to missing DCF77 */
+  86:../drivers/Display.c **** static volatile bool	 l_flgDisplayUpdEnabled = true;
+  87:../drivers/Display.c **** 
+  88:../drivers/Display.c ****     /*!@brief Flag triggers the execution of function @ref l_DispNextFct. */
+  89:../drivers/Display.c **** static volatile bool	 l_DispNextFctTrigger;
+  90:../drivers/Display.c **** 
+  91:../drivers/Display.c ****     /*!@brief Function pointer for a callback routine which is executed after
+  92:../drivers/Display.c ****      * the specified amount of time has elapsed, see @ref DisplayNext().
+  93:../drivers/Display.c ****      */
+  94:../drivers/Display.c **** static DISP_NEXT_FCT	 l_DispNextFct;
+  95:../drivers/Display.c **** 
+ARM GAS  /tmp/ccSHpvpe.s 			page 4
+
+
+  96:../drivers/Display.c ****     /*!@brief User parameter for function @ref l_DispNextFct. */
+  97:../drivers/Display.c **** static int		 l_DispNextUserParm;
+  98:../drivers/Display.c **** 
+  99:../drivers/Display.c **** /*=========================== Forward Declarations ===========================*/
+ 100:../drivers/Display.c **** 
+ 101:../drivers/Display.c **** static void  DisplayUpdate (void);
+ 102:../drivers/Display.c **** static char *ItemDataString (const ITEM *pItem);
+ 103:../drivers/Display.c **** static void  DisplayUpdateClock (void);
+ 104:../drivers/Display.c **** static void  SwitchLCD_Off(TIM_HDL hdl);
+ 105:../drivers/Display.c **** static void  SwitchDeviceOff(TIM_HDL hdl);
+ 106:../drivers/Display.c **** static void  DispNextTrigger(TIM_HDL hdl);
+ 107:../drivers/Display.c **** 
+ 108:../drivers/Display.c **** 
+ 109:../drivers/Display.c **** /***************************************************************************//**
+ 110:../drivers/Display.c ****  *
+ 111:../drivers/Display.c ****  * @brief	Initialize the Display
+ 112:../drivers/Display.c ****  *
+ 113:../drivers/Display.c ****  * This routine initializes the LC-Display and all the required functionality
+ 114:../drivers/Display.c ****  * around it, e.g. a timer to switch off the display when it is not in use.
+ 115:../drivers/Display.c ****  *
+ 116:../drivers/Display.c ****  ******************************************************************************/
+ 117:../drivers/Display.c **** void  DisplayInit (const LCD_FIELD *pField, const ITEM *pItemList, int itemCnt)
+ 118:../drivers/Display.c **** {
+  96              		.loc 1 118 0
+  97              		.cfi_startproc
+  98              		@ args = 0, pretend = 0, frame = 16
+  99              		@ frame_needed = 0, uses_anonymous_args = 0
+ 100 0000 00B5     		push	{lr}
+ 101              		.cfi_def_cfa_offset 4
+ 102              		.cfi_offset 14, -4
+ 103 0002 85B0     		sub	sp, sp, #20
+ 104              		.cfi_def_cfa_offset 24
+ 105 0004 0390     		str	r0, [sp, #12]
+ 106 0006 0291     		str	r1, [sp, #8]
+ 107 0008 0192     		str	r2, [sp, #4]
+ 119:../drivers/Display.c ****     /* Parameter check */
+ 120:../drivers/Display.c ****     EFM_ASSERT(pField != NULL);
+ 108              		.loc 1 120 0
+ 109 000a 039B     		ldr	r3, [sp, #12]
+ 110 000c 002B     		cmp	r3, #0
+ 111 000e 03D1     		bne	.L2
+ 112              		.loc 1 120 0 is_stmt 0 discriminator 1
+ 113 0010 2648     		ldr	r0, .L7
+ 114 0012 7821     		movs	r1, #120
+ 115 0014 FFF7FEFF 		bl	assertEFM
+ 116              	.L2:
+ 121:../drivers/Display.c ****     EFM_ASSERT(pItemList != NULL);
+ 117              		.loc 1 121 0 is_stmt 1
+ 118 0018 029B     		ldr	r3, [sp, #8]
+ 119 001a 002B     		cmp	r3, #0
+ 120 001c 03D1     		bne	.L3
+ 121              		.loc 1 121 0 is_stmt 0 discriminator 1
+ 122 001e 2348     		ldr	r0, .L7
+ 123 0020 7921     		movs	r1, #121
+ 124 0022 FFF7FEFF 		bl	assertEFM
+ 125              	.L3:
+ 122:../drivers/Display.c **** 
+ARM GAS  /tmp/ccSHpvpe.s 			page 5
+
+
+ 123:../drivers/Display.c ****     /* Save configuration */
+ 124:../drivers/Display.c ****     l_pItemList = pItemList;
+ 126              		.loc 1 124 0 is_stmt 1
+ 127 0026 224B     		ldr	r3, .L7+4
+ 128 0028 029A     		ldr	r2, [sp, #8]
+ 129 002a 1A60     		str	r2, [r3]
+ 125:../drivers/Display.c ****     l_ItemCnt   = itemCnt;
+ 130              		.loc 1 125 0
+ 131 002c 214B     		ldr	r3, .L7+8
+ 132 002e 019A     		ldr	r2, [sp, #4]
+ 133 0030 1A60     		str	r2, [r3]
+ 126:../drivers/Display.c **** 
+ 127:../drivers/Display.c ****     /* Configure PD0 to hold power, set FET input to HIGH */
+ 128:../drivers/Display.c ****     GPIO_PinModeSet (HOLD_POWER_PORT, HOLD_POWER_PIN, gpioModePushPull, 1);
+ 134              		.loc 1 128 0
+ 135 0032 0320     		movs	r0, #3
+ 136 0034 0021     		movs	r1, #0
+ 137 0036 0422     		movs	r2, #4
+ 138 0038 0123     		movs	r3, #1
+ 139 003a FFF7FEFF 		bl	GPIO_PinModeSet
+ 129:../drivers/Display.c **** 
+ 130:../drivers/Display.c ****     /* Get a timer handle to switch the display off after a time */
+ 131:../drivers/Display.c ****     if (l_hdlLCD_Off == NONE)
+ 140              		.loc 1 131 0
+ 141 003e 1E4B     		ldr	r3, .L7+12
+ 142 0040 1B68     		ldr	r3, [r3]
+ 143 0042 B3F1FF3F 		cmp	r3, #-1
+ 144 0046 05D1     		bne	.L4
+ 132:../drivers/Display.c **** 	l_hdlLCD_Off = sTimerCreate (SwitchLCD_Off);
+ 145              		.loc 1 132 0
+ 146 0048 1C48     		ldr	r0, .L7+16
+ 147 004a FFF7FEFF 		bl	sTimerCreate
+ 148 004e 0246     		mov	r2, r0
+ 149 0050 194B     		ldr	r3, .L7+12
+ 150 0052 1A60     		str	r2, [r3]
+ 151              	.L4:
+ 133:../drivers/Display.c **** 
+ 134:../drivers/Display.c ****     /* Get a timer handle to switch the device off after a time */
+ 135:../drivers/Display.c ****     if (l_hdlPowerOff == NONE)
+ 152              		.loc 1 135 0
+ 153 0054 1A4B     		ldr	r3, .L7+20
+ 154 0056 1B68     		ldr	r3, [r3]
+ 155 0058 B3F1FF3F 		cmp	r3, #-1
+ 156 005c 0BD1     		bne	.L5
+ 136:../drivers/Display.c ****     {
+ 137:../drivers/Display.c **** 	l_hdlPowerOff = sTimerCreate (SwitchDeviceOff);
+ 157              		.loc 1 137 0
+ 158 005e 1948     		ldr	r0, .L7+24
+ 159 0060 FFF7FEFF 		bl	sTimerCreate
+ 160 0064 0246     		mov	r2, r0
+ 161 0066 164B     		ldr	r3, .L7+20
+ 162 0068 1A60     		str	r2, [r3]
+ 138:../drivers/Display.c **** 	sTimerStart (l_hdlPowerOff, POWER_OFF_TIMEOUT);	// initial timer start
+ 163              		.loc 1 138 0
+ 164 006a 154B     		ldr	r3, .L7+20
+ 165 006c 1B68     		ldr	r3, [r3]
+ 166 006e 1846     		mov	r0, r3
+ARM GAS  /tmp/ccSHpvpe.s 			page 6
+
+
+ 167 0070 7821     		movs	r1, #120
+ 168 0072 FFF7FEFF 		bl	sTimerStart
+ 169              	.L5:
+ 139:../drivers/Display.c ****     }
+ 140:../drivers/Display.c **** 
+ 141:../drivers/Display.c ****     /* Create timer to trigger a callback routine after duration is over */
+ 142:../drivers/Display.c ****     if (l_hdlDispNext == NONE)
+ 170              		.loc 1 142 0
+ 171 0076 144B     		ldr	r3, .L7+28
+ 172 0078 1B68     		ldr	r3, [r3]
+ 173 007a B3F1FF3F 		cmp	r3, #-1
+ 174 007e 05D1     		bne	.L6
+ 143:../drivers/Display.c **** 	l_hdlDispNext = sTimerCreate (DispNextTrigger);
+ 175              		.loc 1 143 0
+ 176 0080 1248     		ldr	r0, .L7+32
+ 177 0082 FFF7FEFF 		bl	sTimerCreate
+ 178 0086 0246     		mov	r2, r0
+ 179 0088 0F4B     		ldr	r3, .L7+28
+ 180 008a 1A60     		str	r2, [r3]
+ 181              	.L6:
+ 144:../drivers/Display.c **** 
+ 145:../drivers/Display.c ****     /* Connect the update function */
+ 146:../drivers/Display.c ****     DisplayUpdateFctInstall (DisplayUpdateClock);
+ 182              		.loc 1 146 0
+ 183 008c 1048     		ldr	r0, .L7+36
+ 184 008e FFF7FEFF 		bl	DisplayUpdateFctInstall
+ 147:../drivers/Display.c **** 
+ 148:../drivers/Display.c ****     /* Set flags to active state */
+ 149:../drivers/Display.c ****     l_bitMaskFieldActive = LCD_FIELD_ID_BIT(LCD_LINE1_BLANK);	// pseudo field
+ 185              		.loc 1 149 0
+ 186 0092 104B     		ldr	r3, .L7+40
+ 187 0094 0122     		movs	r2, #1
+ 188 0096 1A80     		strh	r2, [r3]	@ movhi
+ 150:../drivers/Display.c ****     l_flgDisplayIsOn = true;
+ 189              		.loc 1 150 0
+ 190 0098 0F4B     		ldr	r3, .L7+44
+ 191 009a 0122     		movs	r2, #1
+ 192 009c 1A70     		strb	r2, [r3]
+ 151:../drivers/Display.c **** 
+ 152:../drivers/Display.c ****     /* Initialize the LCD module specific parts */
+ 153:../drivers/Display.c ****     LCD_Init (pField);
+ 193              		.loc 1 153 0
+ 194 009e 0398     		ldr	r0, [sp, #12]
+ 195 00a0 FFF7FEFF 		bl	LCD_Init
+ 154:../drivers/Display.c **** }
+ 196              		.loc 1 154 0
+ 197 00a4 05B0     		add	sp, sp, #20
+ 198              		@ sp needed
+ 199 00a6 5DF804FB 		ldr	pc, [sp], #4
+ 200              	.L8:
+ 201 00aa 00BF     		.align	2
+ 202              	.L7:
+ 203 00ac 00000000 		.word	.LC0
+ 204 00b0 00000000 		.word	l_pItemList
+ 205 00b4 00000000 		.word	l_ItemCnt
+ 206 00b8 00000000 		.word	l_hdlLCD_Off
+ 207 00bc 00000000 		.word	SwitchLCD_Off
+ARM GAS  /tmp/ccSHpvpe.s 			page 7
+
+
+ 208 00c0 00000000 		.word	l_hdlPowerOff
+ 209 00c4 00000000 		.word	SwitchDeviceOff
+ 210 00c8 00000000 		.word	l_hdlDispNext
+ 211 00cc 00000000 		.word	DispNextTrigger
+ 212 00d0 00000000 		.word	DisplayUpdateClock
+ 213 00d4 00000000 		.word	l_bitMaskFieldActive
+ 214 00d8 00000000 		.word	l_flgDisplayIsOn
+ 215              		.cfi_endproc
+ 216              	.LFE90:
+ 218              		.section	.text.DisplayKeyHandler,"ax",%progbits
+ 219              		.align	2
+ 220              		.global	DisplayKeyHandler
+ 221              		.thumb
+ 222              		.thumb_func
+ 224              	DisplayKeyHandler:
+ 225              	.LFB91:
+ 155:../drivers/Display.c **** 
+ 156:../drivers/Display.c **** 
+ 157:../drivers/Display.c **** /***************************************************************************//**
+ 158:../drivers/Display.c ****  *
+ 159:../drivers/Display.c ****  * @brief	Display Key Handler
+ 160:../drivers/Display.c ****  *
+ 161:../drivers/Display.c ****  * This handler receives the translated key codes from the interrupt-driven
+ 162:../drivers/Display.c ****  * key handler, including autorepeat keys.  That is, whenever the user asserts
+ 163:../drivers/Display.c ****  * a key (push button), the resulting code is sent to this function.  The main
+ 164:../drivers/Display.c ****  * purpose of the handler is to navigate through the list of items which can
+ 165:../drivers/Display.c ****  * be displayed on the LCD.
+ 166:../drivers/Display.c ****  *
+ 167:../drivers/Display.c ****  * The following keys are recognized:
+ 168:../drivers/Display.c ****  * - <b>POWER</b> returns to the first item to be displayed.
+ 169:../drivers/Display.c ****  * - <b>NEXT</b> moves to the next item to be displayed.
+ 170:../drivers/Display.c ****  * - <b>PREV</b> moves to the previous item.
+ 171:../drivers/Display.c ****  * If the keys are released, the LCD Power-Off timer is started.  The value
+ 172:../drivers/Display.c ****  * for this timer can be adjusted via the define @ref LCD_POWER_OFF_TIMEOUT.
+ 173:../drivers/Display.c ****  *
+ 174:../drivers/Display.c ****  * @warning
+ 175:../drivers/Display.c ****  * 	This function is called in interrupt context!
+ 176:../drivers/Display.c ****  *
+ 177:../drivers/Display.c ****  * @param[in] keycode
+ 178:../drivers/Display.c ****  *	Translated key code of type KEYCODE.
+ 179:../drivers/Display.c ****  *
+ 180:../drivers/Display.c ****  ******************************************************************************/
+ 181:../drivers/Display.c **** void	DisplayKeyHandler (KEYCODE keycode)
+ 182:../drivers/Display.c **** {
+ 226              		.loc 1 182 0
+ 227              		.cfi_startproc
+ 228              		@ args = 0, pretend = 0, frame = 8
+ 229              		@ frame_needed = 0, uses_anonymous_args = 0
+ 230 0000 00B5     		push	{lr}
+ 231              		.cfi_def_cfa_offset 4
+ 232              		.cfi_offset 14, -4
+ 233 0002 83B0     		sub	sp, sp, #12
+ 234              		.cfi_def_cfa_offset 16
+ 235 0004 0346     		mov	r3, r0
+ 236 0006 8DF80730 		strb	r3, [sp, #7]
+ 183:../drivers/Display.c ****     switch (keycode)
+ 237              		.loc 1 183 0
+ARM GAS  /tmp/ccSHpvpe.s 			page 8
+
+
+ 238 000a 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 239 000e 013B     		subs	r3, r3, #1
+ 240 0010 082B     		cmp	r3, #8
+ 241 0012 00F28880 		bhi	.L27
+ 242 0016 01A2     		adr	r2, .L12
+ 243 0018 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 244              		.p2align 2
+ 245              	.L12:
+ 246 001c 41000000 		.word	.L11+1
+ 247 0020 53000000 		.word	.L13+1
+ 248 0024 BF000000 		.word	.L14+1
+ 249 0028 5B000000 		.word	.L15+1
+ 250 002c 6D000000 		.word	.L16+1
+ 251 0030 BF000000 		.word	.L14+1
+ 252 0034 8D000000 		.word	.L17+1
+ 253 0038 9F000000 		.word	.L18+1
+ 254 003c BF000000 		.word	.L14+1
+ 255              		.p2align 1
+ 256              	.L11:
+ 184:../drivers/Display.c ****     {
+ 185:../drivers/Display.c **** 	case KEYCODE_POWER_ASSERT:	// POWER was asserted
+ 186:../drivers/Display.c **** 	    if (! l_flgDisplayIsOn)
+ 257              		.loc 1 186 0
+ 258 0040 3B4B     		ldr	r3, .L28
+ 259 0042 1B78     		ldrb	r3, [r3]
+ 260 0044 DBB2     		uxtb	r3, r3
+ 261 0046 83F00103 		eor	r3, r3, #1
+ 262 004a DBB2     		uxtb	r3, r3
+ 263 004c 002B     		cmp	r3, #0
+ 264 004e 00D0     		beq	.L13
+ 187:../drivers/Display.c **** 		break;			// just use as wake-up if LCD is OFF
+ 265              		.loc 1 187 0
+ 266 0050 4DE0     		b	.L19
+ 267              	.L13:
+ 188:../drivers/Display.c **** 
+ 189:../drivers/Display.c **** 	    /* no break */
+ 190:../drivers/Display.c **** 
+ 191:../drivers/Display.c **** 	case KEYCODE_POWER_REPEAT:	// repeated POWER was asserted
+ 192:../drivers/Display.c **** 	    l_ItemIdx = 0;		// select item number 0
+ 268              		.loc 1 192 0
+ 269 0052 384B     		ldr	r3, .L28+4
+ 270 0054 0022     		movs	r2, #0
+ 271 0056 1A60     		str	r2, [r3]
+ 193:../drivers/Display.c **** 	    break;
+ 272              		.loc 1 193 0
+ 273 0058 49E0     		b	.L19
+ 274              	.L15:
+ 194:../drivers/Display.c **** 
+ 195:../drivers/Display.c **** 	case KEYCODE_NEXT_ASSERT:	// NEXT was asserted
+ 196:../drivers/Display.c **** 	    if (! l_flgDisplayIsOn)
+ 275              		.loc 1 196 0
+ 276 005a 354B     		ldr	r3, .L28
+ 277 005c 1B78     		ldrb	r3, [r3]
+ 278 005e DBB2     		uxtb	r3, r3
+ 279 0060 83F00103 		eor	r3, r3, #1
+ 280 0064 DBB2     		uxtb	r3, r3
+ 281 0066 002B     		cmp	r3, #0
+ARM GAS  /tmp/ccSHpvpe.s 			page 9
+
+
+ 282 0068 00D0     		beq	.L16
+ 197:../drivers/Display.c **** 		break;			// just use as wake-up if LCD is OFF
+ 283              		.loc 1 197 0
+ 284 006a 40E0     		b	.L19
+ 285              	.L16:
+ 198:../drivers/Display.c **** 
+ 199:../drivers/Display.c **** 	    /* no break */
+ 200:../drivers/Display.c **** 
+ 201:../drivers/Display.c **** 	case KEYCODE_NEXT_REPEAT:	// repeated NEXT was asserted
+ 202:../drivers/Display.c **** 	    if (++l_ItemIdx >= l_ItemCnt)
+ 286              		.loc 1 202 0
+ 287 006c 314B     		ldr	r3, .L28+4
+ 288 006e 1B68     		ldr	r3, [r3]
+ 289 0070 5A1C     		adds	r2, r3, #1
+ 290 0072 304B     		ldr	r3, .L28+4
+ 291 0074 1A60     		str	r2, [r3]
+ 292 0076 2F4B     		ldr	r3, .L28+4
+ 293 0078 1A68     		ldr	r2, [r3]
+ 294 007a 2F4B     		ldr	r3, .L28+8
+ 295 007c 1B68     		ldr	r3, [r3]
+ 296 007e 9A42     		cmp	r2, r3
+ 297 0080 03DB     		blt	.L20
+ 203:../drivers/Display.c **** 		l_ItemIdx = 0;		// wrap around
+ 298              		.loc 1 203 0
+ 299 0082 2C4B     		ldr	r3, .L28+4
+ 300 0084 0022     		movs	r2, #0
+ 301 0086 1A60     		str	r2, [r3]
+ 204:../drivers/Display.c **** 
+ 205:../drivers/Display.c **** 	    break;
+ 302              		.loc 1 205 0
+ 303 0088 31E0     		b	.L19
+ 304              	.L20:
+ 305 008a 30E0     		b	.L19
+ 306              	.L17:
+ 206:../drivers/Display.c **** 
+ 207:../drivers/Display.c **** 	case KEYCODE_PREV_ASSERT:	// PREV was asserted
+ 208:../drivers/Display.c **** 	    if (! l_flgDisplayIsOn)
+ 307              		.loc 1 208 0
+ 308 008c 284B     		ldr	r3, .L28
+ 309 008e 1B78     		ldrb	r3, [r3]
+ 310 0090 DBB2     		uxtb	r3, r3
+ 311 0092 83F00103 		eor	r3, r3, #1
+ 312 0096 DBB2     		uxtb	r3, r3
+ 313 0098 002B     		cmp	r3, #0
+ 314 009a 00D0     		beq	.L18
+ 209:../drivers/Display.c **** 		break;			// just use as wake-up if LCD is OFF
+ 315              		.loc 1 209 0
+ 316 009c 27E0     		b	.L19
+ 317              	.L18:
+ 210:../drivers/Display.c **** 
+ 211:../drivers/Display.c **** 	    /* no break */
+ 212:../drivers/Display.c **** 
+ 213:../drivers/Display.c **** 	case KEYCODE_PREV_REPEAT:	// repeated PREV was asserted
+ 214:../drivers/Display.c **** 	    if (--l_ItemIdx < 0)
+ 318              		.loc 1 214 0
+ 319 009e 254B     		ldr	r3, .L28+4
+ 320 00a0 1B68     		ldr	r3, [r3]
+ARM GAS  /tmp/ccSHpvpe.s 			page 10
+
+
+ 321 00a2 5A1E     		subs	r2, r3, #1
+ 322 00a4 234B     		ldr	r3, .L28+4
+ 323 00a6 1A60     		str	r2, [r3]
+ 324 00a8 224B     		ldr	r3, .L28+4
+ 325 00aa 1B68     		ldr	r3, [r3]
+ 326 00ac 002B     		cmp	r3, #0
+ 327 00ae 05DA     		bge	.L21
+ 215:../drivers/Display.c **** 		l_ItemIdx = l_ItemCnt-1; // wrap around
+ 328              		.loc 1 215 0
+ 329 00b0 214B     		ldr	r3, .L28+8
+ 330 00b2 1B68     		ldr	r3, [r3]
+ 331 00b4 5A1E     		subs	r2, r3, #1
+ 332 00b6 1F4B     		ldr	r3, .L28+4
+ 333 00b8 1A60     		str	r2, [r3]
+ 216:../drivers/Display.c **** 
+ 217:../drivers/Display.c **** 	    break;
+ 334              		.loc 1 217 0
+ 335 00ba 18E0     		b	.L19
+ 336              	.L21:
+ 337 00bc 17E0     		b	.L19
+ 338              	.L14:
+ 218:../drivers/Display.c **** 
+ 219:../drivers/Display.c **** 	case KEYCODE_POWER_RELEASE:	// POWER was released
+ 220:../drivers/Display.c **** 	case KEYCODE_PREV_RELEASE:	// PREV was released
+ 221:../drivers/Display.c **** 	case KEYCODE_NEXT_RELEASE:	// NEXT was released
+ 222:../drivers/Display.c **** 	    /* (re-)start timers to switch display/device OFF after time */
+ 223:../drivers/Display.c **** 	    if (l_hdlLCD_Off != NONE)
+ 339              		.loc 1 223 0
+ 340 00be 1F4B     		ldr	r3, .L28+12
+ 341 00c0 1B68     		ldr	r3, [r3]
+ 342 00c2 B3F1FF3F 		cmp	r3, #-1
+ 343 00c6 05D0     		beq	.L22
+ 224:../drivers/Display.c **** 		sTimerStart (l_hdlLCD_Off, LCD_POWER_OFF_TIMEOUT);
+ 344              		.loc 1 224 0
+ 345 00c8 1C4B     		ldr	r3, .L28+12
+ 346 00ca 1B68     		ldr	r3, [r3]
+ 347 00cc 1846     		mov	r0, r3
+ 348 00ce 3C21     		movs	r1, #60
+ 349 00d0 FFF7FEFF 		bl	sTimerStart
+ 350              	.L22:
+ 225:../drivers/Display.c **** 
+ 226:../drivers/Display.c **** 	    if (l_hdlPowerOff != NONE)
+ 351              		.loc 1 226 0
+ 352 00d4 1A4B     		ldr	r3, .L28+16
+ 353 00d6 1B68     		ldr	r3, [r3]
+ 354 00d8 B3F1FF3F 		cmp	r3, #-1
+ 355 00dc 06D0     		beq	.L23
+ 227:../drivers/Display.c **** 		sTimerStart (l_hdlPowerOff, POWER_OFF_TIMEOUT);
+ 356              		.loc 1 227 0
+ 357 00de 184B     		ldr	r3, .L28+16
+ 358 00e0 1B68     		ldr	r3, [r3]
+ 359 00e2 1846     		mov	r0, r3
+ 360 00e4 7821     		movs	r1, #120
+ 361 00e6 FFF7FEFF 		bl	sTimerStart
+ 228:../drivers/Display.c **** 
+ 229:../drivers/Display.c **** 	    return;
+ 362              		.loc 1 229 0
+ARM GAS  /tmp/ccSHpvpe.s 			page 11
+
+
+ 363 00ea 1DE0     		b	.L9
+ 364              	.L23:
+ 365 00ec 1CE0     		b	.L9
+ 366              	.L19:
+ 230:../drivers/Display.c **** 
+ 231:../drivers/Display.c **** 	default:	// ignore all other key codes
+ 232:../drivers/Display.c **** 	    return;
+ 233:../drivers/Display.c ****     }
+ 234:../drivers/Display.c **** 
+ 235:../drivers/Display.c ****     /* Common part of KEYCODE_Sx_ASSERT */
+ 236:../drivers/Display.c ****     l_bitMaskFieldActive = LCD_FIELD_ID_MASK_ITEM;  // activate item
+ 367              		.loc 1 236 0
+ 368 00ee 154B     		ldr	r3, .L28+20
+ 369 00f0 7022     		movs	r2, #112
+ 370 00f2 1A80     		strh	r2, [r3]	@ movhi
+ 237:../drivers/Display.c **** 
+ 238:../drivers/Display.c ****     if (l_hdlLCD_Off != NONE)
+ 371              		.loc 1 238 0
+ 372 00f4 114B     		ldr	r3, .L28+12
+ 373 00f6 1B68     		ldr	r3, [r3]
+ 374 00f8 B3F1FF3F 		cmp	r3, #-1
+ 375 00fc 04D0     		beq	.L25
+ 239:../drivers/Display.c **** 	sTimerCancel (l_hdlLCD_Off);	// inhibit power-off of LCD
+ 376              		.loc 1 239 0
+ 377 00fe 0F4B     		ldr	r3, .L28+12
+ 378 0100 1B68     		ldr	r3, [r3]
+ 379 0102 1846     		mov	r0, r3
+ 380 0104 FFF7FEFF 		bl	sTimerCancel
+ 381              	.L25:
+ 240:../drivers/Display.c **** 
+ 241:../drivers/Display.c ****     if (l_hdlPowerOff != NONE)
+ 382              		.loc 1 241 0
+ 383 0108 0D4B     		ldr	r3, .L28+16
+ 384 010a 1B68     		ldr	r3, [r3]
+ 385 010c B3F1FF3F 		cmp	r3, #-1
+ 386 0110 04D0     		beq	.L26
+ 242:../drivers/Display.c **** 	sTimerCancel (l_hdlPowerOff);	// inhibit device power-off
+ 387              		.loc 1 242 0
+ 388 0112 0B4B     		ldr	r3, .L28+16
+ 389 0114 1B68     		ldr	r3, [r3]
+ 390 0116 1846     		mov	r0, r3
+ 391 0118 FFF7FEFF 		bl	sTimerCancel
+ 392              	.L26:
+ 243:../drivers/Display.c **** 
+ 244:../drivers/Display.c ****     /* Initiate first update for all selected fields */
+ 245:../drivers/Display.c ****     l_bitMaskFieldUpd = l_bitMaskFieldActive;
+ 393              		.loc 1 245 0
+ 394 011c 094B     		ldr	r3, .L28+20
+ 395 011e 1A88     		ldrh	r2, [r3]
+ 396 0120 094B     		ldr	r3, .L28+24
+ 397 0122 1A80     		strh	r2, [r3]	@ movhi
+ 398 0124 00E0     		b	.L9
+ 399              	.L27:
+ 232:../drivers/Display.c **** 	    return;
+ 400              		.loc 1 232 0
+ 401 0126 00BF     		nop
+ 402              	.L9:
+ARM GAS  /tmp/ccSHpvpe.s 			page 12
+
+
+ 246:../drivers/Display.c **** }
+ 403              		.loc 1 246 0
+ 404 0128 03B0     		add	sp, sp, #12
+ 405              		@ sp needed
+ 406 012a 5DF804FB 		ldr	pc, [sp], #4
+ 407              	.L29:
+ 408 012e 00BF     		.align	2
+ 409              	.L28:
+ 410 0130 00000000 		.word	l_flgDisplayIsOn
+ 411 0134 00000000 		.word	l_ItemIdx
+ 412 0138 00000000 		.word	l_ItemCnt
+ 413 013c 00000000 		.word	l_hdlLCD_Off
+ 414 0140 00000000 		.word	l_hdlPowerOff
+ 415 0144 00000000 		.word	l_bitMaskFieldActive
+ 416 0148 00000000 		.word	l_bitMaskFieldUpd
+ 417              		.cfi_endproc
+ 418              	.LFE91:
+ 420              		.section	.text.DisplayUpdateCheck,"ax",%progbits
+ 421              		.align	2
+ 422              		.global	DisplayUpdateCheck
+ 423              		.thumb
+ 424              		.thumb_func
+ 426              	DisplayUpdateCheck:
+ 427              	.LFB92:
+ 247:../drivers/Display.c **** 
+ 248:../drivers/Display.c **** 
+ 249:../drivers/Display.c **** /***************************************************************************//**
+ 250:../drivers/Display.c ****  *
+ 251:../drivers/Display.c ****  * @brief	Display Update Check
+ 252:../drivers/Display.c ****  *
+ 253:../drivers/Display.c ****  * This function checks if the information on the LC-Display needs to be
+ 254:../drivers/Display.c ****  * updated, or if the LCD is currently not used and can be switched off.
+ 255:../drivers/Display.c ****  *
+ 256:../drivers/Display.c ****  * @note
+ 257:../drivers/Display.c ****  * 	This function may be called from standard program, usually the loop
+ 258:../drivers/Display.c ****  * 	in module "main.c" - it must not be called from interrupt routines!
+ 259:../drivers/Display.c ****  * 	In this application it is called every second, triggered from the
+ 260:../drivers/Display.c ****  * 	one second interrupt of the RTC.
+ 261:../drivers/Display.c ****  *
+ 262:../drivers/Display.c ****  ******************************************************************************/
+ 263:../drivers/Display.c **** void	DisplayUpdateCheck (void)
+ 264:../drivers/Display.c **** {
+ 428              		.loc 1 264 0
+ 429              		.cfi_startproc
+ 430              		@ args = 0, pretend = 0, frame = 8
+ 431              		@ frame_needed = 0, uses_anonymous_args = 0
+ 432 0000 00B5     		push	{lr}
+ 433              		.cfi_def_cfa_offset 4
+ 434              		.cfi_offset 14, -4
+ 435 0002 83B0     		sub	sp, sp, #12
+ 436              		.cfi_def_cfa_offset 16
+ 265:../drivers/Display.c **** static int prevSeconds;
+ 266:../drivers/Display.c **** 
+ 267:../drivers/Display.c **** 
+ 268:../drivers/Display.c ****     /* If one second is over, we need to update measurements */
+ 269:../drivers/Display.c ****     if (prevSeconds != g_CurrDateTime.tm_sec)
+ 437              		.loc 1 269 0
+ARM GAS  /tmp/ccSHpvpe.s 			page 13
+
+
+ 438 0004 274B     		ldr	r3, .L38
+ 439 0006 1A68     		ldr	r2, [r3]
+ 440 0008 274B     		ldr	r3, .L38+4
+ 441 000a 1B68     		ldr	r3, [r3]
+ 442 000c 9A42     		cmp	r2, r3
+ 443 000e 06D0     		beq	.L31
+ 270:../drivers/Display.c ****     {
+ 271:../drivers/Display.c **** 	prevSeconds = g_CurrDateTime.tm_sec;
+ 444              		.loc 1 271 0
+ 445 0010 244B     		ldr	r3, .L38
+ 446 0012 1A68     		ldr	r2, [r3]
+ 447 0014 244B     		ldr	r3, .L38+4
+ 448 0016 1A60     		str	r2, [r3]
+ 272:../drivers/Display.c **** 
+ 273:../drivers/Display.c **** 	DisplayUpdateTrigger (LCD_ITEM_DATA);
+ 449              		.loc 1 273 0
+ 450 0018 0620     		movs	r0, #6
+ 451 001a FFF7FEFF 		bl	DisplayUpdateTrigger
+ 452              	.L31:
+ 274:../drivers/Display.c ****     }
+ 275:../drivers/Display.c **** 
+ 276:../drivers/Display.c ****     /*
+ 277:../drivers/Display.c ****      * Check for callback trigger
+ 278:../drivers/Display.c ****      */
+ 279:../drivers/Display.c ****     if (l_DispNextFctTrigger)
+ 453              		.loc 1 279 0
+ 454 001e 234B     		ldr	r3, .L38+8
+ 455 0020 1B78     		ldrb	r3, [r3]
+ 456 0022 DBB2     		uxtb	r3, r3
+ 457 0024 002B     		cmp	r3, #0
+ 458 0026 14D0     		beq	.L32
+ 459              	.LBB2:
+ 280:../drivers/Display.c ****     {
+ 281:../drivers/Display.c **** 	DISP_NEXT_FCT fct = l_DispNextFct;
+ 460              		.loc 1 281 0
+ 461 0028 214B     		ldr	r3, .L38+12
+ 462 002a 1B68     		ldr	r3, [r3]
+ 463 002c 0193     		str	r3, [sp, #4]
+ 282:../drivers/Display.c **** 
+ 283:../drivers/Display.c **** 	/* Clear trigger flag */
+ 284:../drivers/Display.c **** 	l_DispNextFctTrigger = false;
+ 464              		.loc 1 284 0
+ 465 002e 1F4B     		ldr	r3, .L38+8
+ 466 0030 0022     		movs	r2, #0
+ 467 0032 1A70     		strb	r2, [r3]
+ 285:../drivers/Display.c **** 
+ 286:../drivers/Display.c **** 	/* See if a callback routine has been defined and call it */
+ 287:../drivers/Display.c **** 	if (fct)
+ 468              		.loc 1 287 0
+ 469 0034 019B     		ldr	r3, [sp, #4]
+ 470 0036 002B     		cmp	r3, #0
+ 471 0038 08D0     		beq	.L33
+ 288:../drivers/Display.c **** 	{
+ 289:../drivers/Display.c **** 	    l_DispNextFct = NULL;	// no NEW callback for default
+ 472              		.loc 1 289 0
+ 473 003a 1D4B     		ldr	r3, .L38+12
+ 474 003c 0022     		movs	r2, #0
+ARM GAS  /tmp/ccSHpvpe.s 			page 14
+
+
+ 475 003e 1A60     		str	r2, [r3]
+ 290:../drivers/Display.c **** 
+ 291:../drivers/Display.c **** 	    fct (l_DispNextUserParm);	// call user routine
+ 476              		.loc 1 291 0
+ 477 0040 1C4B     		ldr	r3, .L38+16
+ 478 0042 1A68     		ldr	r2, [r3]
+ 479 0044 019B     		ldr	r3, [sp, #4]
+ 480 0046 1046     		mov	r0, r2
+ 481 0048 9847     		blx	r3
+ 482 004a 02E0     		b	.L32
+ 483              	.L33:
+ 292:../drivers/Display.c **** 	}
+ 293:../drivers/Display.c **** 	else
+ 294:../drivers/Display.c **** 	{
+ 295:../drivers/Display.c **** 	    /* No callback - switch LCD off */
+ 296:../drivers/Display.c **** 	    SwitchLCD_Off((TIM_HDL)0);
+ 484              		.loc 1 296 0
+ 485 004c 0020     		movs	r0, #0
+ 486 004e FFF7FEFF 		bl	SwitchLCD_Off
+ 487              	.L32:
+ 488              	.LBE2:
+ 297:../drivers/Display.c **** 	}
+ 298:../drivers/Display.c **** 
+ 299:../drivers/Display.c ****     }
+ 300:../drivers/Display.c **** 
+ 301:../drivers/Display.c ****     /*
+ 302:../drivers/Display.c ****      * Check if LC-Display should be powered-on or off.  This is executed
+ 303:../drivers/Display.c ****      * in this main loop since it must not happen in any interrupt service
+ 304:../drivers/Display.c ****      * routine (ISR) due to calling delay functions and other issues.
+ 305:../drivers/Display.c ****      * However, the reason when to do it is triggered via ISRs.
+ 306:../drivers/Display.c ****      */
+ 307:../drivers/Display.c ****     if (l_bitMaskFieldActive)
+ 489              		.loc 1 307 0
+ 490 0052 194B     		ldr	r3, .L38+20
+ 491 0054 1B88     		ldrh	r3, [r3]
+ 492 0056 002B     		cmp	r3, #0
+ 493 0058 17D0     		beq	.L34
+ 308:../drivers/Display.c ****     {
+ 309:../drivers/Display.c **** 	/* LCD should be powered ON */
+ 310:../drivers/Display.c **** 	if (! l_flgDisplayIsOn)
+ 494              		.loc 1 310 0
+ 495 005a 184B     		ldr	r3, .L38+24
+ 496 005c 1B78     		ldrb	r3, [r3]
+ 497 005e DBB2     		uxtb	r3, r3
+ 498 0060 83F00103 		eor	r3, r3, #1
+ 499 0064 DBB2     		uxtb	r3, r3
+ 500 0066 002B     		cmp	r3, #0
+ 501 0068 04D0     		beq	.L35
+ 311:../drivers/Display.c **** 	{
+ 312:../drivers/Display.c **** 	    LCD_PowerOn();
+ 502              		.loc 1 312 0
+ 503 006a FFF7FEFF 		bl	LCD_PowerOn
+ 313:../drivers/Display.c **** 	    l_flgDisplayIsOn = true;
+ 504              		.loc 1 313 0
+ 505 006e 134B     		ldr	r3, .L38+24
+ 506 0070 0122     		movs	r2, #1
+ 507 0072 1A70     		strb	r2, [r3]
+ARM GAS  /tmp/ccSHpvpe.s 			page 15
+
+
+ 508              	.L35:
+ 314:../drivers/Display.c **** 	}
+ 315:../drivers/Display.c **** 
+ 316:../drivers/Display.c **** 	/* LCD is ON - check if fields need to be updated */
+ 317:../drivers/Display.c **** 	if (l_bitMaskFieldUpd & l_bitMaskFieldActive)
+ 509              		.loc 1 317 0
+ 510 0074 124B     		ldr	r3, .L38+28
+ 511 0076 1A88     		ldrh	r2, [r3]
+ 512 0078 0F4B     		ldr	r3, .L38+20
+ 513 007a 1B88     		ldrh	r3, [r3]
+ 514 007c 1340     		ands	r3, r3, r2
+ 515 007e 9BB2     		uxth	r3, r3
+ 516 0080 002B     		cmp	r3, #0
+ 517 0082 0CD0     		beq	.L30
+ 318:../drivers/Display.c **** 	    DisplayUpdate();
+ 518              		.loc 1 318 0
+ 519 0084 FFF7FEFF 		bl	DisplayUpdate
+ 520 0088 09E0     		b	.L30
+ 521              	.L34:
+ 319:../drivers/Display.c ****     }
+ 320:../drivers/Display.c ****     else
+ 321:../drivers/Display.c ****     {
+ 322:../drivers/Display.c **** 	/* LCD should be powered OFF */
+ 323:../drivers/Display.c **** 	if (l_flgDisplayIsOn)
+ 522              		.loc 1 323 0
+ 523 008a 0C4B     		ldr	r3, .L38+24
+ 524 008c 1B78     		ldrb	r3, [r3]
+ 525 008e DBB2     		uxtb	r3, r3
+ 526 0090 002B     		cmp	r3, #0
+ 527 0092 04D0     		beq	.L30
+ 324:../drivers/Display.c **** 	{
+ 325:../drivers/Display.c **** 	    LCD_PowerOff();
+ 528              		.loc 1 325 0
+ 529 0094 FFF7FEFF 		bl	LCD_PowerOff
+ 326:../drivers/Display.c **** 	    l_flgDisplayIsOn = false;
+ 530              		.loc 1 326 0
+ 531 0098 084B     		ldr	r3, .L38+24
+ 532 009a 0022     		movs	r2, #0
+ 533 009c 1A70     		strb	r2, [r3]
+ 534              	.L30:
+ 327:../drivers/Display.c **** 	}
+ 328:../drivers/Display.c ****     }
+ 329:../drivers/Display.c **** }
+ 535              		.loc 1 329 0
+ 536 009e 03B0     		add	sp, sp, #12
+ 537              		@ sp needed
+ 538 00a0 5DF804FB 		ldr	pc, [sp], #4
+ 539              	.L39:
+ 540              		.align	2
+ 541              	.L38:
+ 542 00a4 00000000 		.word	g_CurrDateTime
+ 543 00a8 00000000 		.word	prevSeconds.6706
+ 544 00ac 00000000 		.word	l_DispNextFctTrigger
+ 545 00b0 00000000 		.word	l_DispNextFct
+ 546 00b4 00000000 		.word	l_DispNextUserParm
+ 547 00b8 00000000 		.word	l_bitMaskFieldActive
+ 548 00bc 00000000 		.word	l_flgDisplayIsOn
+ARM GAS  /tmp/ccSHpvpe.s 			page 16
+
+
+ 549 00c0 00000000 		.word	l_bitMaskFieldUpd
+ 550              		.cfi_endproc
+ 551              	.LFE92:
+ 553              		.section	.rodata
+ 554 0015 000000   		.align	2
+ 555              	.LC1:
+ 556 0018 00       		.ascii	"\000"
+ 557 0019 000000   		.align	2
+ 558              	.LC2:
+ 559 001c 257300   		.ascii	"%s\000"
+ 560 001f 00       		.align	2
+ 561              	.LC3:
+ 562 0020 5B253032 		.ascii	"[%02X]\000"
+ 562      585D00
+ 563 0027 00       		.align	2
+ 564              	.LC4:
+ 565 0028 52454144 		.ascii	"READ ERROR\000"
+ 565      20455252 
+ 565      4F5200
+ 566 0033 00       		.align	2
+ 567              	.LC5:
+ 568 0034 25303264 		.ascii	"%02d%02d%02d %02d:%02d:%02d\000"
+ 568      25303264 
+ 568      25303264 
+ 568      20253032 
+ 568      643A2530 
+ 569              		.section	.text.DisplayUpdate,"ax",%progbits
+ 570              		.align	2
+ 571              		.thumb
+ 572              		.thumb_func
+ 574              	DisplayUpdate:
+ 575              	.LFB93:
+ 330:../drivers/Display.c **** 
+ 331:../drivers/Display.c **** 
+ 332:../drivers/Display.c **** /***************************************************************************//**
+ 333:../drivers/Display.c ****  *
+ 334:../drivers/Display.c ****  * @brief	Display Update
+ 335:../drivers/Display.c ****  *
+ 336:../drivers/Display.c ****  * This local function is called from DisplayUpdateCheck() whenever fields
+ 337:../drivers/Display.c ****  * need to be updated, i.e. when bits in @ref l_bitMaskFieldUpd are set.
+ 338:../drivers/Display.c ****  * It displays the respective data on the LCD and clears the associated bit.
+ 339:../drivers/Display.c ****  *
+ 340:../drivers/Display.c ****  ******************************************************************************/
+ 341:../drivers/Display.c **** static void DisplayUpdate (void)
+ 342:../drivers/Display.c **** {
+ 576              		.loc 1 342 0
+ 577              		.cfi_startproc
+ 578              		@ args = 0, pretend = 0, frame = 8
+ 579              		@ frame_needed = 0, uses_anonymous_args = 0
+ 580 0000 70B5     		push	{r4, r5, r6, lr}
+ 581              		.cfi_def_cfa_offset 16
+ 582              		.cfi_offset 4, -16
+ 583              		.cfi_offset 5, -12
+ 584              		.cfi_offset 6, -8
+ 585              		.cfi_offset 14, -4
+ 586 0002 86B0     		sub	sp, sp, #24
+ 587              		.cfi_def_cfa_offset 40
+ARM GAS  /tmp/ccSHpvpe.s 			page 17
+
+
+ 343:../drivers/Display.c **** LCD_FIELD_ID	 id;
+ 344:../drivers/Display.c **** const char	*pStr;
+ 345:../drivers/Display.c **** 
+ 346:../drivers/Display.c **** 
+ 347:../drivers/Display.c ****     for (id = LCD_LINE1_BLANK;  id < LCD_FIELD_ID_CNT;  id++)
+ 588              		.loc 1 347 0
+ 589 0004 0023     		movs	r3, #0
+ 590 0006 8DF81730 		strb	r3, [sp, #23]
+ 591 000a B8E0     		b	.L41
+ 592              	.L57:
+ 348:../drivers/Display.c ****     {
+ 349:../drivers/Display.c **** 	if ((LCD_FIELD_ID_BIT_VAR(l_bitMaskFieldUpd,    id) == 0)
+ 593              		.loc 1 349 0
+ 594 000c 9DF81730 		ldrb	r3, [sp, #23]	@ zero_extendqisi2
+ 595 0010 9B00     		lsls	r3, r3, #2
+ 596 0012 1A46     		mov	r2, r3
+ 597 0014 5D4B     		ldr	r3, .L59
+ 598 0016 03F18873 		add	r3, r3, #17825792
+ 599 001a 5B01     		lsls	r3, r3, #5
+ 600 001c 1344     		add	r3, r3, r2
+ 601 001e 1B68     		ldr	r3, [r3]
+ 602 0020 002B     		cmp	r3, #0
+ 603 0022 0BD0     		beq	.L42
+ 350:../drivers/Display.c **** 	||  (LCD_FIELD_ID_BIT_VAR(l_bitMaskFieldActive, id) == 0))
+ 604              		.loc 1 350 0
+ 605 0024 9DF81730 		ldrb	r3, [sp, #23]	@ zero_extendqisi2
+ 606 0028 9B00     		lsls	r3, r3, #2
+ 607 002a 1A46     		mov	r2, r3
+ 608 002c 584B     		ldr	r3, .L59+4
+ 609 002e 03F18873 		add	r3, r3, #17825792
+ 610 0032 5B01     		lsls	r3, r3, #5
+ 611 0034 1344     		add	r3, r3, r2
+ 612 0036 1B68     		ldr	r3, [r3]
+ 613 0038 002B     		cmp	r3, #0
+ 614 003a 00D1     		bne	.L43
+ 615              	.L42:
+ 351:../drivers/Display.c **** 	    continue;		// nothing to be done for this field
+ 616              		.loc 1 351 0
+ 617 003c 9AE0     		b	.L44
+ 618              	.L43:
+ 352:../drivers/Display.c **** 
+ 353:../drivers/Display.c **** 	/* clear this bit */
+ 354:../drivers/Display.c **** 	LCD_FIELD_ID_BIT_VAR(l_bitMaskFieldUpd, id) = 0;
+ 619              		.loc 1 354 0
+ 620 003e 9DF81730 		ldrb	r3, [sp, #23]	@ zero_extendqisi2
+ 621 0042 9B00     		lsls	r3, r3, #2
+ 622 0044 1A46     		mov	r2, r3
+ 623 0046 514B     		ldr	r3, .L59
+ 624 0048 03F18873 		add	r3, r3, #17825792
+ 625 004c 5B01     		lsls	r3, r3, #5
+ 626 004e 1344     		add	r3, r3, r2
+ 627 0050 0022     		movs	r2, #0
+ 628 0052 1A60     		str	r2, [r3]
+ 355:../drivers/Display.c **** 
+ 356:../drivers/Display.c **** 	/* update the respective field */
+ 357:../drivers/Display.c **** 	switch (id)
+ 629              		.loc 1 357 0
+ARM GAS  /tmp/ccSHpvpe.s 			page 18
+
+
+ 630 0054 9DF81730 		ldrb	r3, [sp, #23]	@ zero_extendqisi2
+ 631 0058 072B     		cmp	r3, #7
+ 632 005a 00F28A80 		bhi	.L58
+ 633 005e 01A2     		adr	r2, .L47
+ 634 0060 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 635              		.p2align 2
+ 636              	.L47:
+ 637 0064 85000000 		.word	.L46+1
+ 638 0068 85000000 		.word	.L46+1
+ 639 006c 73010000 		.word	.L58+1
+ 640 0070 73010000 		.word	.L58+1
+ 641 0074 93000000 		.word	.L48+1
+ 642 0078 AF000000 		.word	.L49+1
+ 643 007c E9000000 		.word	.L50+1
+ 644 0080 43010000 		.word	.L51+1
+ 645              		.p2align 1
+ 646              	.L46:
+ 358:../drivers/Display.c **** 	{
+ 359:../drivers/Display.c **** 	    case LCD_LINE1_BLANK:
+ 360:../drivers/Display.c **** 	    case LCD_LINE2_BLANK:	// print empty line
+ 361:../drivers/Display.c **** 		LCD_Printf (id, "");
+ 647              		.loc 1 361 0
+ 648 0084 9DF81730 		ldrb	r3, [sp, #23]	@ zero_extendqisi2
+ 649 0088 1846     		mov	r0, r3
+ 650 008a 4249     		ldr	r1, .L59+8
+ 651 008c FFF7FEFF 		bl	LCD_Printf
+ 362:../drivers/Display.c **** 		break;
+ 652              		.loc 1 362 0
+ 653 0090 70E0     		b	.L44
+ 654              	.L48:
+ 363:../drivers/Display.c **** 
+ 364:../drivers/Display.c **** 	    case LCD_ITEM_DESC:		// display item description
+ 365:../drivers/Display.c **** 		LCD_Printf (id, "%s", l_pItemList[l_ItemIdx]);
+ 655              		.loc 1 365 0
+ 656 0092 414B     		ldr	r3, .L59+12
+ 657 0094 1A68     		ldr	r2, [r3]
+ 658 0096 414B     		ldr	r3, .L59+16
+ 659 0098 1B68     		ldr	r3, [r3]
+ 660 009a DB00     		lsls	r3, r3, #3
+ 661 009c 1344     		add	r3, r3, r2
+ 662 009e 9DF81720 		ldrb	r2, [sp, #23]	@ zero_extendqisi2
+ 663 00a2 1046     		mov	r0, r2
+ 664 00a4 3E49     		ldr	r1, .L59+20
+ 665 00a6 0CCB     		ldmia	r3, {r2, r3}
+ 666 00a8 FFF7FEFF 		bl	LCD_Printf
+ 366:../drivers/Display.c **** 		break;
+ 667              		.loc 1 366 0
+ 668 00ac 62E0     		b	.L44
+ 669              	.L49:
+ 367:../drivers/Display.c **** 
+ 368:../drivers/Display.c **** 	    case LCD_ITEM_ADDR:		// display item register address
+ 369:../drivers/Display.c **** 		if (l_pItemList[l_ItemIdx].Cmd != SBS_NONE)
+ 670              		.loc 1 369 0
+ 671 00ae 3A4B     		ldr	r3, .L59+12
+ 672 00b0 1A68     		ldr	r2, [r3]
+ 673 00b2 3A4B     		ldr	r3, .L59+16
+ 674 00b4 1B68     		ldr	r3, [r3]
+ARM GAS  /tmp/ccSHpvpe.s 			page 19
+
+
+ 675 00b6 DB00     		lsls	r3, r3, #3
+ 676 00b8 1344     		add	r3, r3, r2
+ 677 00ba 9B88     		ldrh	r3, [r3, #4]
+ 678 00bc 1BB2     		sxth	r3, r3
+ 679 00be B3F1FF3F 		cmp	r3, #-1
+ 680 00c2 10D0     		beq	.L52
+ 370:../drivers/Display.c **** 		    LCD_Printf (id, "[%02X]", l_pItemList[l_ItemIdx].Cmd & 0xFF);
+ 681              		.loc 1 370 0
+ 682 00c4 344B     		ldr	r3, .L59+12
+ 683 00c6 1A68     		ldr	r2, [r3]
+ 684 00c8 344B     		ldr	r3, .L59+16
+ 685 00ca 1B68     		ldr	r3, [r3]
+ 686 00cc DB00     		lsls	r3, r3, #3
+ 687 00ce 1344     		add	r3, r3, r2
+ 688 00d0 9B88     		ldrh	r3, [r3, #4]
+ 689 00d2 9BB2     		uxth	r3, r3
+ 690 00d4 DBB2     		uxtb	r3, r3
+ 691 00d6 9DF81720 		ldrb	r2, [sp, #23]	@ zero_extendqisi2
+ 692 00da 1046     		mov	r0, r2
+ 693 00dc 3149     		ldr	r1, .L59+24
+ 694 00de 1A46     		mov	r2, r3
+ 695 00e0 FFF7FEFF 		bl	LCD_Printf
+ 371:../drivers/Display.c **** 		break;
+ 696              		.loc 1 371 0
+ 697 00e4 46E0     		b	.L44
+ 698              	.L52:
+ 699 00e6 45E0     		b	.L44
+ 700              	.L50:
+ 372:../drivers/Display.c **** 
+ 373:../drivers/Display.c **** 	    case LCD_ITEM_DATA:		// display item register data
+ 374:../drivers/Display.c **** 		pStr = ItemDataString(&l_pItemList[l_ItemIdx]);
+ 701              		.loc 1 374 0
+ 702 00e8 2B4B     		ldr	r3, .L59+12
+ 703 00ea 1A68     		ldr	r2, [r3]
+ 704 00ec 2B4B     		ldr	r3, .L59+16
+ 705 00ee 1B68     		ldr	r3, [r3]
+ 706 00f0 DB00     		lsls	r3, r3, #3
+ 707 00f2 1344     		add	r3, r3, r2
+ 708 00f4 1846     		mov	r0, r3
+ 709 00f6 FFF7FEFF 		bl	ItemDataString
+ 710 00fa 0490     		str	r0, [sp, #16]
+ 375:../drivers/Display.c **** 		if (pStr != NULL)
+ 711              		.loc 1 375 0
+ 712 00fc 049B     		ldr	r3, [sp, #16]
+ 713 00fe 002B     		cmp	r3, #0
+ 714 0100 18D0     		beq	.L53
+ 376:../drivers/Display.c **** 		{
+ 377:../drivers/Display.c **** 		    if (l_pItemList[l_ItemIdx].Cmd != SBS_NONE)
+ 715              		.loc 1 377 0
+ 716 0102 254B     		ldr	r3, .L59+12
+ 717 0104 1A68     		ldr	r2, [r3]
+ 718 0106 254B     		ldr	r3, .L59+16
+ 719 0108 1B68     		ldr	r3, [r3]
+ 720 010a DB00     		lsls	r3, r3, #3
+ 721 010c 1344     		add	r3, r3, r2
+ 722 010e 9B88     		ldrh	r3, [r3, #4]
+ 723 0110 1BB2     		sxth	r3, r3
+ARM GAS  /tmp/ccSHpvpe.s 			page 20
+
+
+ 724 0112 B3F1FF3F 		cmp	r3, #-1
+ 725 0116 07D0     		beq	.L54
+ 378:../drivers/Display.c **** 			LCD_Printf (id, "%s", pStr);
+ 726              		.loc 1 378 0
+ 727 0118 9DF81730 		ldrb	r3, [sp, #23]	@ zero_extendqisi2
+ 728 011c 1846     		mov	r0, r3
+ 729 011e 2049     		ldr	r1, .L59+20
+ 730 0120 049A     		ldr	r2, [sp, #16]
+ 731 0122 FFF7FEFF 		bl	LCD_Printf
+ 379:../drivers/Display.c **** 		    else // use the whole line to display special information
+ 380:../drivers/Display.c **** 			LCD_Printf (LCD_LINE2_TEXT, "%s", pStr);
+ 381:../drivers/Display.c **** 		}
+ 382:../drivers/Display.c **** 		else
+ 383:../drivers/Display.c **** 		{
+ 384:../drivers/Display.c **** 		    LCD_Printf (id, "READ ERROR");
+ 385:../drivers/Display.c **** 		    //TODO: flash LED to indicate ERROR ???
+ 386:../drivers/Display.c **** 		}
+ 387:../drivers/Display.c **** 		break;
+ 732              		.loc 1 387 0
+ 733 0126 25E0     		b	.L44
+ 734              	.L54:
+ 380:../drivers/Display.c **** 			LCD_Printf (LCD_LINE2_TEXT, "%s", pStr);
+ 735              		.loc 1 380 0
+ 736 0128 0320     		movs	r0, #3
+ 737 012a 1D49     		ldr	r1, .L59+20
+ 738 012c 049A     		ldr	r2, [sp, #16]
+ 739 012e FFF7FEFF 		bl	LCD_Printf
+ 740              		.loc 1 387 0
+ 741 0132 1FE0     		b	.L44
+ 742              	.L53:
+ 384:../drivers/Display.c **** 		    LCD_Printf (id, "READ ERROR");
+ 743              		.loc 1 384 0
+ 744 0134 9DF81730 		ldrb	r3, [sp, #23]	@ zero_extendqisi2
+ 745 0138 1846     		mov	r0, r3
+ 746 013a 1B49     		ldr	r1, .L59+28
+ 747 013c FFF7FEFF 		bl	LCD_Printf
+ 748              		.loc 1 387 0
+ 749 0140 18E0     		b	.L44
+ 750              	.L51:
+ 388:../drivers/Display.c **** 
+ 389:../drivers/Display.c **** 	    case LCD_CLOCK:		// current date and time
+ 390:../drivers/Display.c **** 		LCD_Printf (id, "%02d%02d%02d %02d:%02d:%02d",
+ 751              		.loc 1 390 0
+ 752 0142 1A4B     		ldr	r3, .L59+32
+ 753 0144 5A69     		ldr	r2, [r3, #20]
+ 391:../drivers/Display.c **** 			    g_CurrDateTime.tm_year,
+ 392:../drivers/Display.c **** 			    g_CurrDateTime.tm_mon + 1,
+ 754              		.loc 1 392 0
+ 755 0146 194B     		ldr	r3, .L59+32
+ 756 0148 1B69     		ldr	r3, [r3, #16]
+ 390:../drivers/Display.c **** 		LCD_Printf (id, "%02d%02d%02d %02d:%02d:%02d",
+ 757              		.loc 1 390 0
+ 758 014a 0133     		adds	r3, r3, #1
+ 759 014c 1749     		ldr	r1, .L59+32
+ 760 014e CE68     		ldr	r6, [r1, #12]
+ 761 0150 1649     		ldr	r1, .L59+32
+ 762 0152 8D68     		ldr	r5, [r1, #8]
+ARM GAS  /tmp/ccSHpvpe.s 			page 21
+
+
+ 763 0154 1549     		ldr	r1, .L59+32
+ 764 0156 4C68     		ldr	r4, [r1, #4]
+ 765 0158 1449     		ldr	r1, .L59+32
+ 766 015a 0868     		ldr	r0, [r1]
+ 767 015c 9DF81710 		ldrb	r1, [sp, #23]	@ zero_extendqisi2
+ 768 0160 0096     		str	r6, [sp]
+ 769 0162 0195     		str	r5, [sp, #4]
+ 770 0164 0294     		str	r4, [sp, #8]
+ 771 0166 0390     		str	r0, [sp, #12]
+ 772 0168 0846     		mov	r0, r1
+ 773 016a 1149     		ldr	r1, .L59+36
+ 774 016c FFF7FEFF 		bl	LCD_Printf
+ 393:../drivers/Display.c **** 			    g_CurrDateTime.tm_mday,
+ 394:../drivers/Display.c **** 			    g_CurrDateTime.tm_hour,
+ 395:../drivers/Display.c **** 			    g_CurrDateTime.tm_min,
+ 396:../drivers/Display.c **** 			    g_CurrDateTime.tm_sec);
+ 397:../drivers/Display.c **** 		break;
+ 775              		.loc 1 397 0
+ 776 0170 00E0     		b	.L44
+ 777              	.L58:
+ 398:../drivers/Display.c **** 
+ 399:../drivers/Display.c **** 	    default:		// LCD_LINE1_TEXT, LCD_LINE2_TEXT, or unknown ID
+ 400:../drivers/Display.c **** 		break;		// nothing to be done
+ 778              		.loc 1 400 0
+ 779 0172 00BF     		nop
+ 780              	.L44:
+ 347:../drivers/Display.c ****     for (id = LCD_LINE1_BLANK;  id < LCD_FIELD_ID_CNT;  id++)
+ 781              		.loc 1 347 0
+ 782 0174 9DF81730 		ldrb	r3, [sp, #23]	@ zero_extendqisi2
+ 783 0178 0133     		adds	r3, r3, #1
+ 784 017a 8DF81730 		strb	r3, [sp, #23]
+ 785              	.L41:
+ 347:../drivers/Display.c ****     for (id = LCD_LINE1_BLANK;  id < LCD_FIELD_ID_CNT;  id++)
+ 786              		.loc 1 347 0 is_stmt 0 discriminator 1
+ 787 017e 9DF81730 		ldrb	r3, [sp, #23]	@ zero_extendqisi2
+ 788 0182 072B     		cmp	r3, #7
+ 789 0184 7FF642AF 		bls	.L57
+ 401:../drivers/Display.c **** 	}
+ 402:../drivers/Display.c ****     }
+ 403:../drivers/Display.c **** }
+ 790              		.loc 1 403 0 is_stmt 1
+ 791 0188 06B0     		add	sp, sp, #24
+ 792              		@ sp needed
+ 793 018a 70BD     		pop	{r4, r5, r6, pc}
+ 794              	.L60:
+ 795              		.align	2
+ 796              	.L59:
+ 797 018c 00000000 		.word	l_bitMaskFieldUpd
+ 798 0190 00000000 		.word	l_bitMaskFieldActive
+ 799 0194 18000000 		.word	.LC1
+ 800 0198 00000000 		.word	l_pItemList
+ 801 019c 00000000 		.word	l_ItemIdx
+ 802 01a0 1C000000 		.word	.LC2
+ 803 01a4 20000000 		.word	.LC3
+ 804 01a8 28000000 		.word	.LC4
+ 805 01ac 00000000 		.word	g_CurrDateTime
+ 806 01b0 34000000 		.word	.LC5
+ARM GAS  /tmp/ccSHpvpe.s 			page 22
+
+
+ 807              		.cfi_endproc
+ 808              	.LFE93:
+ 810              		.section	.rodata
+ 811              		.align	2
+ 812              	.LC6:
+ 813 0050 56257320 		.ascii	"V%s %s\000"
+ 813      257300
+ 814 0057 00       		.align	2
+ 815              	.LC7:
+ 816 0058 43523230 		.ascii	"CR2032: %d.%03dV\000"
+ 816      33323A20 
+ 816      25642E25 
+ 816      30336456 
+ 816      00
+ 817 0069 000000   		.align	2
+ 818              	.LC8:
+ 819 006c 30782530 		.ascii	"0x%04X\000"
+ 819      345800
+ 820 0073 00       		.align	2
+ 821              	.LC9:
+ 822 0074 25356400 		.ascii	"%5d\000"
+ 823              		.align	2
+ 824              	.LC10:
+ 825 0078 25303564 		.ascii	"%05d\000"
+ 825      00
+ 826 007d 000000   		.align	2
+ 827              	.LC11:
+ 828 0080 25356425 		.ascii	"%5d%%\000"
+ 828      2500
+ 829 0086 0000     		.align	2
+ 830              	.LC12:
+ 831 0088 2535646D 		.ascii	"%5dmin\000"
+ 831      696E00
+ 832 008f 00       		.align	2
+ 833              	.LC13:
+ 834 0090 2535646D 		.ascii	"%5dms\000"
+ 834      7300
+ 835 0096 0000     		.align	2
+ 836              	.LC14:
+ 837 0098 2535646D 		.ascii	"%5dmV\000"
+ 837      5600
+ 838 009e 0000     		.align	2
+ 839              	.LC15:
+ 840 00a0 2535646D 		.ascii	"%5dmA\000"
+ 840      4100
+ 841 00a6 0000     		.align	2
+ 842              	.LC16:
+ 843 00a8 2535646D 		.ascii	"%5dmAh\000"
+ 843      416800
+ 844 00af 00       		.align	2
+ 845              	.LC17:
+ 846 00b0 25356475 		.ascii	"%5duOhm\000"
+ 846      4F686D00 
+ 847              		.align	2
+ 848              	.LC18:
+ 849 00b8 25303464 		.ascii	"%04d-%02d-%02d\000"
+ 849      2D253032 
+ARM GAS  /tmp/ccSHpvpe.s 			page 23
+
+
+ 849      642D2530 
+ 849      326400
+ 850 00c7 00       		.align	2
+ 851              	.LC19:
+ 852 00c8 25642E25 		.ascii	"%d.%d C\000"
+ 852      64204300 
+ 853              		.section	.text.ItemDataString,"ax",%progbits
+ 854              		.align	2
+ 855              		.thumb
+ 856              		.thumb_func
+ 858              	ItemDataString:
+ 859              	.LFB94:
+ 404:../drivers/Display.c **** 
+ 405:../drivers/Display.c **** 
+ 406:../drivers/Display.c **** /***************************************************************************//**
+ 407:../drivers/Display.c ****  *
+ 408:../drivers/Display.c ****  * @brief	Item Data String
+ 409:../drivers/Display.c ****  *
+ 410:../drivers/Display.c ****  * This routine returns a formatted data string of the specified item data.
+ 411:../drivers/Display.c ****  * It uses BatteryRegReadWord() and BatteryRegReadBlock() to read the data
+ 412:../drivers/Display.c ****  * directly from the battery controller.
+ 413:../drivers/Display.c ****  *
+ 414:../drivers/Display.c ****  * @param[in] pItem
+ 415:../drivers/Display.c ****  *	Address of structure specifies the item that should be used.
+ 416:../drivers/Display.c ****  *
+ 417:../drivers/Display.c ****  * @return
+ 418:../drivers/Display.c ****  * 	Static buffer that contains the formatted data string of the item,
+ 419:../drivers/Display.c ****  * 	or NULL if there was an error, e.g. a read error from the battery
+ 420:../drivers/Display.c ****  * 	controller.
+ 421:../drivers/Display.c ****  *
+ 422:../drivers/Display.c ****  * @warning
+ 423:../drivers/Display.c ****  *	This routine is not MT-save (which should not be a problem for this
+ 424:../drivers/Display.c ****  *	application)!
+ 425:../drivers/Display.c ****  *
+ 426:../drivers/Display.c ****  ******************************************************************************/
+ 427:../drivers/Display.c **** static char	*ItemDataString (const ITEM *pItem)
+ 428:../drivers/Display.c **** {
+ 860              		.loc 1 428 0
+ 861              		.cfi_startproc
+ 862              		@ args = 0, pretend = 0, frame = 40
+ 863              		@ frame_needed = 0, uses_anonymous_args = 0
+ 864 0000 10B5     		push	{r4, lr}
+ 865              		.cfi_def_cfa_offset 8
+ 866              		.cfi_offset 4, -8
+ 867              		.cfi_offset 14, -4
+ 868 0002 8CB0     		sub	sp, sp, #48
+ 869              		.cfi_def_cfa_offset 56
+ 870 0004 0390     		str	r0, [sp, #12]
+ 429:../drivers/Display.c **** static char	 strBuf[20];	// static buffer to return string into
+ 430:../drivers/Display.c **** uint8_t		 dataBuf[20];	// buffer for I2C data, read from the controller
+ 431:../drivers/Display.c **** int		 data = NONE;	// generic data variable
+ 871              		.loc 1 431 0
+ 872 0006 4FF0FF33 		mov	r3, #-1
+ 873 000a 0B93     		str	r3, [sp, #44]
+ 432:../drivers/Display.c **** SBS_CMD		 regAddr;	// command, i.e. the register address to read
+ 433:../drivers/Display.c **** 
+ 434:../drivers/Display.c **** 
+ARM GAS  /tmp/ccSHpvpe.s 			page 24
+
+
+ 435:../drivers/Display.c ****     /* Parameter check */
+ 436:../drivers/Display.c ****     EFM_ASSERT(pItem != NULL);
+ 874              		.loc 1 436 0
+ 875 000c 039B     		ldr	r3, [sp, #12]
+ 876 000e 002B     		cmp	r3, #0
+ 877 0010 04D1     		bne	.L62
+ 878              		.loc 1 436 0 is_stmt 0 discriminator 1
+ 879 0012 9648     		ldr	r0, .L92
+ 880 0014 4FF4DA71 		mov	r1, #436
+ 881 0018 FFF7FEFF 		bl	assertEFM
+ 882              	.L62:
+ 437:../drivers/Display.c ****     if (pItem == NULL)
+ 883              		.loc 1 437 0 is_stmt 1
+ 884 001c 039B     		ldr	r3, [sp, #12]
+ 885 001e 002B     		cmp	r3, #0
+ 886 0020 01D1     		bne	.L63
+ 438:../drivers/Display.c **** 	return NULL;		// error
+ 887              		.loc 1 438 0
+ 888 0022 0023     		movs	r3, #0
+ 889 0024 1FE1     		b	.L91
+ 890              	.L63:
+ 439:../drivers/Display.c **** 
+ 440:../drivers/Display.c ****     /* Check if item needs any data (that should be the standard) */
+ 441:../drivers/Display.c ****     regAddr = pItem->Cmd;
+ 891              		.loc 1 441 0
+ 892 0026 039B     		ldr	r3, [sp, #12]
+ 893 0028 9B88     		ldrh	r3, [r3, #4]	@ movhi
+ 894 002a ADF82A30 		strh	r3, [sp, #42]	@ movhi
+ 442:../drivers/Display.c ****     if (regAddr != SBS_NONE)
+ 895              		.loc 1 442 0
+ 896 002e BDF92A30 		ldrsh	r3, [sp, #42]
+ 897 0032 B3F1FF3F 		cmp	r3, #-1
+ 898 0036 48D0     		beq	.L65
+ 443:../drivers/Display.c ****     {
+ 444:../drivers/Display.c **** 	/* See how many bytes we need to read */
+ 445:../drivers/Display.c **** 	data = SBS_CMD_SIZE(regAddr);	// get object size
+ 899              		.loc 1 445 0
+ 900 0038 BDF92A30 		ldrsh	r3, [sp, #42]
+ 901 003c 1B12     		asrs	r3, r3, #8
+ 902 003e 9BB2     		uxth	r3, r3
+ 903 0040 9BB2     		uxth	r3, r3
+ 904 0042 DBB2     		uxtb	r3, r3
+ 905 0044 0B93     		str	r3, [sp, #44]
+ 446:../drivers/Display.c **** 	if (data != 0)
+ 906              		.loc 1 446 0
+ 907 0046 0B9B     		ldr	r3, [sp, #44]
+ 908 0048 002B     		cmp	r3, #0
+ 909 004a 33D0     		beq	.L66
+ 447:../drivers/Display.c **** 	{
+ 448:../drivers/Display.c **** 	    /* More than one byte - must be a block, i.e. a string */
+ 449:../drivers/Display.c **** 	    EFM_ASSERT(data < (int)sizeof(dataBuf));
+ 910              		.loc 1 449 0
+ 911 004c 0B9B     		ldr	r3, [sp, #44]
+ 912 004e 132B     		cmp	r3, #19
+ 913 0050 04DD     		ble	.L67
+ 914              		.loc 1 449 0 is_stmt 0 discriminator 1
+ 915 0052 8648     		ldr	r0, .L92
+ARM GAS  /tmp/ccSHpvpe.s 			page 25
+
+
+ 916 0054 40F2C111 		movw	r1, #449
+ 917 0058 FFF7FEFF 		bl	assertEFM
+ 918              	.L67:
+ 450:../drivers/Display.c **** 
+ 451:../drivers/Display.c **** 	    if (BatteryRegReadBlock (regAddr, dataBuf, sizeof(dataBuf)) < 0)
+ 919              		.loc 1 451 0 is_stmt 1
+ 920 005c BDF92A20 		ldrsh	r2, [sp, #42]
+ 921 0060 04AB     		add	r3, sp, #16
+ 922 0062 1046     		mov	r0, r2
+ 923 0064 1946     		mov	r1, r3
+ 924 0066 1422     		movs	r2, #20
+ 925 0068 FFF7FEFF 		bl	BatteryRegReadBlock
+ 926 006c 0346     		mov	r3, r0
+ 927 006e 002B     		cmp	r3, #0
+ 928 0070 01DA     		bge	.L68
+ 452:../drivers/Display.c **** 		return NULL;	// READ ERROR
+ 929              		.loc 1 452 0
+ 930 0072 0023     		movs	r3, #0
+ 931 0074 F7E0     		b	.L91
+ 932              	.L68:
+ 453:../drivers/Display.c **** 
+ 454:../drivers/Display.c **** 	    /*
+ 455:../drivers/Display.c **** 	     * The buggy battery controller firmware delivers strings with
+ 456:../drivers/Display.c **** 	     * leading spaces.  We check for this and remove them.
+ 457:../drivers/Display.c **** 	     */
+ 458:../drivers/Display.c **** 	    data = 0;		// used as index
+ 933              		.loc 1 458 0
+ 934 0076 0023     		movs	r3, #0
+ 935 0078 0B93     		str	r3, [sp, #44]
+ 459:../drivers/Display.c **** 	    while (isspace((int)dataBuf[data])  &&  data < (int)sizeof(dataBuf))
+ 936              		.loc 1 459 0
+ 937 007a 02E0     		b	.L69
+ 938              	.L71:
+ 460:../drivers/Display.c **** 		data++;
+ 939              		.loc 1 460 0
+ 940 007c 0B9B     		ldr	r3, [sp, #44]
+ 941 007e 0133     		adds	r3, r3, #1
+ 942 0080 0B93     		str	r3, [sp, #44]
+ 943              	.L69:
+ 459:../drivers/Display.c **** 	    while (isspace((int)dataBuf[data])  &&  data < (int)sizeof(dataBuf))
+ 944              		.loc 1 459 0 discriminator 1
+ 945 0082 7B4B     		ldr	r3, .L92+4
+ 946 0084 1A68     		ldr	r2, [r3]
+ 947 0086 04A9     		add	r1, sp, #16
+ 948 0088 0B9B     		ldr	r3, [sp, #44]
+ 949 008a 0B44     		add	r3, r3, r1
+ 950 008c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 951 008e 0133     		adds	r3, r3, #1
+ 952 0090 1344     		add	r3, r3, r2
+ 953 0092 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 954 0094 03F00803 		and	r3, r3, #8
+ 955 0098 002B     		cmp	r3, #0
+ 956 009a 02D0     		beq	.L70
+ 459:../drivers/Display.c **** 	    while (isspace((int)dataBuf[data])  &&  data < (int)sizeof(dataBuf))
+ 957              		.loc 1 459 0 is_stmt 0 discriminator 2
+ 958 009c 0B9B     		ldr	r3, [sp, #44]
+ 959 009e 132B     		cmp	r3, #19
+ARM GAS  /tmp/ccSHpvpe.s 			page 26
+
+
+ 960 00a0 ECDD     		ble	.L71
+ 961              	.L70:
+ 461:../drivers/Display.c **** 
+ 462:../drivers/Display.c **** 	    /* copy string */
+ 463:../drivers/Display.c **** 	    return strcpy (strBuf, (char *)dataBuf+data);
+ 962              		.loc 1 463 0 is_stmt 1
+ 963 00a2 0B9B     		ldr	r3, [sp, #44]
+ 964 00a4 04AA     		add	r2, sp, #16
+ 965 00a6 1344     		add	r3, r3, r2
+ 966 00a8 7248     		ldr	r0, .L92+8
+ 967 00aa 1946     		mov	r1, r3
+ 968 00ac FFF7FEFF 		bl	strcpy
+ 969 00b0 0346     		mov	r3, r0
+ 970 00b2 D8E0     		b	.L91
+ 971              	.L66:
+ 464:../drivers/Display.c **** 	}
+ 465:../drivers/Display.c **** 	else
+ 466:../drivers/Display.c **** 	{
+ 467:../drivers/Display.c **** 	    /* Just one byte to read */
+ 468:../drivers/Display.c **** 	    data = BatteryRegReadWord (regAddr);
+ 972              		.loc 1 468 0
+ 973 00b4 BDF92A30 		ldrsh	r3, [sp, #42]
+ 974 00b8 1846     		mov	r0, r3
+ 975 00ba FFF7FEFF 		bl	BatteryRegReadWord
+ 976 00be 0B90     		str	r0, [sp, #44]
+ 469:../drivers/Display.c **** 	    if (data < 0)
+ 977              		.loc 1 469 0
+ 978 00c0 0B9B     		ldr	r3, [sp, #44]
+ 979 00c2 002B     		cmp	r3, #0
+ 980 00c4 01DA     		bge	.L65
+ 470:../drivers/Display.c **** 		return NULL;	// READ ERROR
+ 981              		.loc 1 470 0
+ 982 00c6 0023     		movs	r3, #0
+ 983 00c8 CDE0     		b	.L91
+ 984              	.L65:
+ 471:../drivers/Display.c **** 	}
+ 472:../drivers/Display.c ****     }
+ 473:../drivers/Display.c **** 
+ 474:../drivers/Display.c ****     /* Variable <data> contains 16bit raw value, build formatted string */
+ 475:../drivers/Display.c ****     switch (pItem->Frmt)
+ 985              		.loc 1 475 0
+ 986 00ca 039B     		ldr	r3, [sp, #12]
+ 987 00cc 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 988 00ce 0F2B     		cmp	r3, #15
+ 989 00d0 00F2C680 		bhi	.L72
+ 990 00d4 01A1     		adr	r1, .L74
+ 991 00d6 51F823F0 		ldr	pc, [r1, r3, lsl #2]
+ 992 00da 00BF     		.p2align 2
+ 993              	.L74:
+ 994 00dc 1D010000 		.word	.L73+1
+ 995 00e0 2B010000 		.word	.L75+1
+ 996 00e4 61020000 		.word	.L72+1
+ 997 00e8 65010000 		.word	.L76+1
+ 998 00ec 71010000 		.word	.L77+1
+ 999 00f0 7D010000 		.word	.L78+1
+ 1000 00f4 89010000 		.word	.L79+1
+ 1001 00f8 95010000 		.word	.L80+1
+ARM GAS  /tmp/ccSHpvpe.s 			page 27
+
+
+ 1002 00fc A1010000 		.word	.L81+1
+ 1003 0100 B5010000 		.word	.L82+1
+ 1004 0104 C5010000 		.word	.L83+1
+ 1005 0108 D1010000 		.word	.L84+1
+ 1006 010c DD010000 		.word	.L85+1
+ 1007 0110 E9010000 		.word	.L86+1
+ 1008 0114 F5010000 		.word	.L87+1
+ 1009 0118 17020000 		.word	.L88+1
+ 1010              		.p2align 1
+ 1011              	.L73:
+ 1012              	.LBB3:
+ 476:../drivers/Display.c ****     {
+ 477:../drivers/Display.c **** 	case FRMT_FW_VERSION:	// Firmware Version
+ 478:../drivers/Display.c **** 	    sprintf (strBuf, "V%s %s", prjVersion, prjDate);
+ 1013              		.loc 1 478 0
+ 1014 011c 5548     		ldr	r0, .L92+8
+ 1015 011e 5649     		ldr	r1, .L92+12
+ 1016 0120 564A     		ldr	r2, .L92+16
+ 1017 0122 574B     		ldr	r3, .L92+20
+ 1018 0124 FFF7FEFF 		bl	sprintf
+ 479:../drivers/Display.c **** 	    break;
+ 1019              		.loc 1 479 0
+ 1020 0128 9CE0     		b	.L89
+ 1021              	.L75:
+ 480:../drivers/Display.c **** 
+ 481:../drivers/Display.c **** 	case FRMT_CR2032_BAT:	// Voltage of local CR2032 supply battery
+ 482:../drivers/Display.c **** 	    data = ReadVdd();
+ 1022              		.loc 1 482 0
+ 1023 012a FFF7FEFF 		bl	ReadVdd
+ 1024 012e 0346     		mov	r3, r0
+ 1025 0130 0B93     		str	r3, [sp, #44]
+ 483:../drivers/Display.c **** 	    sprintf (strBuf, "CR2032: %d.%03dV", data / 1000, data % 1000);
+ 1026              		.loc 1 483 0
+ 1027 0132 0B9B     		ldr	r3, [sp, #44]
+ 1028 0134 534A     		ldr	r2, .L92+24
+ 1029 0136 82FB0312 		smull	r1, r2, r2, r3
+ 1030 013a 9211     		asrs	r2, r2, #6
+ 1031 013c DB17     		asrs	r3, r3, #31
+ 1032 013e D41A     		subs	r4, r2, r3
+ 1033 0140 0B9A     		ldr	r2, [sp, #44]
+ 1034 0142 504B     		ldr	r3, .L92+24
+ 1035 0144 83FB0213 		smull	r1, r3, r3, r2
+ 1036 0148 9911     		asrs	r1, r3, #6
+ 1037 014a D317     		asrs	r3, r2, #31
+ 1038 014c CB1A     		subs	r3, r1, r3
+ 1039 014e 4FF47A71 		mov	r1, #1000
+ 1040 0152 01FB03F3 		mul	r3, r1, r3
+ 1041 0156 D31A     		subs	r3, r2, r3
+ 1042 0158 4648     		ldr	r0, .L92+8
+ 1043 015a 4B49     		ldr	r1, .L92+28
+ 1044 015c 2246     		mov	r2, r4
+ 1045 015e FFF7FEFF 		bl	sprintf
+ 484:../drivers/Display.c **** 	    break;
+ 1046              		.loc 1 484 0
+ 1047 0162 7FE0     		b	.L89
+ 1048              	.L76:
+ 485:../drivers/Display.c **** 
+ARM GAS  /tmp/ccSHpvpe.s 			page 28
+
+
+ 486:../drivers/Display.c **** 	case FRMT_HEX:		// HEX Digits
+ 487:../drivers/Display.c **** 	    sprintf (strBuf, "0x%04X", data);
+ 1049              		.loc 1 487 0
+ 1050 0164 4348     		ldr	r0, .L92+8
+ 1051 0166 4949     		ldr	r1, .L92+32
+ 1052 0168 0B9A     		ldr	r2, [sp, #44]
+ 1053 016a FFF7FEFF 		bl	sprintf
+ 488:../drivers/Display.c **** 	    break;
+ 1054              		.loc 1 488 0
+ 1055 016e 79E0     		b	.L89
+ 1056              	.L77:
+ 489:../drivers/Display.c **** 
+ 490:../drivers/Display.c **** 	case FRMT_INTEGER:	// Integer Value
+ 491:../drivers/Display.c **** 	    sprintf (strBuf, "%5d", data);
+ 1057              		.loc 1 491 0
+ 1058 0170 4048     		ldr	r0, .L92+8
+ 1059 0172 4749     		ldr	r1, .L92+36
+ 1060 0174 0B9A     		ldr	r2, [sp, #44]
+ 1061 0176 FFF7FEFF 		bl	sprintf
+ 492:../drivers/Display.c **** 	    break;
+ 1062              		.loc 1 492 0
+ 1063 017a 73E0     		b	.L89
+ 1064              	.L78:
+ 493:../drivers/Display.c **** 
+ 494:../drivers/Display.c **** 	case FRMT_SERNUM:	// 5-Digit Integer Value
+ 495:../drivers/Display.c **** 	    sprintf (strBuf, "%05d", data);
+ 1065              		.loc 1 495 0
+ 1066 017c 3D48     		ldr	r0, .L92+8
+ 1067 017e 4549     		ldr	r1, .L92+40
+ 1068 0180 0B9A     		ldr	r2, [sp, #44]
+ 1069 0182 FFF7FEFF 		bl	sprintf
+ 496:../drivers/Display.c **** 	    break;
+ 1070              		.loc 1 496 0
+ 1071 0186 6DE0     		b	.L89
+ 1072              	.L79:
+ 497:../drivers/Display.c **** 
+ 498:../drivers/Display.c **** 	case FRMT_PERCENT:	// Amount in percent
+ 499:../drivers/Display.c **** 	    sprintf (strBuf, "%5d%%", data);
+ 1073              		.loc 1 499 0
+ 1074 0188 3A48     		ldr	r0, .L92+8
+ 1075 018a 4349     		ldr	r1, .L92+44
+ 1076 018c 0B9A     		ldr	r2, [sp, #44]
+ 1077 018e FFF7FEFF 		bl	sprintf
+ 500:../drivers/Display.c **** 	    break;
+ 1078              		.loc 1 500 0
+ 1079 0192 67E0     		b	.L89
+ 1080              	.L80:
+ 501:../drivers/Display.c **** 
+ 502:../drivers/Display.c **** 	case FRMT_DURATION:	// Duration in [min]
+ 503:../drivers/Display.c **** 	    sprintf (strBuf, "%5dmin", data);
+ 1081              		.loc 1 503 0
+ 1082 0194 3748     		ldr	r0, .L92+8
+ 1083 0196 4149     		ldr	r1, .L92+48
+ 1084 0198 0B9A     		ldr	r2, [sp, #44]
+ 1085 019a FFF7FEFF 		bl	sprintf
+ 504:../drivers/Display.c **** 	    break;
+ 1086              		.loc 1 504 0
+ARM GAS  /tmp/ccSHpvpe.s 			page 29
+
+
+ 1087 019e 61E0     		b	.L89
+ 1088              	.L81:
+ 505:../drivers/Display.c **** 
+ 506:../drivers/Display.c **** 	case FRMT_OC_REATIME:	// Overcurrent Reaction Time in 1/2[ms] units
+ 507:../drivers/Display.c **** 	    sprintf (strBuf, "%5dms", data/2);
+ 1089              		.loc 1 507 0
+ 1090 01a0 0B9B     		ldr	r3, [sp, #44]
+ 1091 01a2 DA0F     		lsrs	r2, r3, #31
+ 1092 01a4 1344     		add	r3, r3, r2
+ 1093 01a6 5B10     		asrs	r3, r3, #1
+ 1094 01a8 3248     		ldr	r0, .L92+8
+ 1095 01aa 3D49     		ldr	r1, .L92+52
+ 1096 01ac 1A46     		mov	r2, r3
+ 1097 01ae FFF7FEFF 		bl	sprintf
+ 508:../drivers/Display.c **** 	    break;
+ 1098              		.loc 1 508 0
+ 1099 01b2 57E0     		b	.L89
+ 1100              	.L82:
+ 509:../drivers/Display.c **** 
+ 510:../drivers/Display.c **** 	case FRMT_HC_REATIME:	// Highcurrent Reaction Time in 2[ms] units
+ 511:../drivers/Display.c **** 	    sprintf (strBuf, "%5dms", data*2);
+ 1101              		.loc 1 511 0
+ 1102 01b4 0B9B     		ldr	r3, [sp, #44]
+ 1103 01b6 5B00     		lsls	r3, r3, #1
+ 1104 01b8 2E48     		ldr	r0, .L92+8
+ 1105 01ba 3949     		ldr	r1, .L92+52
+ 1106 01bc 1A46     		mov	r2, r3
+ 1107 01be FFF7FEFF 		bl	sprintf
+ 512:../drivers/Display.c **** 	    break;
+ 1108              		.loc 1 512 0
+ 1109 01c2 4FE0     		b	.L89
+ 1110              	.L83:
+ 513:../drivers/Display.c **** 
+ 514:../drivers/Display.c **** 	case FRMT_MILLIVOLT:	// Voltage in [mV]
+ 515:../drivers/Display.c **** 	    sprintf (strBuf, "%5dmV", data);
+ 1111              		.loc 1 515 0
+ 1112 01c4 2B48     		ldr	r0, .L92+8
+ 1113 01c6 3749     		ldr	r1, .L92+56
+ 1114 01c8 0B9A     		ldr	r2, [sp, #44]
+ 1115 01ca FFF7FEFF 		bl	sprintf
+ 516:../drivers/Display.c **** 	    break;
+ 1116              		.loc 1 516 0
+ 1117 01ce 49E0     		b	.L89
+ 1118              	.L84:
+ 517:../drivers/Display.c **** 
+ 518:../drivers/Display.c **** 	case FRMT_MILLIAMP:	// Current in [mA]
+ 519:../drivers/Display.c **** 	    sprintf (strBuf, "%5dmA", data);
+ 1119              		.loc 1 519 0
+ 1120 01d0 2848     		ldr	r0, .L92+8
+ 1121 01d2 3549     		ldr	r1, .L92+60
+ 1122 01d4 0B9A     		ldr	r2, [sp, #44]
+ 1123 01d6 FFF7FEFF 		bl	sprintf
+ 520:../drivers/Display.c **** 	    break;
+ 1124              		.loc 1 520 0
+ 1125 01da 43E0     		b	.L89
+ 1126              	.L85:
+ 521:../drivers/Display.c **** 
+ARM GAS  /tmp/ccSHpvpe.s 			page 30
+
+
+ 522:../drivers/Display.c **** 	case FRMT_MILLIAMPH:	// Capacity in [mAh]
+ 523:../drivers/Display.c **** 	    sprintf (strBuf, "%5dmAh", data);
+ 1127              		.loc 1 523 0
+ 1128 01dc 2548     		ldr	r0, .L92+8
+ 1129 01de 3349     		ldr	r1, .L92+64
+ 1130 01e0 0B9A     		ldr	r2, [sp, #44]
+ 1131 01e2 FFF7FEFF 		bl	sprintf
+ 524:../drivers/Display.c **** 	    break;
+ 1132              		.loc 1 524 0
+ 1133 01e6 3DE0     		b	.L89
+ 1134              	.L86:
+ 525:../drivers/Display.c **** 
+ 526:../drivers/Display.c **** 	case FRMT_MICROOHM:	// Resistance in [uOhm]
+ 527:../drivers/Display.c **** 	    sprintf (strBuf, "%5duOhm", data);
+ 1135              		.loc 1 527 0
+ 1136 01e8 2248     		ldr	r0, .L92+8
+ 1137 01ea 3149     		ldr	r1, .L92+68
+ 1138 01ec 0B9A     		ldr	r2, [sp, #44]
+ 1139 01ee FFF7FEFF 		bl	sprintf
+ 528:../drivers/Display.c **** 	    break;
+ 1140              		.loc 1 528 0
+ 1141 01f2 37E0     		b	.L89
+ 1142              	.L87:
+ 529:../drivers/Display.c **** 
+ 530:../drivers/Display.c **** 	case FRMT_DATE:		// Date [15:9=Year|8:5=Month|4:0=Day]
+ 531:../drivers/Display.c **** 	    sprintf (strBuf, "%04d-%02d-%02d", 1980 + (data >> 9),
+ 1143              		.loc 1 531 0
+ 1144 01f4 0B9B     		ldr	r3, [sp, #44]
+ 1145 01f6 5B12     		asrs	r3, r3, #9
+ 1146 01f8 03F2BC72 		addw	r2, r3, #1980
+ 532:../drivers/Display.c **** 		     (data >> 5) & 0xF, data & 0x1F);
+ 1147              		.loc 1 532 0
+ 1148 01fc 0B9B     		ldr	r3, [sp, #44]
+ 1149 01fe 5B11     		asrs	r3, r3, #5
+ 531:../drivers/Display.c **** 	    sprintf (strBuf, "%04d-%02d-%02d", 1980 + (data >> 9),
+ 1150              		.loc 1 531 0
+ 1151 0200 03F00F03 		and	r3, r3, #15
+ 1152 0204 0B99     		ldr	r1, [sp, #44]
+ 1153 0206 01F01F01 		and	r1, r1, #31
+ 1154 020a 0091     		str	r1, [sp]
+ 1155 020c 1948     		ldr	r0, .L92+8
+ 1156 020e 2949     		ldr	r1, .L92+72
+ 1157 0210 FFF7FEFF 		bl	sprintf
+ 533:../drivers/Display.c **** 	    break;
+ 1158              		.loc 1 533 0
+ 1159 0214 26E0     		b	.L89
+ 1160              	.L88:
+ 534:../drivers/Display.c **** 
+ 535:../drivers/Display.c **** 	case FRMT_TEMP:		// Temperature in 1/10[K], convert to [°C]
+ 536:../drivers/Display.c **** 	    data -= 2732;	// subtract base of 273.16K
+ 1161              		.loc 1 536 0
+ 1162 0216 0B9B     		ldr	r3, [sp, #44]
+ 1163 0218 A3F6AC23 		subw	r3, r3, #2732
+ 1164 021c 0B93     		str	r3, [sp, #44]
+ 537:../drivers/Display.c **** 	    int degC = data / 10;
+ 1165              		.loc 1 537 0
+ 1166 021e 0B9B     		ldr	r3, [sp, #44]
+ARM GAS  /tmp/ccSHpvpe.s 			page 31
+
+
+ 1167 0220 254A     		ldr	r2, .L92+76
+ 1168 0222 82FB0312 		smull	r1, r2, r2, r3
+ 1169 0226 9210     		asrs	r2, r2, #2
+ 1170 0228 DB17     		asrs	r3, r3, #31
+ 1171 022a D31A     		subs	r3, r2, r3
+ 1172 022c 0993     		str	r3, [sp, #36]
+ 538:../drivers/Display.c **** 	    if (data < 0)
+ 1173              		.loc 1 538 0
+ 1174 022e 0B9B     		ldr	r3, [sp, #44]
+ 1175 0230 002B     		cmp	r3, #0
+ 1176 0232 02DA     		bge	.L90
+ 539:../drivers/Display.c **** 		data = -data;
+ 1177              		.loc 1 539 0
+ 1178 0234 0B9B     		ldr	r3, [sp, #44]
+ 1179 0236 5B42     		negs	r3, r3
+ 1180 0238 0B93     		str	r3, [sp, #44]
+ 1181              	.L90:
+ 540:../drivers/Display.c **** 	    sprintf (strBuf, "%d.%d C", degC, data % 10);
+ 1182              		.loc 1 540 0
+ 1183 023a 0B9A     		ldr	r2, [sp, #44]
+ 1184 023c 1E4B     		ldr	r3, .L92+76
+ 1185 023e 83FB0213 		smull	r1, r3, r3, r2
+ 1186 0242 9910     		asrs	r1, r3, #2
+ 1187 0244 D317     		asrs	r3, r2, #31
+ 1188 0246 CC1A     		subs	r4, r1, r3
+ 1189 0248 2346     		mov	r3, r4
+ 1190 024a 9B00     		lsls	r3, r3, #2
+ 1191 024c 2344     		add	r3, r3, r4
+ 1192 024e 5B00     		lsls	r3, r3, #1
+ 1193 0250 D41A     		subs	r4, r2, r3
+ 1194 0252 0848     		ldr	r0, .L92+8
+ 1195 0254 1949     		ldr	r1, .L92+80
+ 1196 0256 099A     		ldr	r2, [sp, #36]
+ 1197 0258 2346     		mov	r3, r4
+ 1198 025a FFF7FEFF 		bl	sprintf
+ 541:../drivers/Display.c **** 	    break;
+ 1199              		.loc 1 541 0
+ 1200 025e 01E0     		b	.L89
+ 1201              	.L72:
+ 542:../drivers/Display.c **** 
+ 543:../drivers/Display.c **** 	default:		// unsupported format
+ 544:../drivers/Display.c **** 	    return NULL;
+ 1202              		.loc 1 544 0
+ 1203 0260 0023     		movs	r3, #0
+ 1204 0262 00E0     		b	.L91
+ 1205              	.L89:
+ 1206              	.LBE3:
+ 545:../drivers/Display.c **** 
+ 546:../drivers/Display.c ****     }	// switch (pItem->Frmt)
+ 547:../drivers/Display.c **** 
+ 548:../drivers/Display.c ****     return strBuf;
+ 1207              		.loc 1 548 0
+ 1208 0264 034B     		ldr	r3, .L92+8
+ 1209              	.L91:
+ 549:../drivers/Display.c **** }
+ 1210              		.loc 1 549 0
+ 1211 0266 1846     		mov	r0, r3
+ARM GAS  /tmp/ccSHpvpe.s 			page 32
+
+
+ 1212 0268 0CB0     		add	sp, sp, #48
+ 1213              		@ sp needed
+ 1214 026a 10BD     		pop	{r4, pc}
+ 1215              	.L93:
+ 1216              		.align	2
+ 1217              	.L92:
+ 1218 026c 00000000 		.word	.LC0
+ 1219 0270 00000000 		.word	__ctype_ptr__
+ 1220 0274 00000000 		.word	strBuf.6728
+ 1221 0278 50000000 		.word	.LC6
+ 1222 027c 00000000 		.word	prjVersion
+ 1223 0280 00000000 		.word	prjDate
+ 1224 0284 D34D6210 		.word	274877907
+ 1225 0288 58000000 		.word	.LC7
+ 1226 028c 6C000000 		.word	.LC8
+ 1227 0290 74000000 		.word	.LC9
+ 1228 0294 78000000 		.word	.LC10
+ 1229 0298 80000000 		.word	.LC11
+ 1230 029c 88000000 		.word	.LC12
+ 1231 02a0 90000000 		.word	.LC13
+ 1232 02a4 98000000 		.word	.LC14
+ 1233 02a8 A0000000 		.word	.LC15
+ 1234 02ac A8000000 		.word	.LC16
+ 1235 02b0 B0000000 		.word	.LC17
+ 1236 02b4 B8000000 		.word	.LC18
+ 1237 02b8 67666666 		.word	1717986919
+ 1238 02bc C8000000 		.word	.LC19
+ 1239              		.cfi_endproc
+ 1240              	.LFE94:
+ 1242              		.section	.text.DisplayText,"ax",%progbits
+ 1243              		.align	2
+ 1244              		.global	DisplayText
+ 1245              		.thumb
+ 1246              		.thumb_func
+ 1248              	DisplayText:
+ 1249              	.LFB95:
+ 550:../drivers/Display.c **** 
+ 551:../drivers/Display.c **** 
+ 552:../drivers/Display.c **** /***************************************************************************//**
+ 553:../drivers/Display.c ****  *
+ 554:../drivers/Display.c ****  * @brief	Display Text
+ 555:../drivers/Display.c ****  *
+ 556:../drivers/Display.c ****  * This routine allows you to display text on the LCD.  If the LCD is off,
+ 557:../drivers/Display.c ****  * it will be powered-on.  To automatically switch it off after a specified
+ 558:../drivers/Display.c ****  * duration, or to display another text after this time, DisplayNext() can
+ 559:../drivers/Display.c ****  * be used.
+ 560:../drivers/Display.c ****  *
+ 561:../drivers/Display.c ****  * @param[in] lineNum
+ 562:../drivers/Display.c ****  *	The line number where to display the text.  Must be 1 or 2.
+ 563:../drivers/Display.c ****  *
+ 564:../drivers/Display.c ****  * @param[in] frmt
+ 565:../drivers/Display.c ****  *	Format string of the text to print - same as for printf().
+ 566:../drivers/Display.c ****  *
+ 567:../drivers/Display.c ****  * @see
+ 568:../drivers/Display.c ****  * 	DisplayNext()
+ 569:../drivers/Display.c ****  *
+ 570:../drivers/Display.c ****  ******************************************************************************/
+ARM GAS  /tmp/ccSHpvpe.s 			page 33
+
+
+ 571:../drivers/Display.c **** void	DisplayText (int lineNum, const char *frmt, ...)
+ 572:../drivers/Display.c **** {
+ 1250              		.loc 1 572 0
+ 1251              		.cfi_startproc
+ 1252              		@ args = 4, pretend = 12, frame = 16
+ 1253              		@ frame_needed = 0, uses_anonymous_args = 1
+ 1254 0000 0EB4     		push	{r1, r2, r3}
+ 1255              		.cfi_def_cfa_offset 12
+ 1256              		.cfi_offset 1, -12
+ 1257              		.cfi_offset 2, -8
+ 1258              		.cfi_offset 3, -4
+ 1259 0002 00B5     		push	{lr}
+ 1260              		.cfi_def_cfa_offset 16
+ 1261              		.cfi_offset 14, -16
+ 1262 0004 84B0     		sub	sp, sp, #16
+ 1263              		.cfi_def_cfa_offset 32
+ 1264 0006 0190     		str	r0, [sp, #4]
+ 573:../drivers/Display.c **** LCD_FIELD_ID	id;
+ 574:../drivers/Display.c **** va_list		args;
+ 575:../drivers/Display.c **** 
+ 576:../drivers/Display.c **** 
+ 577:../drivers/Display.c ****     /* Parameter check */
+ 578:../drivers/Display.c ****     if (lineNum < 1  ||  lineNum > 2)
+ 1265              		.loc 1 578 0
+ 1266 0008 019B     		ldr	r3, [sp, #4]
+ 1267 000a 002B     		cmp	r3, #0
+ 1268 000c 02DD     		ble	.L95
+ 1269              		.loc 1 578 0 is_stmt 0 discriminator 1
+ 1270 000e 019B     		ldr	r3, [sp, #4]
+ 1271 0010 022B     		cmp	r3, #2
+ 1272 0012 05DD     		ble	.L96
+ 1273              	.L95:
+ 579:../drivers/Display.c ****     {
+ 580:../drivers/Display.c **** 	EFM_ASSERT(false);
+ 1274              		.loc 1 580 0 is_stmt 1
+ 1275 0014 1E48     		ldr	r0, .L101
+ 1276 0016 4FF41171 		mov	r1, #580
+ 1277 001a FFF7FEFF 		bl	assertEFM
+ 1278 001e 32E0     		b	.L94
+ 1279              	.L96:
+ 581:../drivers/Display.c **** 	return;
+ 582:../drivers/Display.c ****     }
+ 583:../drivers/Display.c **** 
+ 584:../drivers/Display.c ****     /* Specify field to use */
+ 585:../drivers/Display.c ****     id = (lineNum == 1 ? LCD_LINE1_TEXT : LCD_LINE2_TEXT);
+ 1280              		.loc 1 585 0
+ 1281 0020 019B     		ldr	r3, [sp, #4]
+ 1282 0022 012B     		cmp	r3, #1
+ 1283 0024 01D1     		bne	.L98
+ 1284              		.loc 1 585 0 is_stmt 0 discriminator 1
+ 1285 0026 0223     		movs	r3, #2
+ 1286 0028 00E0     		b	.L99
+ 1287              	.L98:
+ 1288              		.loc 1 585 0 discriminator 2
+ 1289 002a 0323     		movs	r3, #3
+ 1290              	.L99:
+ 1291              		.loc 1 585 0 discriminator 3
+ARM GAS  /tmp/ccSHpvpe.s 			page 34
+
+
+ 1292 002c 8DF80F30 		strb	r3, [sp, #15]
+ 586:../drivers/Display.c **** 
+ 587:../drivers/Display.c ****     /* Activate LCD */
+ 588:../drivers/Display.c ****     LCD_FIELD_ID_BIT_VAR(l_bitMaskFieldActive, id) = 1;
+ 1293              		.loc 1 588 0 is_stmt 1 discriminator 3
+ 1294 0030 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 1295 0034 9B00     		lsls	r3, r3, #2
+ 1296 0036 1A46     		mov	r2, r3
+ 1297 0038 164B     		ldr	r3, .L101+4
+ 1298 003a 03F18873 		add	r3, r3, #17825792
+ 1299 003e 5B01     		lsls	r3, r3, #5
+ 1300 0040 1344     		add	r3, r3, r2
+ 1301 0042 0122     		movs	r2, #1
+ 1302 0044 1A60     		str	r2, [r3]
+ 589:../drivers/Display.c ****     LCD_FIELD_ID_BIT_VAR(l_bitMaskFieldUpd, id) = 1;
+ 1303              		.loc 1 589 0 discriminator 3
+ 1304 0046 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 1305 004a 9B00     		lsls	r3, r3, #2
+ 1306 004c 1A46     		mov	r2, r3
+ 1307 004e 124B     		ldr	r3, .L101+8
+ 1308 0050 03F18873 		add	r3, r3, #17825792
+ 1309 0054 5B01     		lsls	r3, r3, #5
+ 1310 0056 1344     		add	r3, r3, r2
+ 1311 0058 0122     		movs	r2, #1
+ 1312 005a 1A60     		str	r2, [r3]
+ 590:../drivers/Display.c ****     DisplayUpdateCheck();
+ 1313              		.loc 1 590 0 discriminator 3
+ 1314 005c FFF7FEFF 		bl	DisplayUpdateCheck
+ 591:../drivers/Display.c **** 
+ 592:../drivers/Display.c ****     /* Print Text */
+ 593:../drivers/Display.c ****     va_start (args, frmt);
+ 1315              		.loc 1 593 0 discriminator 3
+ 1316 0060 06AB     		add	r3, sp, #24
+ 1317 0062 0293     		str	r3, [sp, #8]
+ 594:../drivers/Display.c ****     LCD_vPrintf (id, frmt, args);
+ 1318              		.loc 1 594 0 discriminator 3
+ 1319 0064 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 1320 0068 1846     		mov	r0, r3
+ 1321 006a 0599     		ldr	r1, [sp, #20]
+ 1322 006c 029A     		ldr	r2, [sp, #8]
+ 1323 006e FFF7FEFF 		bl	LCD_vPrintf
+ 595:../drivers/Display.c ****     va_end (args);
+ 596:../drivers/Display.c **** 
+ 597:../drivers/Display.c ****     /* Cancel possible running power-off timer to ensure LCD remains ON */
+ 598:../drivers/Display.c ****     if (l_hdlLCD_Off != NONE)
+ 1324              		.loc 1 598 0 discriminator 3
+ 1325 0072 0A4B     		ldr	r3, .L101+12
+ 1326 0074 1B68     		ldr	r3, [r3]
+ 1327 0076 B3F1FF3F 		cmp	r3, #-1
+ 1328 007a 04D0     		beq	.L94
+ 599:../drivers/Display.c **** 	sTimerCancel (l_hdlLCD_Off);
+ 1329              		.loc 1 599 0
+ 1330 007c 074B     		ldr	r3, .L101+12
+ 1331 007e 1B68     		ldr	r3, [r3]
+ 1332 0080 1846     		mov	r0, r3
+ 1333 0082 FFF7FEFF 		bl	sTimerCancel
+ 1334              	.L94:
+ARM GAS  /tmp/ccSHpvpe.s 			page 35
+
+
+ 600:../drivers/Display.c **** }
+ 1335              		.loc 1 600 0
+ 1336 0086 04B0     		add	sp, sp, #16
+ 1337              		@ sp needed
+ 1338 0088 5DF804EB 		ldr	lr, [sp], #4
+ 1339 008c 03B0     		add	sp, sp, #12
+ 1340 008e 7047     		bx	lr
+ 1341              	.L102:
+ 1342              		.align	2
+ 1343              	.L101:
+ 1344 0090 00000000 		.word	.LC0
+ 1345 0094 00000000 		.word	l_bitMaskFieldActive
+ 1346 0098 00000000 		.word	l_bitMaskFieldUpd
+ 1347 009c 00000000 		.word	l_hdlLCD_Off
+ 1348              		.cfi_endproc
+ 1349              	.LFE95:
+ 1351              		.section	.text.DisplayNext,"ax",%progbits
+ 1352              		.align	2
+ 1353              		.global	DisplayNext
+ 1354              		.thumb
+ 1355              		.thumb_func
+ 1357              	DisplayNext:
+ 1358              	.LFB96:
+ 601:../drivers/Display.c **** 
+ 602:../drivers/Display.c **** 
+ 603:../drivers/Display.c **** /***************************************************************************//**
+ 604:../drivers/Display.c ****  *
+ 605:../drivers/Display.c ****  * @brief	Display Next
+ 606:../drivers/Display.c ****  *
+ 607:../drivers/Display.c ****  * This function defines what should happen next on the LC-Display.  It is
+ 608:../drivers/Display.c ****  * typically used after calling DisplayText() in one of the following ways:
+ 609:../drivers/Display.c ****  *
+ 610:../drivers/Display.c ****  * - @p duration is specified and @p fct is NULL: the LCD is switched off
+ 611:../drivers/Display.c ****  *   after the amount of time.
+ 612:../drivers/Display.c ****  *
+ 613:../drivers/Display.c ****  * - @p duration is specified and @p fct is not NULL: the callback function is
+ 614:../drivers/Display.c ****  *   executed after the amount of time.  This function may call DisplayText()
+ 615:../drivers/Display.c ****  *   and DisplayNext() again.  In this way it is possible to realize a
+ 616:../drivers/Display.c ****  *   "ticker" on the LCD.  For a generic approach a user parameter @p userParm
+ 617:../drivers/Display.c ****  *   is passed to the function which can be used to specify the item to be
+ 618:../drivers/Display.c ****  *   displayed.
+ 619:../drivers/Display.c ****  *
+ 620:../drivers/Display.c ****  * - @p duration is 0 and @p fct is NULL: the LCD is switched off immediately.
+ 621:../drivers/Display.c ****  *
+ 622:../drivers/Display.c ****  * - @p duration is 0 and @p fct is not NULL: the callback function will be
+ 623:../drivers/Display.c ****  *   executed as soon as possible.
+ 624:../drivers/Display.c ****  *
+ 625:../drivers/Display.c ****  * @param[in] duration
+ 626:../drivers/Display.c ****  * 	Duration in seconds, <b>after</b> which the specified action should
+ 627:../drivers/Display.c ****  * 	occur.  If a duration of 0 is specified, this happens immediately!
+ 628:../drivers/Display.c ****  *
+ 629:../drivers/Display.c ****  * @param[in] fct
+ 630:../drivers/Display.c ****  *	Callback function to be executed after @p duration.  If NULL is
+ 631:../drivers/Display.c ****  *	specified, no function will be called, instead the LC-Display is
+ 632:../drivers/Display.c ****  *	powered-off.
+ 633:../drivers/Display.c ****  *
+ 634:../drivers/Display.c ****  * @param[in] userParm
+ARM GAS  /tmp/ccSHpvpe.s 			page 36
+
+
+ 635:../drivers/Display.c ****  *	User parameter for function @p fct.
+ 636:../drivers/Display.c ****  *
+ 637:../drivers/Display.c ****  * @note
+ 638:../drivers/Display.c ****  * 	Only one callback function can be installed at a dedicated time, i.e.
+ 639:../drivers/Display.c ****  * 	they cannot be stacked.  The function is called in standard context
+ 640:../drivers/Display.c ****  * 	by DisplayUpdateCheck() (not by an ISR), so there are no limitations.
+ 641:../drivers/Display.c ****  *
+ 642:../drivers/Display.c ****  ******************************************************************************/
+ 643:../drivers/Display.c **** void	DisplayNext (unsigned int duration, DISP_NEXT_FCT fct, int userParm)
+ 644:../drivers/Display.c **** {
+ 1359              		.loc 1 644 0
+ 1360              		.cfi_startproc
+ 1361              		@ args = 0, pretend = 0, frame = 16
+ 1362              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1363 0000 00B5     		push	{lr}
+ 1364              		.cfi_def_cfa_offset 4
+ 1365              		.cfi_offset 14, -4
+ 1366 0002 85B0     		sub	sp, sp, #20
+ 1367              		.cfi_def_cfa_offset 24
+ 1368 0004 0390     		str	r0, [sp, #12]
+ 1369 0006 0291     		str	r1, [sp, #8]
+ 1370 0008 0192     		str	r2, [sp, #4]
+ 645:../drivers/Display.c ****     /* Be sure to reset the trigger flag */
+ 646:../drivers/Display.c ****     l_DispNextFctTrigger = false;
+ 1371              		.loc 1 646 0
+ 1372 000a 1A4B     		ldr	r3, .L109
+ 1373 000c 0022     		movs	r2, #0
+ 1374 000e 1A70     		strb	r2, [r3]
+ 647:../drivers/Display.c **** 
+ 648:../drivers/Display.c ****     /* Cancel possible running timer */
+ 649:../drivers/Display.c ****     if (l_hdlDispNext != NONE)
+ 1375              		.loc 1 649 0
+ 1376 0010 194B     		ldr	r3, .L109+4
+ 1377 0012 1B68     		ldr	r3, [r3]
+ 1378 0014 B3F1FF3F 		cmp	r3, #-1
+ 1379 0018 04D0     		beq	.L104
+ 650:../drivers/Display.c **** 	sTimerCancel (l_hdlDispNext);
+ 1380              		.loc 1 650 0
+ 1381 001a 174B     		ldr	r3, .L109+4
+ 1382 001c 1B68     		ldr	r3, [r3]
+ 1383 001e 1846     		mov	r0, r3
+ 1384 0020 FFF7FEFF 		bl	sTimerCancel
+ 1385              	.L104:
+ 651:../drivers/Display.c **** 
+ 652:../drivers/Display.c ****     /* Verify if LCD is active */
+ 653:../drivers/Display.c ****     if (! l_flgDisplayIsOn)
+ 1386              		.loc 1 653 0
+ 1387 0024 154B     		ldr	r3, .L109+8
+ 1388 0026 1B78     		ldrb	r3, [r3]
+ 1389 0028 DBB2     		uxtb	r3, r3
+ 1390 002a 83F00103 		eor	r3, r3, #1
+ 1391 002e DBB2     		uxtb	r3, r3
+ 1392 0030 002B     		cmp	r3, #0
+ 1393 0032 00D0     		beq	.L105
+ 654:../drivers/Display.c **** 	return;			// LCD is already OFF, nothing to display
+ 1394              		.loc 1 654 0
+ 1395 0034 1AE0     		b	.L103
+ARM GAS  /tmp/ccSHpvpe.s 			page 37
+
+
+ 1396              	.L105:
+ 655:../drivers/Display.c **** 
+ 656:../drivers/Display.c ****     /* Store function with argument */
+ 657:../drivers/Display.c ****     l_DispNextFct = fct;
+ 1397              		.loc 1 657 0
+ 1398 0036 124B     		ldr	r3, .L109+12
+ 1399 0038 029A     		ldr	r2, [sp, #8]
+ 1400 003a 1A60     		str	r2, [r3]
+ 658:../drivers/Display.c ****     l_DispNextUserParm = userParm;
+ 1401              		.loc 1 658 0
+ 1402 003c 114B     		ldr	r3, .L109+16
+ 1403 003e 019A     		ldr	r2, [sp, #4]
+ 1404 0040 1A60     		str	r2, [r3]
+ 659:../drivers/Display.c **** 
+ 660:../drivers/Display.c ****     /* Start timer for duration, or trigger function immediately */
+ 661:../drivers/Display.c ****     if (duration > 0)
+ 1405              		.loc 1 661 0
+ 1406 0042 039B     		ldr	r3, [sp, #12]
+ 1407 0044 002B     		cmp	r3, #0
+ 1408 0046 0BD0     		beq	.L107
+ 662:../drivers/Display.c ****     {
+ 663:../drivers/Display.c **** 	if (l_hdlDispNext != NONE)
+ 1409              		.loc 1 663 0
+ 1410 0048 0B4B     		ldr	r3, .L109+4
+ 1411 004a 1B68     		ldr	r3, [r3]
+ 1412 004c B3F1FF3F 		cmp	r3, #-1
+ 1413 0050 0CD0     		beq	.L103
+ 664:../drivers/Display.c **** 	    sTimerStart (l_hdlDispNext, duration);
+ 1414              		.loc 1 664 0
+ 1415 0052 094B     		ldr	r3, .L109+4
+ 1416 0054 1B68     		ldr	r3, [r3]
+ 1417 0056 1846     		mov	r0, r3
+ 1418 0058 0399     		ldr	r1, [sp, #12]
+ 1419 005a FFF7FEFF 		bl	sTimerStart
+ 1420 005e 05E0     		b	.L103
+ 1421              	.L107:
+ 665:../drivers/Display.c ****     }
+ 666:../drivers/Display.c ****     else
+ 667:../drivers/Display.c ****     {
+ 668:../drivers/Display.c **** 	l_DispNextFctTrigger = true;
+ 1422              		.loc 1 668 0
+ 1423 0060 044B     		ldr	r3, .L109
+ 1424 0062 0122     		movs	r2, #1
+ 1425 0064 1A70     		strb	r2, [r3]
+ 669:../drivers/Display.c **** 	g_flgIRQ = true;	// keep on running
+ 1426              		.loc 1 669 0
+ 1427 0066 084B     		ldr	r3, .L109+20
+ 1428 0068 0122     		movs	r2, #1
+ 1429 006a 1A70     		strb	r2, [r3]
+ 1430              	.L103:
+ 670:../drivers/Display.c ****     }
+ 671:../drivers/Display.c **** }
+ 1431              		.loc 1 671 0
+ 1432 006c 05B0     		add	sp, sp, #20
+ 1433              		@ sp needed
+ 1434 006e 5DF804FB 		ldr	pc, [sp], #4
+ 1435              	.L110:
+ARM GAS  /tmp/ccSHpvpe.s 			page 38
+
+
+ 1436 0072 00BF     		.align	2
+ 1437              	.L109:
+ 1438 0074 00000000 		.word	l_DispNextFctTrigger
+ 1439 0078 00000000 		.word	l_hdlDispNext
+ 1440 007c 00000000 		.word	l_flgDisplayIsOn
+ 1441 0080 00000000 		.word	l_DispNextFct
+ 1442 0084 00000000 		.word	l_DispNextUserParm
+ 1443 0088 00000000 		.word	g_flgIRQ
+ 1444              		.cfi_endproc
+ 1445              	.LFE96:
+ 1447              		.section	.text.DisplayUpdateClock,"ax",%progbits
+ 1448              		.align	2
+ 1449              		.thumb
+ 1450              		.thumb_func
+ 1452              	DisplayUpdateClock:
+ 1453              	.LFB97:
+ 672:../drivers/Display.c **** 
+ 673:../drivers/Display.c **** 
+ 674:../drivers/Display.c **** /***************************************************************************//**
+ 675:../drivers/Display.c ****  *
+ 676:../drivers/Display.c ****  * @brief	Display Update for Clock
+ 677:../drivers/Display.c ****  *
+ 678:../drivers/Display.c ****  * This is a small helper routine to update the display whenever the system
+ 679:../drivers/Display.c ****  * time has changed, i.e. every second.  It is usually bound to the AlarmClock
+ 680:../drivers/Display.c ****  * module via DisplayUpdateFctInstall().
+ 681:../drivers/Display.c ****  *
+ 682:../drivers/Display.c ****  ******************************************************************************/
+ 683:../drivers/Display.c **** static void DisplayUpdateClock (void)
+ 684:../drivers/Display.c **** {
+ 1454              		.loc 1 684 0
+ 1455              		.cfi_startproc
+ 1456              		@ args = 0, pretend = 0, frame = 0
+ 1457              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1458              		@ link register save eliminated.
+ 685:../drivers/Display.c ****     if (l_flgDisplayIsOn)
+ 1459              		.loc 1 685 0
+ 1460 0000 064B     		ldr	r3, .L113
+ 1461 0002 1B78     		ldrb	r3, [r3]
+ 1462 0004 DBB2     		uxtb	r3, r3
+ 1463 0006 002B     		cmp	r3, #0
+ 1464 0008 06D0     		beq	.L111
+ 686:../drivers/Display.c ****     {
+ 687:../drivers/Display.c **** 	LCD_FIELD_ID_BIT_VAR(l_bitMaskFieldUpd, LCD_CLOCK) = 1;
+ 1465              		.loc 1 687 0
+ 1466 000a 054B     		ldr	r3, .L113+4
+ 1467 000c 03F18873 		add	r3, r3, #17825792
+ 1468 0010 5B01     		lsls	r3, r3, #5
+ 1469 0012 1C33     		adds	r3, r3, #28
+ 1470 0014 0122     		movs	r2, #1
+ 1471 0016 1A60     		str	r2, [r3]
+ 1472              	.L111:
+ 688:../drivers/Display.c ****     }
+ 689:../drivers/Display.c **** }
+ 1473              		.loc 1 689 0
+ 1474 0018 7047     		bx	lr
+ 1475              	.L114:
+ 1476 001a 00BF     		.align	2
+ARM GAS  /tmp/ccSHpvpe.s 			page 39
+
+
+ 1477              	.L113:
+ 1478 001c 00000000 		.word	l_flgDisplayIsOn
+ 1479 0020 00000000 		.word	l_bitMaskFieldUpd
+ 1480              		.cfi_endproc
+ 1481              	.LFE97:
+ 1483              		.section	.text.DisplayUpdateTrigger,"ax",%progbits
+ 1484              		.align	2
+ 1485              		.global	DisplayUpdateTrigger
+ 1486              		.thumb
+ 1487              		.thumb_func
+ 1489              	DisplayUpdateTrigger:
+ 1490              	.LFB98:
+ 690:../drivers/Display.c **** 
+ 691:../drivers/Display.c **** 
+ 692:../drivers/Display.c **** /***************************************************************************//**
+ 693:../drivers/Display.c ****  *
+ 694:../drivers/Display.c ****  * @brief	Trigger a Display Update
+ 695:../drivers/Display.c ****  *
+ 696:../drivers/Display.c ****  * This routine must be called when a field needs to be updated, i.e. its
+ 697:../drivers/Display.c ****  * contents has changed, so the field must be re-displayed on the LCD.  If
+ 698:../drivers/Display.c ****  * the specified field ist currently not displayed on the LCD, the update
+ 699:../drivers/Display.c ****  * will be ignored.
+ 700:../drivers/Display.c ****  *
+ 701:../drivers/Display.c ****  * @param[in] fieldID
+ 702:../drivers/Display.c ****  *	The LCD field to be updated.
+ 703:../drivers/Display.c ****  *
+ 704:../drivers/Display.c ****  ******************************************************************************/
+ 705:../drivers/Display.c **** void DisplayUpdateTrigger (LCD_FIELD_ID fieldID)
+ 706:../drivers/Display.c **** {
+ 1491              		.loc 1 706 0
+ 1492              		.cfi_startproc
+ 1493              		@ args = 0, pretend = 0, frame = 8
+ 1494              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1495              		@ link register save eliminated.
+ 1496 0000 82B0     		sub	sp, sp, #8
+ 1497              		.cfi_def_cfa_offset 8
+ 1498 0002 0346     		mov	r3, r0
+ 1499 0004 8DF80730 		strb	r3, [sp, #7]
+ 707:../drivers/Display.c ****     LCD_FIELD_ID_BIT_VAR(l_bitMaskFieldUpd, fieldID) = 1;
+ 1500              		.loc 1 707 0
+ 1501 0008 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 1502 000c 9B00     		lsls	r3, r3, #2
+ 1503 000e 1A46     		mov	r2, r3
+ 1504 0010 054B     		ldr	r3, .L116
+ 1505 0012 03F18873 		add	r3, r3, #17825792
+ 1506 0016 5B01     		lsls	r3, r3, #5
+ 1507 0018 1344     		add	r3, r3, r2
+ 1508 001a 0122     		movs	r2, #1
+ 1509 001c 1A60     		str	r2, [r3]
+ 708:../drivers/Display.c **** 
+ 709:../drivers/Display.c ****     g_flgIRQ = true;	// keep on running
+ 1510              		.loc 1 709 0
+ 1511 001e 034B     		ldr	r3, .L116+4
+ 1512 0020 0122     		movs	r2, #1
+ 1513 0022 1A70     		strb	r2, [r3]
+ 710:../drivers/Display.c **** }
+ 1514              		.loc 1 710 0
+ARM GAS  /tmp/ccSHpvpe.s 			page 40
+
+
+ 1515 0024 02B0     		add	sp, sp, #8
+ 1516              		@ sp needed
+ 1517 0026 7047     		bx	lr
+ 1518              	.L117:
+ 1519              		.align	2
+ 1520              	.L116:
+ 1521 0028 00000000 		.word	l_bitMaskFieldUpd
+ 1522 002c 00000000 		.word	g_flgIRQ
+ 1523              		.cfi_endproc
+ 1524              	.LFE98:
+ 1526              		.section	.text.SwitchLCD_Off,"ax",%progbits
+ 1527              		.align	2
+ 1528              		.thumb
+ 1529              		.thumb_func
+ 1531              	SwitchLCD_Off:
+ 1532              	.LFB99:
+ 711:../drivers/Display.c **** 
+ 712:../drivers/Display.c **** 
+ 713:../drivers/Display.c **** /***************************************************************************//**
+ 714:../drivers/Display.c ****  *
+ 715:../drivers/Display.c ****  * @brief	Switch LCD Off
+ 716:../drivers/Display.c ****  *
+ 717:../drivers/Display.c ****  * This routine is called from the RTC interrupt handler to trigger the
+ 718:../drivers/Display.c ****  * power-off of the LC-Display, after @ref LCD_POWER_OFF_TIME seconds have
+ 719:../drivers/Display.c ****  * elapsed.
+ 720:../drivers/Display.c ****  *
+ 721:../drivers/Display.c ****  ******************************************************************************/
+ 722:../drivers/Display.c **** static void SwitchLCD_Off(TIM_HDL hdl)
+ 723:../drivers/Display.c **** {
+ 1533              		.loc 1 723 0
+ 1534              		.cfi_startproc
+ 1535              		@ args = 0, pretend = 0, frame = 8
+ 1536              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1537              		@ link register save eliminated.
+ 1538 0000 82B0     		sub	sp, sp, #8
+ 1539              		.cfi_def_cfa_offset 8
+ 1540 0002 0190     		str	r0, [sp, #4]
+ 724:../drivers/Display.c ****     (void) hdl;		// suppress compiler warning "unused parameter"
+ 725:../drivers/Display.c **** 
+ 726:../drivers/Display.c ****     if (l_flgDisplayUpdEnabled)		// NOT in the very beginning
+ 1541              		.loc 1 726 0
+ 1542 0004 064B     		ldr	r3, .L120
+ 1543 0006 1B78     		ldrb	r3, [r3]
+ 1544 0008 DBB2     		uxtb	r3, r3
+ 1545 000a 002B     		cmp	r3, #0
+ 1546 000c 02D0     		beq	.L119
+ 727:../drivers/Display.c **** 	l_bitMaskFieldActive = 0;
+ 1547              		.loc 1 727 0
+ 1548 000e 054B     		ldr	r3, .L120+4
+ 1549 0010 0022     		movs	r2, #0
+ 1550 0012 1A80     		strh	r2, [r3]	@ movhi
+ 1551              	.L119:
+ 728:../drivers/Display.c **** 
+ 729:../drivers/Display.c ****     g_flgIRQ = true;	// keep on running
+ 1552              		.loc 1 729 0
+ 1553 0014 044B     		ldr	r3, .L120+8
+ 1554 0016 0122     		movs	r2, #1
+ARM GAS  /tmp/ccSHpvpe.s 			page 41
+
+
+ 1555 0018 1A70     		strb	r2, [r3]
+ 730:../drivers/Display.c **** }
+ 1556              		.loc 1 730 0
+ 1557 001a 02B0     		add	sp, sp, #8
+ 1558              		@ sp needed
+ 1559 001c 7047     		bx	lr
+ 1560              	.L121:
+ 1561 001e 00BF     		.align	2
+ 1562              	.L120:
+ 1563 0020 00000000 		.word	l_flgDisplayUpdEnabled
+ 1564 0024 00000000 		.word	l_bitMaskFieldActive
+ 1565 0028 00000000 		.word	g_flgIRQ
+ 1566              		.cfi_endproc
+ 1567              	.LFE99:
+ 1569              		.section	.text.SwitchDeviceOff,"ax",%progbits
+ 1570              		.align	2
+ 1571              		.thumb
+ 1572              		.thumb_func
+ 1574              	SwitchDeviceOff:
+ 1575              	.LFB100:
+ 731:../drivers/Display.c **** 
+ 732:../drivers/Display.c **** 
+ 733:../drivers/Display.c **** /***************************************************************************//**
+ 734:../drivers/Display.c ****  *
+ 735:../drivers/Display.c ****  * @brief	Switch Device Off
+ 736:../drivers/Display.c ****  *
+ 737:../drivers/Display.c ****  * This routine is called from the RTC interrupt handler to trigger the
+ 738:../drivers/Display.c ****  * power-off of the whole device, after @ref POWER_OFF_TIMEOUT seconds are
+ 739:../drivers/Display.c ****  * over without any keq assertion.
+ 740:../drivers/Display.c ****  *
+ 741:../drivers/Display.c ****  ******************************************************************************/
+ 742:../drivers/Display.c **** static void SwitchDeviceOff(TIM_HDL hdl)
+ 743:../drivers/Display.c **** {
+ 1576              		.loc 1 743 0
+ 1577              		.cfi_startproc
+ 1578              		@ args = 0, pretend = 0, frame = 8
+ 1579              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1580              		@ link register save eliminated.
+ 1581 0000 82B0     		sub	sp, sp, #8
+ 1582              		.cfi_def_cfa_offset 8
+ 1583 0002 0190     		str	r0, [sp, #4]
+ 744:../drivers/Display.c ****     (void) hdl;		// suppress compiler warning "unused parameter"
+ 745:../drivers/Display.c **** 
+ 746:../drivers/Display.c ****     SET_POWER_PIN(0);	// set FET input to LOW
+ 1584              		.loc 1 746 0
+ 1585 0004 024B     		ldr	r3, .L123
+ 1586 0006 0022     		movs	r2, #0
+ 1587 0008 1A60     		str	r2, [r3]
+ 747:../drivers/Display.c **** }
+ 1588              		.loc 1 747 0
+ 1589 000a 02B0     		add	sp, sp, #8
+ 1590              		@ sp needed
+ 1591 000c 7047     		bx	lr
+ 1592              	.L124:
+ 1593 000e 00BF     		.align	2
+ 1594              	.L123:
+ 1595 0010 000F0C42 		.word	1108086528
+ARM GAS  /tmp/ccSHpvpe.s 			page 42
+
+
+ 1596              		.cfi_endproc
+ 1597              	.LFE100:
+ 1599              		.section	.text.DispNextTrigger,"ax",%progbits
+ 1600              		.align	2
+ 1601              		.thumb
+ 1602              		.thumb_func
+ 1604              	DispNextTrigger:
+ 1605              	.LFB101:
+ 748:../drivers/Display.c **** 
+ 749:../drivers/Display.c **** 
+ 750:../drivers/Display.c **** /***************************************************************************//**
+ 751:../drivers/Display.c ****  *
+ 752:../drivers/Display.c ****  * @brief	Display Next Trigger
+ 753:../drivers/Display.c ****  *
+ 754:../drivers/Display.c ****  * This routine is called from the RTC interrupt handler to trigger a
+ 755:../drivers/Display.c ****  * @ref DISP_NEXT_FCT callback routine, after the specified amount of
+ 756:../drivers/Display.c ****  * time is over.  If no callback routine is installed, SwitchLCD_Off()
+ 757:../drivers/Display.c ****  * is called instead to switch the LCD off.
+ 758:../drivers/Display.c ****  *
+ 759:../drivers/Display.c ****  * @see
+ 760:../drivers/Display.c ****  * 	DisplayNext(), DisplayText()
+ 761:../drivers/Display.c ****  *
+ 762:../drivers/Display.c ****  ******************************************************************************/
+ 763:../drivers/Display.c **** static void DispNextTrigger(TIM_HDL hdl)
+ 764:../drivers/Display.c **** {
+ 1606              		.loc 1 764 0
+ 1607              		.cfi_startproc
+ 1608              		@ args = 0, pretend = 0, frame = 8
+ 1609              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1610 0000 00B5     		push	{lr}
+ 1611              		.cfi_def_cfa_offset 4
+ 1612              		.cfi_offset 14, -4
+ 1613 0002 83B0     		sub	sp, sp, #12
+ 1614              		.cfi_def_cfa_offset 16
+ 1615 0004 0190     		str	r0, [sp, #4]
+ 765:../drivers/Display.c ****     (void) hdl;		// suppress compiler warning "unused parameter"
+ 766:../drivers/Display.c **** 
+ 767:../drivers/Display.c ****     /* See if callback routine has been specified */
+ 768:../drivers/Display.c ****     if (l_DispNextFct)
+ 1616              		.loc 1 768 0
+ 1617 0006 084B     		ldr	r3, .L128
+ 1618 0008 1B68     		ldr	r3, [r3]
+ 1619 000a 002B     		cmp	r3, #0
+ 1620 000c 03D0     		beq	.L126
+ 769:../drivers/Display.c **** 	l_DispNextFctTrigger = true;
+ 1621              		.loc 1 769 0
+ 1622 000e 074B     		ldr	r3, .L128+4
+ 1623 0010 0122     		movs	r2, #1
+ 1624 0012 1A70     		strb	r2, [r3]
+ 1625 0014 02E0     		b	.L127
+ 1626              	.L126:
+ 770:../drivers/Display.c ****     else
+ 771:../drivers/Display.c **** 	SwitchLCD_Off((TIM_HDL)0);	// no further fct, switch LCD off
+ 1627              		.loc 1 771 0
+ 1628 0016 0020     		movs	r0, #0
+ 1629 0018 FFF7FEFF 		bl	SwitchLCD_Off
+ 1630              	.L127:
+ARM GAS  /tmp/ccSHpvpe.s 			page 43
+
+
+ 772:../drivers/Display.c **** 
+ 773:../drivers/Display.c ****     g_flgIRQ = true;	// keep on running
+ 1631              		.loc 1 773 0
+ 1632 001c 044B     		ldr	r3, .L128+8
+ 1633 001e 0122     		movs	r2, #1
+ 1634 0020 1A70     		strb	r2, [r3]
+ 774:../drivers/Display.c **** }
+ 1635              		.loc 1 774 0
+ 1636 0022 03B0     		add	sp, sp, #12
+ 1637              		@ sp needed
+ 1638 0024 5DF804FB 		ldr	pc, [sp], #4
+ 1639              	.L129:
+ 1640              		.align	2
+ 1641              	.L128:
+ 1642 0028 00000000 		.word	l_DispNextFct
+ 1643 002c 00000000 		.word	l_DispNextFctTrigger
+ 1644 0030 00000000 		.word	g_flgIRQ
+ 1645              		.cfi_endproc
+ 1646              	.LFE101:
+ 1648              		.section	.bss.prevSeconds.6706,"aw",%nobits
+ 1649              		.align	2
+ 1652              	prevSeconds.6706:
+ 1653 0000 00000000 		.space	4
+ 1654              		.section	.bss.strBuf.6728,"aw",%nobits
+ 1655              		.align	2
+ 1658              	strBuf.6728:
+ 1659 0000 00000000 		.space	20
+ 1659      00000000 
+ 1659      00000000 
+ 1659      00000000 
+ 1659      00000000 
+ 1660              		.text
+ 1661              	.Letext0:
+ 1662              		.file 2 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/lib/gcc/arm-none-eabi/4.8.4/include/stdarg.h"
+ 1663              		.file 3 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 1664              		.file 4 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 1665              		.file 5 "../Device/EnergyMicro/EFM32G/Include/efm32g_gpio_p.h"
+ 1666              		.file 6 "../Device/EnergyMicro/EFM32G/Include/efm32g_gpio.h"
+ 1667              		.file 7 "../emlib/inc/em_gpio.h"
+ 1668              		.file 8 "../drivers/Keys.h"
+ 1669              		.file 9 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/time.h"
+ 1670              		.file 10 "../drivers/AlarmClock.h"
+ 1671              		.file 11 "../drivers/BatteryMon.h"
+ 1672              		.file 12 "../drivers/Display.h"
+ 1673              		.file 13 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/ctype.h"
+ 1674              		.file 14 "../CMSIS/Include/core_cm3.h"
+ 1675              		.file 15 "../config.h"
+ 1676              		.file 16 "<built-in>"

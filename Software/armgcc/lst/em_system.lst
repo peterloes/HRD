@@ -1,0 +1,297 @@
+ARM GAS  /tmp/ccm4Wbuu.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"em_system.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.rodata
+  19              		.align	2
+  20              	.LC0:
+  21 0000 2E2E2F65 		.ascii	"../emlib/src/em_system.c\000"
+  21      6D6C6962 
+  21      2F737263 
+  21      2F656D5F 
+  21      73797374 
+  22 0019 000000   		.section	.text.SYSTEM_ChipRevisionGet,"ax",%progbits
+  23              		.align	2
+  24              		.global	SYSTEM_ChipRevisionGet
+  25              		.thumb
+  26              		.thumb_func
+  28              	SYSTEM_ChipRevisionGet:
+  29              	.LFB64:
+  30              		.file 1 "../emlib/src/em_system.c"
+   1:../emlib/src/em_system.c **** /***************************************************************************//**
+   2:../emlib/src/em_system.c ****  * @file
+   3:../emlib/src/em_system.c ****  * @brief System Peripheral API
+   4:../emlib/src/em_system.c ****  * @author Energy Micro AS
+   5:../emlib/src/em_system.c ****  * @version 3.20.2
+   6:../emlib/src/em_system.c ****  *******************************************************************************
+   7:../emlib/src/em_system.c ****  * @section License
+   8:../emlib/src/em_system.c ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/src/em_system.c ****  *******************************************************************************
+  10:../emlib/src/em_system.c ****  *
+  11:../emlib/src/em_system.c ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/src/em_system.c ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/src/em_system.c ****  * freely, subject to the following restrictions:
+  14:../emlib/src/em_system.c ****  *
+  15:../emlib/src/em_system.c ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/src/em_system.c ****  *    claim that you wrote the original software.
+  17:../emlib/src/em_system.c ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/src/em_system.c ****  *    misrepresented as being the original software.
+  19:../emlib/src/em_system.c ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/src/em_system.c ****  *
+  21:../emlib/src/em_system.c ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/src/em_system.c ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/src/em_system.c ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/src/em_system.c ****  * including, but not limited to, any implied warranties of merchantability
+ARM GAS  /tmp/ccm4Wbuu.s 			page 2
+
+
+  25:../emlib/src/em_system.c ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/src/em_system.c ****  * of any proprietary rights of a third party.
+  27:../emlib/src/em_system.c ****  *
+  28:../emlib/src/em_system.c ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/src/em_system.c ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/src/em_system.c ****  * arising from your use of this Software.
+  31:../emlib/src/em_system.c ****  *
+  32:../emlib/src/em_system.c ****  ******************************************************************************/
+  33:../emlib/src/em_system.c **** #include "em_system.h"
+  34:../emlib/src/em_system.c **** #include "em_assert.h"
+  35:../emlib/src/em_system.c **** 
+  36:../emlib/src/em_system.c **** /***************************************************************************//**
+  37:../emlib/src/em_system.c ****  * @addtogroup EM_Library
+  38:../emlib/src/em_system.c ****  * @{
+  39:../emlib/src/em_system.c ****  ******************************************************************************/
+  40:../emlib/src/em_system.c **** 
+  41:../emlib/src/em_system.c **** /***************************************************************************//**
+  42:../emlib/src/em_system.c ****  * @addtogroup SYSTEM
+  43:../emlib/src/em_system.c ****  * @brief System Peripheral API
+  44:../emlib/src/em_system.c ****  * @{
+  45:../emlib/src/em_system.c ****  ******************************************************************************/
+  46:../emlib/src/em_system.c **** 
+  47:../emlib/src/em_system.c **** /*******************************************************************************
+  48:../emlib/src/em_system.c ****  **************************   GLOBAL FUNCTIONS   *******************************
+  49:../emlib/src/em_system.c ****  ******************************************************************************/
+  50:../emlib/src/em_system.c **** 
+  51:../emlib/src/em_system.c **** /***************************************************************************//**
+  52:../emlib/src/em_system.c ****  * @brief
+  53:../emlib/src/em_system.c ****  *   Get chip major/minor revision.
+  54:../emlib/src/em_system.c ****  *
+  55:../emlib/src/em_system.c ****  * @param[out] rev
+  56:../emlib/src/em_system.c ****  *   Location to place chip revision info.
+  57:../emlib/src/em_system.c ****  ******************************************************************************/
+  58:../emlib/src/em_system.c **** void SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev)
+  59:../emlib/src/em_system.c **** {
+  31              		.loc 1 59 0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 16
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35 0000 00B5     		push	{lr}
+  36              		.cfi_def_cfa_offset 4
+  37              		.cfi_offset 14, -4
+  38 0002 85B0     		sub	sp, sp, #20
+  39              		.cfi_def_cfa_offset 24
+  40 0004 0190     		str	r0, [sp, #4]
+  60:../emlib/src/em_system.c ****   uint8_t tmp;
+  61:../emlib/src/em_system.c **** 
+  62:../emlib/src/em_system.c ****   EFM_ASSERT(rev);
+  41              		.loc 1 62 0
+  42 0006 019B     		ldr	r3, [sp, #4]
+  43 0008 002B     		cmp	r3, #0
+  44 000a 03D1     		bne	.L2
+  45              		.loc 1 62 0 is_stmt 0 discriminator 1
+  46 000c 1248     		ldr	r0, .L3
+  47 000e 3E21     		movs	r1, #62
+  48 0010 FFF7FEFF 		bl	assertEFM
+  49              	.L2:
+ARM GAS  /tmp/ccm4Wbuu.s 			page 3
+
+
+  63:../emlib/src/em_system.c **** 
+  64:../emlib/src/em_system.c ****   rev->major = (ROMTABLE->PID0 & _ROMTABLE_PID0_REVMAJOR_MASK) >> _ROMTABLE_PID0_REVMAJOR_SHIFT;
+  50              		.loc 1 64 0 is_stmt 1
+  51 0014 114B     		ldr	r3, .L3+4
+  52 0016 1B69     		ldr	r3, [r3, #16]
+  53 0018 DBB2     		uxtb	r3, r3
+  54 001a 03F03F03 		and	r3, r3, #63
+  55 001e DAB2     		uxtb	r2, r3
+  56 0020 019B     		ldr	r3, [sp, #4]
+  57 0022 1A70     		strb	r2, [r3]
+  65:../emlib/src/em_system.c **** 
+  66:../emlib/src/em_system.c ****   tmp        = (ROMTABLE->PID2 & _ROMTABLE_PID2_REVMINORMSB_MASK);
+  58              		.loc 1 66 0
+  59 0024 0D4B     		ldr	r3, .L3+4
+  60 0026 9B69     		ldr	r3, [r3, #24]
+  61 0028 DBB2     		uxtb	r3, r3
+  62 002a 23F00F03 		bic	r3, r3, #15
+  63 002e 8DF80F30 		strb	r3, [sp, #15]
+  67:../emlib/src/em_system.c ****   tmp       |= ((ROMTABLE->PID3 & _ROMTABLE_PID3_REVMINORLSB_MASK) >> _ROMTABLE_PID3_REVMINORLSB_SH
+  64              		.loc 1 67 0
+  65 0032 0A4B     		ldr	r3, .L3+4
+  66 0034 DB69     		ldr	r3, [r3, #28]
+  67 0036 03F0F003 		and	r3, r3, #240
+  68 003a 1B09     		lsrs	r3, r3, #4
+  69 003c DAB2     		uxtb	r2, r3
+  70 003e 9DF80F30 		ldrb	r3, [sp, #15]
+  71 0042 1343     		orrs	r3, r3, r2
+  72 0044 8DF80F30 		strb	r3, [sp, #15]
+  68:../emlib/src/em_system.c ****   rev->minor = tmp;
+  73              		.loc 1 68 0
+  74 0048 019B     		ldr	r3, [sp, #4]
+  75 004a 9DF80F20 		ldrb	r2, [sp, #15]
+  76 004e 5A70     		strb	r2, [r3, #1]
+  69:../emlib/src/em_system.c **** }
+  77              		.loc 1 69 0
+  78 0050 05B0     		add	sp, sp, #20
+  79              		@ sp needed
+  80 0052 5DF804FB 		ldr	pc, [sp], #4
+  81              	.L4:
+  82 0056 00BF     		.align	2
+  83              	.L3:
+  84 0058 00000000 		.word	.LC0
+  85 005c D0FF0FE0 		.word	-535822384
+  86              		.cfi_endproc
+  87              	.LFE64:
+  89              		.section	.text.SYSTEM_GetCalibrationValue,"ax",%progbits
+  90              		.align	2
+  91              		.global	SYSTEM_GetCalibrationValue
+  92              		.thumb
+  93              		.thumb_func
+  95              	SYSTEM_GetCalibrationValue:
+  96              	.LFB65:
+  70:../emlib/src/em_system.c **** 
+  71:../emlib/src/em_system.c **** /***************************************************************************//**
+  72:../emlib/src/em_system.c ****  * @brief
+  73:../emlib/src/em_system.c ****  *    Get factory calibration value for a given peripheral register.
+  74:../emlib/src/em_system.c ****  *
+ARM GAS  /tmp/ccm4Wbuu.s 			page 4
+
+
+  75:../emlib/src/em_system.c ****  * @param[in] regAddress
+  76:../emlib/src/em_system.c ****  *    Address of register to get a calibration value for.
+  77:../emlib/src/em_system.c ****  *
+  78:../emlib/src/em_system.c ****  * @return
+  79:../emlib/src/em_system.c ****  *    Calibration value for the requested register.
+  80:../emlib/src/em_system.c ****  ******************************************************************************/
+  81:../emlib/src/em_system.c **** uint32_t SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress)
+  82:../emlib/src/em_system.c **** {
+  97              		.loc 1 82 0
+  98              		.cfi_startproc
+  99              		@ args = 0, pretend = 0, frame = 16
+ 100              		@ frame_needed = 0, uses_anonymous_args = 0
+ 101 0000 00B5     		push	{lr}
+ 102              		.cfi_def_cfa_offset 4
+ 103              		.cfi_offset 14, -4
+ 104 0002 85B0     		sub	sp, sp, #20
+ 105              		.cfi_def_cfa_offset 24
+ 106 0004 0190     		str	r0, [sp, #4]
+  83:../emlib/src/em_system.c ****   int               regCount;
+  84:../emlib/src/em_system.c ****   CALIBRATE_TypeDef *p;
+  85:../emlib/src/em_system.c **** 
+  86:../emlib/src/em_system.c ****   regCount = 1;
+ 107              		.loc 1 86 0
+ 108 0006 0123     		movs	r3, #1
+ 109 0008 0393     		str	r3, [sp, #12]
+  87:../emlib/src/em_system.c ****   p        = CALIBRATE;
+ 110              		.loc 1 87 0
+ 111 000a 114B     		ldr	r3, .L11
+ 112 000c 0293     		str	r3, [sp, #8]
+ 113              	.L10:
+  88:../emlib/src/em_system.c **** 
+  89:../emlib/src/em_system.c ****   for (;; )
+  90:../emlib/src/em_system.c ****   {
+  91:../emlib/src/em_system.c ****     if ((regCount > CALIBRATE_MAX_REGISTERS) ||
+ 114              		.loc 1 91 0
+ 115 000e 039B     		ldr	r3, [sp, #12]
+ 116 0010 322B     		cmp	r3, #50
+ 117 0012 04DC     		bgt	.L6
+  92:../emlib/src/em_system.c ****         (p->VALUE == 0xFFFFFFFF))
+ 118              		.loc 1 92 0 discriminator 1
+ 119 0014 029B     		ldr	r3, [sp, #8]
+ 120 0016 5B68     		ldr	r3, [r3, #4]
+  91:../emlib/src/em_system.c ****     if ((regCount > CALIBRATE_MAX_REGISTERS) ||
+ 121              		.loc 1 91 0 discriminator 1
+ 122 0018 B3F1FF3F 		cmp	r3, #-1
+ 123 001c 05D1     		bne	.L7
+ 124              	.L6:
+  93:../emlib/src/em_system.c ****     {
+  94:../emlib/src/em_system.c ****       EFM_ASSERT(false);
+ 125              		.loc 1 94 0
+ 126 001e 0D48     		ldr	r0, .L11+4
+ 127 0020 5E21     		movs	r1, #94
+ 128 0022 FFF7FEFF 		bl	assertEFM
+  95:../emlib/src/em_system.c ****       return 0;                 /* End of device calibration table reached. */
+ 129              		.loc 1 95 0
+ 130 0026 0023     		movs	r3, #0
+ 131 0028 0EE0     		b	.L8
+ARM GAS  /tmp/ccm4Wbuu.s 			page 5
+
+
+ 132              	.L7:
+  96:../emlib/src/em_system.c ****     }
+  97:../emlib/src/em_system.c **** 
+  98:../emlib/src/em_system.c ****     if (p->ADDRESS == (uint32_t)regAddress)
+ 133              		.loc 1 98 0
+ 134 002a 029B     		ldr	r3, [sp, #8]
+ 135 002c 1A68     		ldr	r2, [r3]
+ 136 002e 019B     		ldr	r3, [sp, #4]
+ 137 0030 9A42     		cmp	r2, r3
+ 138 0032 02D1     		bne	.L9
+  99:../emlib/src/em_system.c ****     {
+ 100:../emlib/src/em_system.c ****       return p->VALUE;          /* Calibration value found ! */
+ 139              		.loc 1 100 0
+ 140 0034 029B     		ldr	r3, [sp, #8]
+ 141 0036 5B68     		ldr	r3, [r3, #4]
+ 142 0038 06E0     		b	.L8
+ 143              	.L9:
+ 101:../emlib/src/em_system.c ****     }
+ 102:../emlib/src/em_system.c **** 
+ 103:../emlib/src/em_system.c ****     p++;
+ 144              		.loc 1 103 0
+ 145 003a 029B     		ldr	r3, [sp, #8]
+ 146 003c 0833     		adds	r3, r3, #8
+ 147 003e 0293     		str	r3, [sp, #8]
+ 104:../emlib/src/em_system.c ****     regCount++;
+ 148              		.loc 1 104 0
+ 149 0040 039B     		ldr	r3, [sp, #12]
+ 150 0042 0133     		adds	r3, r3, #1
+ 151 0044 0393     		str	r3, [sp, #12]
+ 105:../emlib/src/em_system.c ****   }
+ 152              		.loc 1 105 0
+ 153 0046 E2E7     		b	.L10
+ 154              	.L8:
+ 106:../emlib/src/em_system.c **** }
+ 155              		.loc 1 106 0
+ 156 0048 1846     		mov	r0, r3
+ 157 004a 05B0     		add	sp, sp, #20
+ 158              		@ sp needed
+ 159 004c 5DF804FB 		ldr	pc, [sp], #4
+ 160              	.L12:
+ 161              		.align	2
+ 162              	.L11:
+ 163 0050 0080E00F 		.word	266371072
+ 164 0054 00000000 		.word	.LC0
+ 165              		.cfi_endproc
+ 166              	.LFE65:
+ 168              		.text
+ 169              	.Letext0:
+ 170              		.file 2 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 171              		.file 3 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 172              		.file 4 "../Device/EnergyMicro/EFM32G/Include/efm32g_romtable.h"
+ 173              		.file 5 "../Device/EnergyMicro/EFM32G/Include/efm32g_calibrate.h"
+ 174              		.file 6 "../emlib/inc/em_system.h"
+ 175              		.file 7 "../CMSIS/Include/core_cm3.h"

@@ -1,0 +1,883 @@
+ARM GAS  /tmp/ccTGRY3Q.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"system_efm32g.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.data.SystemHFXOClock,"aw",%progbits
+  19              		.align	2
+  22              	SystemHFXOClock:
+  23 0000 0048E801 		.word	32000000
+  24              		.section	.data.SystemLFXOClock,"aw",%progbits
+  25              		.align	2
+  28              	SystemLFXOClock:
+  29 0000 00800000 		.word	32768
+  30              		.section	.text.GetProdRev,"ax",%progbits
+  31              		.align	2
+  32              		.thumb
+  33              		.thumb_func
+  35              	GetProdRev:
+  36              	.LFB57:
+  37              		.file 1 "../Device/EnergyMicro/EFM32G/Source/system_efm32g.c"
+   1:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /***************************************************************************//**
+   2:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @file
+   3:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief CMSIS Cortex-M3 System Layer for EFM32G devices.
+   4:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @author Energy Micro AS
+   5:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @version 3.20.2
+   6:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *******************************************************************************
+   7:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @section License
+   8:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  ******************************************************************************
+  10:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+  11:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * including commercial applications, and to alter it and redistribute it
+  13:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * freely, subject to the following restrictions:
+  14:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+  15:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *    claim that you wrote the original software.
+  17:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *    misrepresented as being the original software.
+  19:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+  21:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * including, but not limited to, any implied warranties of merchantability
+  25:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * or fitness for any particular purpose or warranties against infringement
+ARM GAS  /tmp/ccTGRY3Q.s 			page 2
+
+
+  26:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * of any proprietary rights of a third party.
+  27:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+  28:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * arising from your use of this Software.
+  31:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+  32:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  ******************************************************************************/
+  33:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+  34:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #include <stdint.h>
+  35:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #include "em_device.h"
+  36:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+  37:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /*******************************************************************************
+  38:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  ******************************   DEFINES   ************************************
+  39:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  ******************************************************************************/
+  40:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+  41:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /** LFRCO frequency, tuned to below frequency during manufacturing. */
+  42:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #define EFM32_LFRCO_FREQ  (32768UL)
+  43:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #define EFM32_ULFRCO_FREQ (1000UL)
+  44:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+  45:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /*******************************************************************************
+  46:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  **************************   LOCAL VARIABLES   ********************************
+  47:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  ******************************************************************************/
+  48:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+  49:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* System oscillator frequencies. These frequencies are normally constant */
+  50:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* for a target, but they are made configurable in order to allow run-time */
+  51:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* handling of different boards. The crystal oscillator clocks can be set */
+  52:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* compile time to a non-default value by defining respective EFM32_nFXO_FREQ */
+  53:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* values according to board design. By defining the EFM32_nFXO_FREQ to 0, */
+  54:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* one indicates that the oscillator is not present, in order to save some */
+  55:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* SW footprint. */
+  56:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+  57:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #ifndef EFM32_HFXO_FREQ
+  58:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #ifdef _EFM32_GIANT_FAMILY
+  59:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #define EFM32_HFXO_FREQ (48000000UL)
+  60:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #else
+  61:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #define EFM32_HFXO_FREQ (32000000UL)
+  62:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+  63:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+  64:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* Do not define variable if HF crystal oscillator not present */
+  65:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #if (EFM32_HFXO_FREQ > 0)
+  66:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  67:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /** System HFXO clock. */ 
+  68:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** static uint32_t SystemHFXOClock = EFM32_HFXO_FREQ;
+  69:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /** @endcond (DO_NOT_INCLUDE_WITH_DOXYGEN) */
+  70:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+  71:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+  72:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #ifndef EFM32_LFXO_FREQ 
+  73:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #define EFM32_LFXO_FREQ (EFM32_LFRCO_FREQ)
+  74:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+  75:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* Do not define variable if LF crystal oscillator not present */
+  76:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #if (EFM32_LFXO_FREQ > 0)
+  77:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  78:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /** System LFXO clock. */ 
+  79:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** static uint32_t SystemLFXOClock = EFM32_LFXO_FREQ;
+  80:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /** @endcond (DO_NOT_INCLUDE_WITH_DOXYGEN) */
+  81:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+  82:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ARM GAS  /tmp/ccTGRY3Q.s 			page 3
+
+
+  83:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /* Inline function to get the chip's Production Revision. */
+  84:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** __STATIC_INLINE uint8_t GetProdRev(void)
+  85:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+  38              		.loc 1 85 0
+  39              		.cfi_startproc
+  40              		@ args = 0, pretend = 0, frame = 0
+  41              		@ frame_needed = 0, uses_anonymous_args = 0
+  42              		@ link register save eliminated.
+  86:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return ((DEVINFO->PART & _DEVINFO_PART_PROD_REV_MASK)
+  43              		.loc 1 86 0
+  44 0000 024B     		ldr	r3, .L3
+  45 0002 DB6C     		ldr	r3, [r3, #76]
+  87:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****                          >> _DEVINFO_PART_PROD_REV_SHIFT);
+  46              		.loc 1 87 0
+  47 0004 1B0E     		lsrs	r3, r3, #24
+  86:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return ((DEVINFO->PART & _DEVINFO_PART_PROD_REV_MASK)
+  48              		.loc 1 86 0
+  49 0006 DBB2     		uxtb	r3, r3
+  88:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+  50              		.loc 1 88 0
+  51 0008 1846     		mov	r0, r3
+  52 000a 7047     		bx	lr
+  53              	.L4:
+  54              		.align	2
+  55              	.L3:
+  56 000c B081E00F 		.word	266371504
+  57              		.cfi_endproc
+  58              	.LFE57:
+  60              		.comm	SystemCoreClock,4,4
+  61              		.section	.text.SystemCoreClockGet,"ax",%progbits
+  62              		.align	2
+  63              		.global	SystemCoreClockGet
+  64              		.thumb
+  65              		.thumb_func
+  67              	SystemCoreClockGet:
+  68              	.LFB58:
+  89:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+  90:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /*******************************************************************************
+  91:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  **************************   GLOBAL VARIABLES   *******************************
+  92:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  ******************************************************************************/
+  93:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+  94:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /**
+  95:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+  96:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   System System Clock Frequency (Core Clock).
+  97:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+  98:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @details
+  99:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Required CMSIS global variable that must be kept up-to-date.
+ 100:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  */
+ 101:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** uint32_t SystemCoreClock;
+ 102:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 103:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /*******************************************************************************
+ 104:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  **************************   GLOBAL FUNCTIONS   *******************************
+ 105:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  ******************************************************************************/
+ 106:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 107:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /***************************************************************************//**
+ 108:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+ 109:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Get the current core clock frequency.
+ARM GAS  /tmp/ccTGRY3Q.s 			page 4
+
+
+ 110:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 111:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @details
+ 112:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Calculate and get the current core clock frequency based on the current
+ 113:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   configuration. Assuming that the SystemCoreClock global variable is
+ 114:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   maintained, the core clock frequency is stored in that variable as well.
+ 115:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This function will however calculate the core clock based on actual HW
+ 116:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   configuration. It will also update the SystemCoreClock global variable.
+ 117:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 118:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 119:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This is an EFM32 proprietary function, not part of the CMSIS definition.
+ 120:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 121:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @return
+ 122:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   The current core clock frequency in Hz.
+ 123:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  ******************************************************************************/
+ 124:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** uint32_t SystemCoreClockGet(void)
+ 125:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+  69              		.loc 1 125 0
+  70              		.cfi_startproc
+  71              		@ args = 0, pretend = 0, frame = 8
+  72              		@ frame_needed = 0, uses_anonymous_args = 0
+  73 0000 00B5     		push	{lr}
+  74              		.cfi_def_cfa_offset 4
+  75              		.cfi_offset 14, -4
+  76 0002 83B0     		sub	sp, sp, #12
+  77              		.cfi_def_cfa_offset 16
+ 126:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   uint32_t ret;
+ 127:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   
+ 128:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   ret = SystemHFClockGet();
+  78              		.loc 1 128 0
+  79 0004 FFF7FEFF 		bl	SystemHFClockGet
+  80 0008 0190     		str	r0, [sp, #4]
+ 129:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #if defined (_EFM32_GIANT_FAMILY)
+ 130:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* Leopard/Giant Gecko has an additional divider */
+ 131:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   ret =  ret / (1 + ((CMU->CTRL & _CMU_CTRL_HFCLKDIV_MASK)>>_CMU_CTRL_HFCLKDIV_SHIFT));
+ 132:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+ 133:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   ret >>= (CMU->HFCORECLKDIV & _CMU_HFCORECLKDIV_HFCORECLKDIV_MASK) >> 
+  81              		.loc 1 133 0
+  82 000a 084B     		ldr	r3, .L7
+  83 000c 5B68     		ldr	r3, [r3, #4]
+  84 000e 03F00F03 		and	r3, r3, #15
+  85 0012 019A     		ldr	r2, [sp, #4]
+  86 0014 22FA03F3 		lsr	r3, r2, r3
+  87 0018 0193     		str	r3, [sp, #4]
+ 134:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****           _CMU_HFCORECLKDIV_HFCORECLKDIV_SHIFT;
+ 135:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 136:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* Keep CMSIS variable up-to-date just in case */
+ 137:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   SystemCoreClock = ret;
+  88              		.loc 1 137 0
+  89 001a 054B     		ldr	r3, .L7+4
+  90 001c 019A     		ldr	r2, [sp, #4]
+  91 001e 1A60     		str	r2, [r3]
+ 138:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 139:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return ret;
+  92              		.loc 1 139 0
+  93 0020 019B     		ldr	r3, [sp, #4]
+ 140:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+  94              		.loc 1 140 0
+ARM GAS  /tmp/ccTGRY3Q.s 			page 5
+
+
+  95 0022 1846     		mov	r0, r3
+  96 0024 03B0     		add	sp, sp, #12
+  97              		@ sp needed
+  98 0026 5DF804FB 		ldr	pc, [sp], #4
+  99              	.L8:
+ 100 002a 00BF     		.align	2
+ 101              	.L7:
+ 102 002c 00800C40 		.word	1074561024
+ 103 0030 00000000 		.word	SystemCoreClock
+ 104              		.cfi_endproc
+ 105              	.LFE58:
+ 107              		.section	.text.SystemHFClockGet,"ax",%progbits
+ 108              		.align	2
+ 109              		.global	SystemHFClockGet
+ 110              		.thumb
+ 111              		.thumb_func
+ 113              	SystemHFClockGet:
+ 114              	.LFB59:
+ 141:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 142:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 143:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /***************************************************************************//**
+ 144:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+ 145:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Get the current HFCLK frequency.
+ 146:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 147:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 148:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This is an EFM32 proprietary function, not part of the CMSIS definition.
+ 149:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 150:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @return
+ 151:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   The current HFCLK frequency in Hz.
+ 152:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  ******************************************************************************/
+ 153:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** uint32_t SystemHFClockGet(void)
+ 154:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+ 115              		.loc 1 154 0
+ 116              		.cfi_startproc
+ 117              		@ args = 0, pretend = 0, frame = 8
+ 118              		@ frame_needed = 0, uses_anonymous_args = 0
+ 119 0000 00B5     		push	{lr}
+ 120              		.cfi_def_cfa_offset 4
+ 121              		.cfi_offset 14, -4
+ 122 0002 83B0     		sub	sp, sp, #12
+ 123              		.cfi_def_cfa_offset 16
+ 155:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   uint32_t ret;
+ 156:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   
+ 157:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   switch (CMU->STATUS & (CMU_STATUS_HFRCOSEL | CMU_STATUS_HFXOSEL |
+ 124              		.loc 1 157 0
+ 125 0004 2F4B     		ldr	r3, .L30
+ 126 0006 DB6A     		ldr	r3, [r3, #44]
+ 127 0008 03F47053 		and	r3, r3, #15360
+ 128 000c B3F5805F 		cmp	r3, #4096
+ 129 0010 0AD0     		beq	.L11
+ 130 0012 B3F5005F 		cmp	r3, #8192
+ 131 0016 03D0     		beq	.L12
+ 132 0018 B3F5006F 		cmp	r3, #2048
+ 133 001c 08D0     		beq	.L13
+ 134 001e 0BE0     		b	.L29
+ 135              	.L12:
+ 158:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****                          CMU_STATUS_LFRCOSEL | CMU_STATUS_LFXOSEL))
+ARM GAS  /tmp/ccTGRY3Q.s 			page 6
+
+
+ 159:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   {
+ 160:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****     case CMU_STATUS_LFXOSEL:
+ 161:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #if (EFM32_LFXO_FREQ > 0)
+ 162:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       ret = SystemLFXOClock;
+ 136              		.loc 1 162 0
+ 137 0020 294B     		ldr	r3, .L30+4
+ 138 0022 1B68     		ldr	r3, [r3]
+ 139 0024 0193     		str	r3, [sp, #4]
+ 163:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #else
+ 164:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       /* We should not get here, since core should not be clocked. May */
+ 165:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       /* be caused by a misconfiguration though. */
+ 166:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       ret = 0;
+ 167:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+ 168:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       break;
+ 140              		.loc 1 168 0
+ 141 0026 47E0     		b	.L14
+ 142              	.L11:
+ 169:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       
+ 170:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****     case CMU_STATUS_LFRCOSEL:
+ 171:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       ret = EFM32_LFRCO_FREQ;
+ 143              		.loc 1 171 0
+ 144 0028 4FF40043 		mov	r3, #32768
+ 145 002c 0193     		str	r3, [sp, #4]
+ 172:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       break;
+ 146              		.loc 1 172 0
+ 147 002e 43E0     		b	.L14
+ 148              	.L13:
+ 173:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       
+ 174:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****     case CMU_STATUS_HFXOSEL:
+ 175:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #if (EFM32_HFXO_FREQ > 0)
+ 176:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       ret = SystemHFXOClock;
+ 149              		.loc 1 176 0
+ 150 0030 264B     		ldr	r3, .L30+8
+ 151 0032 1B68     		ldr	r3, [r3]
+ 152 0034 0193     		str	r3, [sp, #4]
+ 177:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #else
+ 178:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       /* We should not get here, since core should not be clocked. May */
+ 179:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       /* be caused by a misconfiguration though. */
+ 180:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       ret = 0;
+ 181:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+ 182:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       break;
+ 153              		.loc 1 182 0
+ 154 0036 3FE0     		b	.L14
+ 155              	.L29:
+ 183:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       
+ 184:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****     default: /* CMU_STATUS_HFRCOSEL */
+ 185:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       switch (CMU->HFRCOCTRL & _CMU_HFRCOCTRL_BAND_MASK)
+ 156              		.loc 1 185 0
+ 157 0038 224B     		ldr	r3, .L30
+ 158 003a DB68     		ldr	r3, [r3, #12]
+ 159 003c 03F4E063 		and	r3, r3, #1792
+ 160 0040 B3F5007F 		cmp	r3, #512
+ 161 0044 1BD0     		beq	.L16
+ 162 0046 B3F5007F 		cmp	r3, #512
+ 163 004a 05D8     		bhi	.L17
+ 164 004c 002B     		cmp	r3, #0
+ 165 004e 24D0     		beq	.L18
+ARM GAS  /tmp/ccTGRY3Q.s 			page 7
+
+
+ 166 0050 B3F5807F 		cmp	r3, #256
+ 167 0054 16D0     		beq	.L19
+ 168 0056 2BE0     		b	.L15
+ 169              	.L17:
+ 170 0058 B3F5806F 		cmp	r3, #1024
+ 171 005c 09D0     		beq	.L20
+ 172 005e B3F5A06F 		cmp	r3, #1280
+ 173 0062 03D0     		beq	.L21
+ 174 0064 B3F5407F 		cmp	r3, #768
+ 175 0068 06D0     		beq	.L22
+ 176 006a 21E0     		b	.L15
+ 177              	.L21:
+ 186:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       {
+ 187:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       case CMU_HFRCOCTRL_BAND_28MHZ:
+ 188:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         ret = 28000000;
+ 178              		.loc 1 188 0
+ 179 006c 184B     		ldr	r3, .L30+12
+ 180 006e 0193     		str	r3, [sp, #4]
+ 189:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         break;
+ 181              		.loc 1 189 0
+ 182 0070 21E0     		b	.L23
+ 183              	.L20:
+ 190:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 191:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       case CMU_HFRCOCTRL_BAND_21MHZ:
+ 192:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         ret = 21000000;
+ 184              		.loc 1 192 0
+ 185 0072 184B     		ldr	r3, .L30+16
+ 186 0074 0193     		str	r3, [sp, #4]
+ 193:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         break;
+ 187              		.loc 1 193 0
+ 188 0076 1EE0     		b	.L23
+ 189              	.L22:
+ 194:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 195:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       case CMU_HFRCOCTRL_BAND_14MHZ:
+ 196:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         ret = 14000000;
+ 190              		.loc 1 196 0
+ 191 0078 174B     		ldr	r3, .L30+20
+ 192 007a 0193     		str	r3, [sp, #4]
+ 197:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         break;
+ 193              		.loc 1 197 0
+ 194 007c 1BE0     		b	.L23
+ 195              	.L16:
+ 198:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 199:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       case CMU_HFRCOCTRL_BAND_11MHZ:
+ 200:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         ret = 11000000;
+ 196              		.loc 1 200 0
+ 197 007e 174B     		ldr	r3, .L30+24
+ 198 0080 0193     		str	r3, [sp, #4]
+ 201:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         break;
+ 199              		.loc 1 201 0
+ 200 0082 18E0     		b	.L23
+ 201              	.L19:
+ 202:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 203:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       case CMU_HFRCOCTRL_BAND_7MHZ:
+ 204:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         if ( GetProdRev() >= 19 )
+ 202              		.loc 1 204 0
+ 203 0084 FFF7FEFF 		bl	GetProdRev
+ARM GAS  /tmp/ccTGRY3Q.s 			page 8
+
+
+ 204 0088 0346     		mov	r3, r0
+ 205 008a 122B     		cmp	r3, #18
+ 206 008c 02D9     		bls	.L24
+ 205:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****           ret = 6600000;
+ 207              		.loc 1 205 0
+ 208 008e 144B     		ldr	r3, .L30+28
+ 209 0090 0193     		str	r3, [sp, #4]
+ 206:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         else
+ 207:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****           ret = 7000000;
+ 208:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         break;
+ 210              		.loc 1 208 0
+ 211 0092 10E0     		b	.L23
+ 212              	.L24:
+ 207:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****           ret = 7000000;
+ 213              		.loc 1 207 0
+ 214 0094 134B     		ldr	r3, .L30+32
+ 215 0096 0193     		str	r3, [sp, #4]
+ 216              		.loc 1 208 0
+ 217 0098 0DE0     		b	.L23
+ 218              	.L18:
+ 209:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 210:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       case CMU_HFRCOCTRL_BAND_1MHZ:
+ 211:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         if ( GetProdRev() >= 19 )
+ 219              		.loc 1 211 0
+ 220 009a FFF7FEFF 		bl	GetProdRev
+ 221 009e 0346     		mov	r3, r0
+ 222 00a0 122B     		cmp	r3, #18
+ 223 00a2 02D9     		bls	.L26
+ 212:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****           ret = 1200000;
+ 224              		.loc 1 212 0
+ 225 00a4 104B     		ldr	r3, .L30+36
+ 226 00a6 0193     		str	r3, [sp, #4]
+ 213:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         else
+ 214:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****           ret = 1000000;
+ 215:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         break;
+ 227              		.loc 1 215 0
+ 228 00a8 05E0     		b	.L23
+ 229              	.L26:
+ 214:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****           ret = 1000000;
+ 230              		.loc 1 214 0
+ 231 00aa 104B     		ldr	r3, .L30+40
+ 232 00ac 0193     		str	r3, [sp, #4]
+ 233              		.loc 1 215 0
+ 234 00ae 02E0     		b	.L23
+ 235              	.L15:
+ 216:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 217:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       default:
+ 218:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         ret = 0;
+ 236              		.loc 1 218 0
+ 237 00b0 0023     		movs	r3, #0
+ 238 00b2 0193     		str	r3, [sp, #4]
+ 219:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****         break;
+ 239              		.loc 1 219 0
+ 240 00b4 00BF     		nop
+ 241              	.L23:
+ 220:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       }
+ 221:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****       break;
+ARM GAS  /tmp/ccTGRY3Q.s 			page 9
+
+
+ 242              		.loc 1 221 0
+ 243 00b6 00BF     		nop
+ 244              	.L14:
+ 222:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   }
+ 223:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 224:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return ret;
+ 245              		.loc 1 224 0
+ 246 00b8 019B     		ldr	r3, [sp, #4]
+ 225:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+ 247              		.loc 1 225 0
+ 248 00ba 1846     		mov	r0, r3
+ 249 00bc 03B0     		add	sp, sp, #12
+ 250              		@ sp needed
+ 251 00be 5DF804FB 		ldr	pc, [sp], #4
+ 252              	.L31:
+ 253 00c2 00BF     		.align	2
+ 254              	.L30:
+ 255 00c4 00800C40 		.word	1074561024
+ 256 00c8 00000000 		.word	SystemLFXOClock
+ 257 00cc 00000000 		.word	SystemHFXOClock
+ 258 00d0 003FAB01 		.word	28000000
+ 259 00d4 406F4001 		.word	21000000
+ 260 00d8 809FD500 		.word	14000000
+ 261 00dc C0D8A700 		.word	11000000
+ 262 00e0 40B56400 		.word	6600000
+ 263 00e4 C0CF6A00 		.word	7000000
+ 264 00e8 804F1200 		.word	1200000
+ 265 00ec 40420F00 		.word	1000000
+ 266              		.cfi_endproc
+ 267              	.LFE59:
+ 269              		.section	.text.SystemHFXOClockGet,"ax",%progbits
+ 270              		.align	2
+ 271              		.global	SystemHFXOClockGet
+ 272              		.thumb
+ 273              		.thumb_func
+ 275              	SystemHFXOClockGet:
+ 276              	.LFB60:
+ 226:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 227:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 228:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /**************************************************************************//**
+ 229:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+ 230:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Get high frequency crystal oscillator clock frequency for target system.
+ 231:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 232:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 233:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This is an EFM32 proprietary function, not part of the CMSIS definition.
+ 234:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 235:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @return
+ 236:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   HFXO frequency in Hz.
+ 237:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *****************************************************************************/
+ 238:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** uint32_t SystemHFXOClockGet(void)
+ 239:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+ 277              		.loc 1 239 0
+ 278              		.cfi_startproc
+ 279              		@ args = 0, pretend = 0, frame = 0
+ 280              		@ frame_needed = 0, uses_anonymous_args = 0
+ 281              		@ link register save eliminated.
+ 240:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* External crystal oscillator present? */
+ARM GAS  /tmp/ccTGRY3Q.s 			page 10
+
+
+ 241:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #if (EFM32_HFXO_FREQ > 0)
+ 242:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return SystemHFXOClock;
+ 282              		.loc 1 242 0
+ 283 0000 014B     		ldr	r3, .L34
+ 284 0002 1B68     		ldr	r3, [r3]
+ 243:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #else
+ 244:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return 0;
+ 245:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+ 246:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+ 285              		.loc 1 246 0
+ 286 0004 1846     		mov	r0, r3
+ 287 0006 7047     		bx	lr
+ 288              	.L35:
+ 289              		.align	2
+ 290              	.L34:
+ 291 0008 00000000 		.word	SystemHFXOClock
+ 292              		.cfi_endproc
+ 293              	.LFE60:
+ 295              		.section	.text.SystemHFXOClockSet,"ax",%progbits
+ 296              		.align	2
+ 297              		.global	SystemHFXOClockSet
+ 298              		.thumb
+ 299              		.thumb_func
+ 301              	SystemHFXOClockSet:
+ 302              	.LFB61:
+ 247:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 248:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 249:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /**************************************************************************//**
+ 250:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+ 251:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Set high frequency crystal oscillator clock frequency for target system.
+ 252:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 253:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 254:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This function is mainly provided for being able to handle target systems
+ 255:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   with different HF crystal oscillator frequencies run-time. If used, it
+ 256:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   should probably only be used once during system startup.
+ 257:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 258:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 259:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This is an EFM32 proprietary function, not part of the CMSIS definition.
+ 260:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 261:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @param[in] freq
+ 262:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   HFXO frequency in Hz used for target.
+ 263:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *****************************************************************************/
+ 264:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** void SystemHFXOClockSet(uint32_t freq)
+ 265:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+ 303              		.loc 1 265 0
+ 304              		.cfi_startproc
+ 305              		@ args = 0, pretend = 0, frame = 8
+ 306              		@ frame_needed = 0, uses_anonymous_args = 0
+ 307 0000 00B5     		push	{lr}
+ 308              		.cfi_def_cfa_offset 4
+ 309              		.cfi_offset 14, -4
+ 310 0002 83B0     		sub	sp, sp, #12
+ 311              		.cfi_def_cfa_offset 16
+ 312 0004 0190     		str	r0, [sp, #4]
+ 266:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* External crystal oscillator present? */
+ 267:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #if (EFM32_HFXO_FREQ > 0)
+ 268:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   SystemHFXOClock = freq;
+ARM GAS  /tmp/ccTGRY3Q.s 			page 11
+
+
+ 313              		.loc 1 268 0
+ 314 0006 074B     		ldr	r3, .L38
+ 315 0008 019A     		ldr	r2, [sp, #4]
+ 316 000a 1A60     		str	r2, [r3]
+ 269:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 270:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* Update core clock frequency if HFXO is used to clock core */
+ 271:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   if (CMU->STATUS & CMU_STATUS_HFXOSEL)
+ 317              		.loc 1 271 0
+ 318 000c 064B     		ldr	r3, .L38+4
+ 319 000e DB6A     		ldr	r3, [r3, #44]
+ 320 0010 03F40063 		and	r3, r3, #2048
+ 321 0014 002B     		cmp	r3, #0
+ 322 0016 01D0     		beq	.L36
+ 272:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   {
+ 273:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****     /* The function will update the global variable */
+ 274:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****     SystemCoreClockGet();
+ 323              		.loc 1 274 0
+ 324 0018 FFF7FEFF 		bl	SystemCoreClockGet
+ 325              	.L36:
+ 275:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   }
+ 276:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #else
+ 277:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   (void)freq; /* Unused parameter */
+ 278:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+ 279:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+ 326              		.loc 1 279 0
+ 327 001c 03B0     		add	sp, sp, #12
+ 328              		@ sp needed
+ 329 001e 5DF804FB 		ldr	pc, [sp], #4
+ 330              	.L39:
+ 331 0022 00BF     		.align	2
+ 332              	.L38:
+ 333 0024 00000000 		.word	SystemHFXOClock
+ 334 0028 00800C40 		.word	1074561024
+ 335              		.cfi_endproc
+ 336              	.LFE61:
+ 338              		.section	.text.SystemInit,"ax",%progbits
+ 339              		.align	2
+ 340              		.global	SystemInit
+ 341              		.thumb
+ 342              		.thumb_func
+ 344              	SystemInit:
+ 345              	.LFB62:
+ 280:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 281:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 282:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /**************************************************************************//**
+ 283:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+ 284:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Initialize the system.
+ 285:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 286:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @details
+ 287:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Do required generic HW system init.
+ 288:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 289:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 290:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This function is invoked during system init, before the main() routine
+ 291:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   and any data has been initialized. For this reason, it cannot do any
+ 292:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   initialization of variables etc.
+ 293:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *****************************************************************************/
+ 294:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** void SystemInit(void)
+ARM GAS  /tmp/ccTGRY3Q.s 			page 12
+
+
+ 295:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+ 346              		.loc 1 295 0
+ 347              		.cfi_startproc
+ 348              		@ args = 0, pretend = 0, frame = 0
+ 349              		@ frame_needed = 0, uses_anonymous_args = 0
+ 350              		@ link register save eliminated.
+ 296:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+ 351              		.loc 1 296 0
+ 352 0000 7047     		bx	lr
+ 353              		.cfi_endproc
+ 354              	.LFE62:
+ 356 0002 00BF     		.section	.text.SystemLFRCOClockGet,"ax",%progbits
+ 357              		.align	2
+ 358              		.global	SystemLFRCOClockGet
+ 359              		.thumb
+ 360              		.thumb_func
+ 362              	SystemLFRCOClockGet:
+ 363              	.LFB63:
+ 297:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 298:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 299:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /**************************************************************************//**
+ 300:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+ 301:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Get low frequency RC oscillator clock frequency for target system.
+ 302:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 303:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 304:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This is an EFM32 proprietary function, not part of the CMSIS definition.
+ 305:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 306:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @return
+ 307:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   LFRCO frequency in Hz.
+ 308:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *****************************************************************************/
+ 309:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** uint32_t SystemLFRCOClockGet(void)
+ 310:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+ 364              		.loc 1 310 0
+ 365              		.cfi_startproc
+ 366              		@ args = 0, pretend = 0, frame = 0
+ 367              		@ frame_needed = 0, uses_anonymous_args = 0
+ 368              		@ link register save eliminated.
+ 311:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* Currently we assume that this frequency is properly tuned during */
+ 312:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* manufacturing and is not changed after reset. If future requirements */
+ 313:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* for re-tuning by user, we can add support for that. */
+ 314:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return EFM32_LFRCO_FREQ;
+ 369              		.loc 1 314 0
+ 370 0000 4FF40043 		mov	r3, #32768
+ 315:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+ 371              		.loc 1 315 0
+ 372 0004 1846     		mov	r0, r3
+ 373 0006 7047     		bx	lr
+ 374              		.cfi_endproc
+ 375              	.LFE63:
+ 377              		.section	.text.SystemULFRCOClockGet,"ax",%progbits
+ 378              		.align	2
+ 379              		.global	SystemULFRCOClockGet
+ 380              		.thumb
+ 381              		.thumb_func
+ 383              	SystemULFRCOClockGet:
+ 384              	.LFB64:
+ 316:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ARM GAS  /tmp/ccTGRY3Q.s 			page 13
+
+
+ 317:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 318:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /**************************************************************************//**
+ 319:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+ 320:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Get ultra low frequency RC oscillator clock frequency for target system.
+ 321:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 322:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 323:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This is an EFM32 proprietary function, not part of the CMSIS definition.
+ 324:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 325:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @return
+ 326:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   ULFRCO frequency in Hz.
+ 327:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *****************************************************************************/
+ 328:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** uint32_t SystemULFRCOClockGet(void)
+ 329:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+ 385              		.loc 1 329 0
+ 386              		.cfi_startproc
+ 387              		@ args = 0, pretend = 0, frame = 0
+ 388              		@ frame_needed = 0, uses_anonymous_args = 0
+ 389              		@ link register save eliminated.
+ 330:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* The ULFRCO frequency is not tuned, and can be very inaccurate */
+ 331:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return EFM32_ULFRCO_FREQ;
+ 390              		.loc 1 331 0
+ 391 0000 4FF47A73 		mov	r3, #1000
+ 332:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+ 392              		.loc 1 332 0
+ 393 0004 1846     		mov	r0, r3
+ 394 0006 7047     		bx	lr
+ 395              		.cfi_endproc
+ 396              	.LFE64:
+ 398              		.section	.text.SystemLFXOClockGet,"ax",%progbits
+ 399              		.align	2
+ 400              		.global	SystemLFXOClockGet
+ 401              		.thumb
+ 402              		.thumb_func
+ 404              	SystemLFXOClockGet:
+ 405              	.LFB65:
+ 333:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 334:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 335:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /**************************************************************************//**
+ 336:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+ 337:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Get low frequency crystal oscillator clock frequency for target system.
+ 338:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 339:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 340:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This is an EFM32 proprietary function, not part of the CMSIS definition.
+ 341:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 342:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @return
+ 343:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   LFXO frequency in Hz.
+ 344:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *****************************************************************************/
+ 345:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** uint32_t SystemLFXOClockGet(void)
+ 346:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+ 406              		.loc 1 346 0
+ 407              		.cfi_startproc
+ 408              		@ args = 0, pretend = 0, frame = 0
+ 409              		@ frame_needed = 0, uses_anonymous_args = 0
+ 410              		@ link register save eliminated.
+ 347:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* External crystal oscillator present? */
+ 348:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #if (EFM32_LFXO_FREQ > 0)
+ 349:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return SystemLFXOClock;
+ARM GAS  /tmp/ccTGRY3Q.s 			page 14
+
+
+ 411              		.loc 1 349 0
+ 412 0000 014B     		ldr	r3, .L47
+ 413 0002 1B68     		ldr	r3, [r3]
+ 350:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #else
+ 351:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   return 0;
+ 352:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+ 353:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+ 414              		.loc 1 353 0
+ 415 0004 1846     		mov	r0, r3
+ 416 0006 7047     		bx	lr
+ 417              	.L48:
+ 418              		.align	2
+ 419              	.L47:
+ 420 0008 00000000 		.word	SystemLFXOClock
+ 421              		.cfi_endproc
+ 422              	.LFE65:
+ 424              		.section	.text.SystemLFXOClockSet,"ax",%progbits
+ 425              		.align	2
+ 426              		.global	SystemLFXOClockSet
+ 427              		.thumb
+ 428              		.thumb_func
+ 430              	SystemLFXOClockSet:
+ 431              	.LFB66:
+ 354:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 355:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 356:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** /**************************************************************************//**
+ 357:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @brief
+ 358:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   Set low frequency crystal oscillator clock frequency for target system.
+ 359:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 360:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 361:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This function is mainly provided for being able to handle target systems
+ 362:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   with different HF crystal oscillator frequencies run-time. If used, it
+ 363:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   should probably only be used once during system startup.
+ 364:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 365:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @note
+ 366:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   This is an EFM32 proprietary function, not part of the CMSIS definition.
+ 367:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *
+ 368:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  * @param[in] freq
+ 369:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *   LFXO frequency in Hz used for target.
+ 370:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****  *****************************************************************************/
+ 371:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** void SystemLFXOClockSet(uint32_t freq)
+ 372:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** {
+ 432              		.loc 1 372 0
+ 433              		.cfi_startproc
+ 434              		@ args = 0, pretend = 0, frame = 8
+ 435              		@ frame_needed = 0, uses_anonymous_args = 0
+ 436 0000 00B5     		push	{lr}
+ 437              		.cfi_def_cfa_offset 4
+ 438              		.cfi_offset 14, -4
+ 439 0002 83B0     		sub	sp, sp, #12
+ 440              		.cfi_def_cfa_offset 16
+ 441 0004 0190     		str	r0, [sp, #4]
+ 373:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* External crystal oscillator present? */
+ 374:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #if (EFM32_LFXO_FREQ > 0)
+ 375:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   SystemLFXOClock = freq;
+ 442              		.loc 1 375 0
+ 443 0006 074B     		ldr	r3, .L51
+ARM GAS  /tmp/ccTGRY3Q.s 			page 15
+
+
+ 444 0008 019A     		ldr	r2, [sp, #4]
+ 445 000a 1A60     		str	r2, [r3]
+ 376:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** 
+ 377:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   /* Update core clock frequency if LFXO is used to clock core */
+ 378:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   if (CMU->STATUS & CMU_STATUS_LFXOSEL)
+ 446              		.loc 1 378 0
+ 447 000c 064B     		ldr	r3, .L51+4
+ 448 000e DB6A     		ldr	r3, [r3, #44]
+ 449 0010 03F40053 		and	r3, r3, #8192
+ 450 0014 002B     		cmp	r3, #0
+ 451 0016 01D0     		beq	.L49
+ 379:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   {
+ 380:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****     /* The function will update the global variable */
+ 381:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****     SystemCoreClockGet();
+ 452              		.loc 1 381 0
+ 453 0018 FFF7FEFF 		bl	SystemCoreClockGet
+ 454              	.L49:
+ 382:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   }
+ 383:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #else
+ 384:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c ****   (void)freq; /* Unused parameter */
+ 385:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** #endif
+ 386:../Device/EnergyMicro/EFM32G/Source/system_efm32g.c **** }
+ 455              		.loc 1 386 0
+ 456 001c 03B0     		add	sp, sp, #12
+ 457              		@ sp needed
+ 458 001e 5DF804FB 		ldr	pc, [sp], #4
+ 459              	.L52:
+ 460 0022 00BF     		.align	2
+ 461              	.L51:
+ 462 0024 00000000 		.word	SystemLFXOClock
+ 463 0028 00800C40 		.word	1074561024
+ 464              		.cfi_endproc
+ 465              	.LFE66:
+ 467              		.text
+ 468              	.Letext0:
+ 469              		.file 2 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 470              		.file 3 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 471              		.file 4 "../Device/EnergyMicro/EFM32G/Include/efm32g230f128.h"
+ 472              		.file 5 "../Device/EnergyMicro/EFM32G/Include/efm32g_devinfo.h"
+ 473              		.file 6 "../CMSIS/Include/core_cm3.h"

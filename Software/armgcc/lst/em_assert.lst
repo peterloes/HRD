@@ -1,0 +1,112 @@
+ARM GAS  /tmp/ccjuvPhX.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"em_assert.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.assertEFM,"ax",%progbits
+  19              		.align	2
+  20              		.global	assertEFM
+  21              		.thumb
+  22              		.thumb_func
+  24              	assertEFM:
+  25              	.LFB0:
+  26              		.file 1 "../emlib/src/em_assert.c"
+   1:../emlib/src/em_assert.c **** /***************************************************************************//**
+   2:../emlib/src/em_assert.c ****  * @file
+   3:../emlib/src/em_assert.c ****  * @brief Assert API
+   4:../emlib/src/em_assert.c ****  * @author Energy Micro AS
+   5:../emlib/src/em_assert.c ****  * @version 3.20.2
+   6:../emlib/src/em_assert.c ****  *******************************************************************************
+   7:../emlib/src/em_assert.c ****  * @section License
+   8:../emlib/src/em_assert.c ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/src/em_assert.c ****  *******************************************************************************
+  10:../emlib/src/em_assert.c ****  *
+  11:../emlib/src/em_assert.c ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/src/em_assert.c ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/src/em_assert.c ****  * freely, subject to the following restrictions:
+  14:../emlib/src/em_assert.c ****  *
+  15:../emlib/src/em_assert.c ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/src/em_assert.c ****  *    claim that you wrote the original software.
+  17:../emlib/src/em_assert.c ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/src/em_assert.c ****  *    misrepresented as being the original software.
+  19:../emlib/src/em_assert.c ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/src/em_assert.c ****  *
+  21:../emlib/src/em_assert.c ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/src/em_assert.c ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/src/em_assert.c ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/src/em_assert.c ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/src/em_assert.c ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/src/em_assert.c ****  * of any proprietary rights of a third party.
+  27:../emlib/src/em_assert.c ****  *
+  28:../emlib/src/em_assert.c ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/src/em_assert.c ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/src/em_assert.c ****  * arising from your use of this Software.
+  31:../emlib/src/em_assert.c ****  *
+  32:../emlib/src/em_assert.c ****  ******************************************************************************/
+ARM GAS  /tmp/ccjuvPhX.s 			page 2
+
+
+  33:../emlib/src/em_assert.c **** #include "em_assert.h"
+  34:../emlib/src/em_assert.c **** 
+  35:../emlib/src/em_assert.c **** #if defined(DEBUG_EFM)
+  36:../emlib/src/em_assert.c **** 
+  37:../emlib/src/em_assert.c **** /***************************************************************************//**
+  38:../emlib/src/em_assert.c ****  * @brief
+  39:../emlib/src/em_assert.c ****  *   EFM internal assert handling.
+  40:../emlib/src/em_assert.c ****  *
+  41:../emlib/src/em_assert.c ****  *   This function is invoked through EFM_ASSERT() macro usage only, it should
+  42:../emlib/src/em_assert.c ****  *   not be used explicitly.
+  43:../emlib/src/em_assert.c ****  *
+  44:../emlib/src/em_assert.c ****  *   Currently this implementation only enters an indefinite loop, allowing
+  45:../emlib/src/em_assert.c ****  *   the use of a debugger to determine cause of failure. By defining
+  46:../emlib/src/em_assert.c ****  *   DEBUG_EFM_USER to the preprocessor for all files, a user defined version
+  47:../emlib/src/em_assert.c ****  *   of this function must be defined and will be invoked instead, possibly
+  48:../emlib/src/em_assert.c ****  *   providing output of assertion location.
+  49:../emlib/src/em_assert.c ****  *
+  50:../emlib/src/em_assert.c ****  *   Please notice that this function is not used unless DEBUG_EFM is defined
+  51:../emlib/src/em_assert.c ****  *   during preprocessing of EFM_ASSERT() usage.
+  52:../emlib/src/em_assert.c ****  *
+  53:../emlib/src/em_assert.c ****  * @par file
+  54:../emlib/src/em_assert.c ****  *   Name of source file where assertion failed.
+  55:../emlib/src/em_assert.c ****  *
+  56:../emlib/src/em_assert.c ****  * @par line
+  57:../emlib/src/em_assert.c ****  *   Line number in source file where assertion failed.
+  58:../emlib/src/em_assert.c ****  ******************************************************************************/
+  59:../emlib/src/em_assert.c **** void assertEFM(const char *file, int line)
+  60:../emlib/src/em_assert.c **** {
+  27              		.loc 1 60 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 8
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32 0000 82B0     		sub	sp, sp, #8
+  33              		.cfi_def_cfa_offset 8
+  34 0002 0190     		str	r0, [sp, #4]
+  35 0004 0091     		str	r1, [sp]
+  36              	.L2:
+  61:../emlib/src/em_assert.c ****   (void)file;  /* Unused parameter */
+  62:../emlib/src/em_assert.c ****   (void)line;  /* Unused parameter */
+  63:../emlib/src/em_assert.c **** 
+  64:../emlib/src/em_assert.c ****   while (1)
+  65:../emlib/src/em_assert.c ****     ;
+  37              		.loc 1 65 0 discriminator 1
+  38 0006 FEE7     		b	.L2
+  39              		.cfi_endproc
+  40              	.LFE0:
+  42              		.text
+  43              	.Letext0:

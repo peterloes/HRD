@@ -1,0 +1,765 @@
+ARM GAS  /tmp/ccALEiNQ.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"clock.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.BITBAND_Peripheral,"ax",%progbits
+  19              		.align	2
+  20              		.thumb
+  21              		.thumb_func
+  23              	BITBAND_Peripheral:
+  24              	.LFB57:
+  25              		.file 1 "../emlib/inc/em_bitband.h"
+   1:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+   2:../emlib/inc/em_bitband.h ****  * @file
+   3:../emlib/inc/em_bitband.h ****  * @brief Bitband Peripheral API
+   4:../emlib/inc/em_bitband.h ****  * @author Energy Micro AS
+   5:../emlib/inc/em_bitband.h ****  * @version 3.20.2
+   6:../emlib/inc/em_bitband.h ****  *******************************************************************************
+   7:../emlib/inc/em_bitband.h ****  * @section License
+   8:../emlib/inc/em_bitband.h ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/inc/em_bitband.h ****  *******************************************************************************
+  10:../emlib/inc/em_bitband.h ****  *
+  11:../emlib/inc/em_bitband.h ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/inc/em_bitband.h ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/inc/em_bitband.h ****  * freely, subject to the following restrictions:
+  14:../emlib/inc/em_bitband.h ****  *
+  15:../emlib/inc/em_bitband.h ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/inc/em_bitband.h ****  *    claim that you wrote the original software.
+  17:../emlib/inc/em_bitband.h ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/inc/em_bitband.h ****  *    misrepresented as being the original software.
+  19:../emlib/inc/em_bitband.h ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/inc/em_bitband.h ****  *
+  21:../emlib/inc/em_bitband.h ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/inc/em_bitband.h ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/inc/em_bitband.h ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/inc/em_bitband.h ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/inc/em_bitband.h ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/inc/em_bitband.h ****  * of any proprietary rights of a third party.
+  27:../emlib/inc/em_bitband.h ****  *
+  28:../emlib/inc/em_bitband.h ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/inc/em_bitband.h ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/inc/em_bitband.h ****  * arising from your use of this Software.
+  31:../emlib/inc/em_bitband.h ****  *
+  32:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  33:../emlib/inc/em_bitband.h **** #ifndef __EM_BITBAND_H
+ARM GAS  /tmp/ccALEiNQ.s 			page 2
+
+
+  34:../emlib/inc/em_bitband.h **** #define __EM_BITBAND_H
+  35:../emlib/inc/em_bitband.h **** 
+  36:../emlib/inc/em_bitband.h **** #include "em_device.h"
+  37:../emlib/inc/em_bitband.h **** #ifdef __cplusplus
+  38:../emlib/inc/em_bitband.h **** extern "C" {
+  39:../emlib/inc/em_bitband.h **** #endif
+  40:../emlib/inc/em_bitband.h **** 
+  41:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+  42:../emlib/inc/em_bitband.h ****  * @addtogroup EM_Library
+  43:../emlib/inc/em_bitband.h ****  * @{
+  44:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  45:../emlib/inc/em_bitband.h **** 
+  46:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+  47:../emlib/inc/em_bitband.h ****  * @addtogroup BITBAND
+  48:../emlib/inc/em_bitband.h ****  * @brief BITBAND Peripheral API
+  49:../emlib/inc/em_bitband.h ****  * @{
+  50:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  51:../emlib/inc/em_bitband.h **** 
+  52:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+  53:../emlib/inc/em_bitband.h ****  * @brief
+  54:../emlib/inc/em_bitband.h ****  *   Perform bit-band operation on peripheral memory location.
+  55:../emlib/inc/em_bitband.h ****  *
+  56:../emlib/inc/em_bitband.h ****  * @details
+  57:../emlib/inc/em_bitband.h ****  *   Bit-banding provides atomic read-modify-write cycle for single bit
+  58:../emlib/inc/em_bitband.h ****  *   modification. Please refer to the reference manual for further details
+  59:../emlib/inc/em_bitband.h ****  *   about bit-banding.
+  60:../emlib/inc/em_bitband.h ****  *
+  61:../emlib/inc/em_bitband.h ****  * @note
+  62:../emlib/inc/em_bitband.h ****  *   This function is only atomic on cores which fully support bitbanding.
+  63:../emlib/inc/em_bitband.h ****  *
+  64:../emlib/inc/em_bitband.h ****  * @param[in] addr Peripheral address location to modify bit in.
+  65:../emlib/inc/em_bitband.h ****  *
+  66:../emlib/inc/em_bitband.h ****  * @param[in] bit Bit position to modify, 0-31.
+  67:../emlib/inc/em_bitband.h ****  *
+  68:../emlib/inc/em_bitband.h ****  * @param[in] val Value to set bit to, 0 or 1.
+  69:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  70:../emlib/inc/em_bitband.h **** __STATIC_INLINE void BITBAND_Peripheral(volatile uint32_t *addr,
+  71:../emlib/inc/em_bitband.h ****                                         uint32_t bit,
+  72:../emlib/inc/em_bitband.h ****                                         uint32_t val)
+  73:../emlib/inc/em_bitband.h **** {
+  26              		.loc 1 73 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 24
+  29              		@ frame_needed = 0, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 86B0     		sub	sp, sp, #24
+  32              		.cfi_def_cfa_offset 24
+  33 0002 0390     		str	r0, [sp, #12]
+  34 0004 0291     		str	r1, [sp, #8]
+  35 0006 0192     		str	r2, [sp, #4]
+  74:../emlib/inc/em_bitband.h **** #if defined(BITBAND_PER_BASE)
+  75:../emlib/inc/em_bitband.h ****   uint32_t tmp =
+  76:../emlib/inc/em_bitband.h ****     BITBAND_PER_BASE + (((uint32_t)addr - PER_MEM_BASE) * 32) + (bit * 4);
+  36              		.loc 1 76 0
+  37 0008 039B     		ldr	r3, [sp, #12]
+  38 000a 03F10473 		add	r3, r3, #34603008
+  39 000e DA00     		lsls	r2, r3, #3
+ARM GAS  /tmp/ccALEiNQ.s 			page 3
+
+
+  40 0010 029B     		ldr	r3, [sp, #8]
+  41 0012 1344     		add	r3, r3, r2
+  75:../emlib/inc/em_bitband.h ****   uint32_t tmp =
+  42              		.loc 1 75 0
+  43 0014 9B00     		lsls	r3, r3, #2
+  44 0016 0593     		str	r3, [sp, #20]
+  77:../emlib/inc/em_bitband.h **** 
+  78:../emlib/inc/em_bitband.h ****   *((volatile uint32_t *)tmp) = (uint32_t)val;
+  45              		.loc 1 78 0
+  46 0018 059B     		ldr	r3, [sp, #20]
+  47 001a 019A     		ldr	r2, [sp, #4]
+  48 001c 1A60     		str	r2, [r3]
+  79:../emlib/inc/em_bitband.h **** #else
+  80:../emlib/inc/em_bitband.h ****   uint32_t tmp = *addr;
+  81:../emlib/inc/em_bitband.h ****   /* Make sure val is not more than 1, because we only want to set one bit. */
+  82:../emlib/inc/em_bitband.h ****   val &= 0x1;
+  83:../emlib/inc/em_bitband.h ****   *addr = (tmp & ~(1 << bit)) | (val << bit);
+  84:../emlib/inc/em_bitband.h **** #endif /* defined(BITBAND_PER_BASE) */
+  85:../emlib/inc/em_bitband.h **** }
+  49              		.loc 1 85 0
+  50 001e 06B0     		add	sp, sp, #24
+  51              		@ sp needed
+  52 0020 7047     		bx	lr
+  53              		.cfi_endproc
+  54              	.LFE57:
+  56 0022 00BF     		.section	.bss.rtcCountsPerSec,"aw",%nobits
+  57              		.align	1
+  60              	rtcCountsPerSec:
+  61 0000 0000     		.space	2
+  62              		.global	g_rtcStartTime
+  63              		.section	.bss.g_rtcStartTime,"aw",%nobits
+  64              		.align	2
+  67              	g_rtcStartTime:
+  68 0000 00000000 		.space	4
+  69              		.section	.bss.rtcOverflowCounter,"aw",%nobits
+  70              		.align	2
+  73              	rtcOverflowCounter:
+  74 0000 00000000 		.space	4
+  75              		.section	.bss.rtcOverflowInterval,"aw",%nobits
+  76              		.align	2
+  79              	rtcOverflowInterval:
+  80 0000 00000000 		.space	4
+  81              		.section	.bss.rtcOverflowIntervalR,"aw",%nobits
+  82              		.align	2
+  85              	rtcOverflowIntervalR:
+  86 0000 00000000 		.space	4
+  87              		.section	.text.time,"ax",%progbits
+  88              		.align	2
+  89              		.global	time
+  90              		.thumb
+  91              		.thumb_func
+  93              	time:
+  94              	.LFB67:
+  95              		.file 2 "../drivers/clock.c"
+   1:../drivers/clock.c **** /***************************************************************************//**
+   2:../drivers/clock.c ****  * @file
+   3:../drivers/clock.c ****  * @brief System clock for tickless calendar application note
+ARM GAS  /tmp/ccALEiNQ.s 			page 4
+
+
+   4:../drivers/clock.c ****  * @author Energy Micro AS
+   5:../drivers/clock.c ****  * @version 2.05
+   6:../drivers/clock.c ****  *******************************************************************************
+   7:../drivers/clock.c ****  * @section License
+   8:../drivers/clock.c ****  * <b>(C) Copyright 2013 Energy Micro AS, http://www.energymicro.com</b>
+   9:../drivers/clock.c ****  *******************************************************************************
+  10:../drivers/clock.c ****  *
+  11:../drivers/clock.c ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../drivers/clock.c ****  * including commercial applications, and to alter it and redistribute it
+  13:../drivers/clock.c ****  * freely, subject to the following restrictions:
+  14:../drivers/clock.c ****  *
+  15:../drivers/clock.c ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../drivers/clock.c ****  *    claim that you wrote the original software.
+  17:../drivers/clock.c ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../drivers/clock.c ****  *    misrepresented as being the original software.
+  19:../drivers/clock.c ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../drivers/clock.c ****  * 4. The source and compiled code may only be used on Energy Micro "EFM32"
+  21:../drivers/clock.c ****  *    microcontrollers and "EFR4" radios.
+  22:../drivers/clock.c ****  *
+  23:../drivers/clock.c ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  24:../drivers/clock.c ****  * obligation to support this Software. Energy Micro AS is providing the
+  25:../drivers/clock.c ****  * Software "AS IS", with no express or implied warranties of any kind,
+  26:../drivers/clock.c ****  * including, but not limited to, any implied warranties of merchantability
+  27:../drivers/clock.c ****  * or fitness for any particular purpose or warranties against infringement
+  28:../drivers/clock.c ****  * of any proprietary rights of a third party.
+  29:../drivers/clock.c ****  *
+  30:../drivers/clock.c ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  31:../drivers/clock.c ****  * special damages, or any other relief, or for any claim by any third party,
+  32:../drivers/clock.c ****  * arising from your use of this Software.
+  33:../drivers/clock.c ****  *
+  34:../drivers/clock.c ****  ****************************************************************************//*
+  35:../drivers/clock.c **** Revision History:
+  36:../drivers/clock.c **** 2015-06-10,rage	Be sure to set tm_isdst to 0 before calling mktime().
+  37:../drivers/clock.c **** 		Added __getzone() for the IAR version of mktime().
+  38:../drivers/clock.c **** 2014-04-10,rage	Made rtcStartTime global, renamed to g_rtcStartTime.
+  39:../drivers/clock.c **** 2014-04-06,rage	BUGFIX in time(): If an overflow interrupt occurs between
+  40:../drivers/clock.c **** 		reading <rtcOverflowCounter> and RTC->CNT, the 24bit counter
+  41:../drivers/clock.c **** 		has wrapped around and the calculated time value is 512s in
+  42:../drivers/clock.c **** 		the past!  To prevent this wrong behaviour, the OF bit in the
+  43:../drivers/clock.c **** 		IEN is cleared while calculating the current time and is
+  44:../drivers/clock.c **** 		enabled again after.
+  45:../drivers/clock.c **** */
+  46:../drivers/clock.c **** 
+  47:../drivers/clock.c **** /* Include standard libraries */
+  48:../drivers/clock.c **** #include <time.h>
+  49:../drivers/clock.c **** #include <stddef.h>
+  50:../drivers/clock.c **** 
+  51:../drivers/clock.c **** /* Include emlib */
+  52:../drivers/clock.c **** #include "em_device.h"
+  53:../drivers/clock.c **** #include "em_bitband.h"
+  54:../drivers/clock.c **** #include "em_rtc.h"
+  55:../drivers/clock.c **** 
+  56:../drivers/clock.c **** /* Include system clock*/
+  57:../drivers/clock.c **** #include "clock.h"
+  58:../drivers/clock.c **** 
+  59:../drivers/clock.c **** /* RTC variables. Used for converting RTC counter to system time */
+  60:../drivers/clock.c **** static uint16_t   rtcCountsPerSec       = 0;
+ARM GAS  /tmp/ccALEiNQ.s 			page 5
+
+
+  61:../drivers/clock.c **** time_t	          g_rtcStartTime        = 0;
+  62:../drivers/clock.c **** static uint32_t   rtcOverflowCounter    = 0;
+  63:../drivers/clock.c **** static uint32_t   rtcOverflowInterval   = 0;
+  64:../drivers/clock.c **** static uint32_t   rtcOverflowIntervalR  = 0;
+  65:../drivers/clock.c **** 
+  66:../drivers/clock.c **** 
+  67:../drivers/clock.c **** 
+  68:../drivers/clock.c **** /******************************************************************************
+  69:../drivers/clock.c ****  * @brief Returns the current system time
+  70:../drivers/clock.c ****  *
+  71:../drivers/clock.c ****  * @param timer
+  72:../drivers/clock.c ****  *   If not a null pointer, time is copied to this
+  73:../drivers/clock.c ****  *
+  74:../drivers/clock.c ****  * @return
+  75:../drivers/clock.c ****  *   Current system time. Should, but does not, return -1 if system time is not available
+  76:../drivers/clock.c ****  *
+  77:../drivers/clock.c ****  *****************************************************************************/
+  78:../drivers/clock.c **** #if defined (__ICCARM__)
+  79:../drivers/clock.c **** time_t __time32( time_t * timer )
+  80:../drivers/clock.c **** #elif defined (__CC_ARM)
+  81:../drivers/clock.c **** time_t time( time_t * timer )
+  82:../drivers/clock.c **** #elif defined (__GNUC__)
+  83:../drivers/clock.c **** time_t time( time_t * timer )
+  84:../drivers/clock.c **** #else
+  85:../drivers/clock.c **** #error Undefined toolkit, need to define alignment
+  86:../drivers/clock.c **** #endif
+  87:../drivers/clock.c **** {
+  96              		.loc 2 87 0
+  97              		.cfi_startproc
+  98              		@ args = 0, pretend = 0, frame = 16
+  99              		@ frame_needed = 0, uses_anonymous_args = 0
+ 100 0000 00B5     		push	{lr}
+ 101              		.cfi_def_cfa_offset 4
+ 102              		.cfi_offset 14, -4
+ 103 0002 85B0     		sub	sp, sp, #20
+ 104              		.cfi_def_cfa_offset 24
+ 105 0004 0190     		str	r0, [sp, #4]
+  88:../drivers/clock.c ****   time_t t;
+  89:../drivers/clock.c **** 
+  90:../drivers/clock.c ****   /* Add the time offset */
+  91:../drivers/clock.c ****   t = g_rtcStartTime;
+ 106              		.loc 2 91 0
+ 107 0006 1D4B     		ldr	r3, .L6
+ 108 0008 1B68     		ldr	r3, [r3]
+ 109 000a 0393     		str	r3, [sp, #12]
+  92:../drivers/clock.c **** 
+  93:../drivers/clock.c ****   /* RAGE: Disable overflow interrupt */
+  94:../drivers/clock.c ****   BITBAND_Peripheral (&(RTC->IEN), _RTC_IEN_OF_SHIFT, 0);
+ 110              		.loc 2 94 0
+ 111 000c 1C48     		ldr	r0, .L6+4
+ 112 000e 0021     		movs	r1, #0
+ 113 0010 0022     		movs	r2, #0
+ 114 0012 FFF7FEFF 		bl	BITBAND_Peripheral
+  95:../drivers/clock.c **** 
+  96:../drivers/clock.c ****   /* Add time based on number of counter overflows*/
+  97:../drivers/clock.c ****   t += rtcOverflowCounter * rtcOverflowInterval;
+ 115              		.loc 2 97 0
+ARM GAS  /tmp/ccALEiNQ.s 			page 6
+
+
+ 116 0016 1B4B     		ldr	r3, .L6+8
+ 117 0018 1B68     		ldr	r3, [r3]
+ 118 001a 1B4A     		ldr	r2, .L6+12
+ 119 001c 1268     		ldr	r2, [r2]
+ 120 001e 02FB03F2 		mul	r2, r2, r3
+ 121 0022 039B     		ldr	r3, [sp, #12]
+ 122 0024 1344     		add	r3, r3, r2
+ 123 0026 0393     		str	r3, [sp, #12]
+  98:../drivers/clock.c **** 
+  99:../drivers/clock.c ****   /* Add remainder if the overflow interval is not an integer */
+ 100:../drivers/clock.c ****   if ( rtcOverflowIntervalR != 0 )
+ 124              		.loc 2 100 0
+ 125 0028 184B     		ldr	r3, .L6+16
+ 126 002a 1B68     		ldr	r3, [r3]
+ 127 002c 002B     		cmp	r3, #0
+ 128 002e 0CD0     		beq	.L3
+ 101:../drivers/clock.c ****   {
+ 102:../drivers/clock.c ****     t += (rtcOverflowCounter * rtcOverflowIntervalR) / rtcCountsPerSec;
+ 129              		.loc 2 102 0
+ 130 0030 144B     		ldr	r3, .L6+8
+ 131 0032 1B68     		ldr	r3, [r3]
+ 132 0034 154A     		ldr	r2, .L6+16
+ 133 0036 1268     		ldr	r2, [r2]
+ 134 0038 02FB03F2 		mul	r2, r2, r3
+ 135 003c 144B     		ldr	r3, .L6+20
+ 136 003e 1B88     		ldrh	r3, [r3]
+ 137 0040 B2FBF3F2 		udiv	r2, r2, r3
+ 138 0044 039B     		ldr	r3, [sp, #12]
+ 139 0046 1344     		add	r3, r3, r2
+ 140 0048 0393     		str	r3, [sp, #12]
+ 141              	.L3:
+ 103:../drivers/clock.c ****   }
+ 104:../drivers/clock.c **** 
+ 105:../drivers/clock.c ****   /* Add the number of seconds for RTC */
+ 106:../drivers/clock.c ****   t += ( RTC->CNT / rtcCountsPerSec );
+ 142              		.loc 2 106 0
+ 143 004a 124B     		ldr	r3, .L6+24
+ 144 004c 5A68     		ldr	r2, [r3, #4]
+ 145 004e 104B     		ldr	r3, .L6+20
+ 146 0050 1B88     		ldrh	r3, [r3]
+ 147 0052 B2FBF3F2 		udiv	r2, r2, r3
+ 148 0056 039B     		ldr	r3, [sp, #12]
+ 149 0058 1344     		add	r3, r3, r2
+ 150 005a 0393     		str	r3, [sp, #12]
+ 107:../drivers/clock.c **** 
+ 108:../drivers/clock.c ****   /* RAGE: Enable overflow interrupt again */
+ 109:../drivers/clock.c ****   BITBAND_Peripheral (&(RTC->IEN), _RTC_IEN_OF_SHIFT, 1);
+ 151              		.loc 2 109 0
+ 152 005c 0848     		ldr	r0, .L6+4
+ 153 005e 0021     		movs	r1, #0
+ 154 0060 0122     		movs	r2, #1
+ 155 0062 FFF7FEFF 		bl	BITBAND_Peripheral
+ 110:../drivers/clock.c **** 
+ 111:../drivers/clock.c ****   /* Copy system time to timer if not NULL*/
+ 112:../drivers/clock.c ****   if ( timer != NULL )
+ 156              		.loc 2 112 0
+ 157 0066 019B     		ldr	r3, [sp, #4]
+ARM GAS  /tmp/ccALEiNQ.s 			page 7
+
+
+ 158 0068 002B     		cmp	r3, #0
+ 159 006a 02D0     		beq	.L4
+ 113:../drivers/clock.c ****   {
+ 114:../drivers/clock.c ****     *timer = t;
+ 160              		.loc 2 114 0
+ 161 006c 019B     		ldr	r3, [sp, #4]
+ 162 006e 039A     		ldr	r2, [sp, #12]
+ 163 0070 1A60     		str	r2, [r3]
+ 164              	.L4:
+ 115:../drivers/clock.c ****   }
+ 116:../drivers/clock.c **** 
+ 117:../drivers/clock.c ****   return t;
+ 165              		.loc 2 117 0
+ 166 0072 039B     		ldr	r3, [sp, #12]
+ 118:../drivers/clock.c **** }
+ 167              		.loc 2 118 0
+ 168 0074 1846     		mov	r0, r3
+ 169 0076 05B0     		add	sp, sp, #20
+ 170              		@ sp needed
+ 171 0078 5DF804FB 		ldr	pc, [sp], #4
+ 172              	.L7:
+ 173              		.align	2
+ 174              	.L6:
+ 175 007c 00000000 		.word	g_rtcStartTime
+ 176 0080 1C000840 		.word	1074266140
+ 177 0084 00000000 		.word	rtcOverflowCounter
+ 178 0088 00000000 		.word	rtcOverflowInterval
+ 179 008c 00000000 		.word	rtcOverflowIntervalR
+ 180 0090 00000000 		.word	rtcCountsPerSec
+ 181 0094 00000840 		.word	1074266112
+ 182              		.cfi_endproc
+ 183              	.LFE67:
+ 185              		.section	.text.clockInit,"ax",%progbits
+ 186              		.align	2
+ 187              		.global	clockInit
+ 188              		.thumb
+ 189              		.thumb_func
+ 191              	clockInit:
+ 192              	.LFB68:
+ 119:../drivers/clock.c **** 
+ 120:../drivers/clock.c **** 
+ 121:../drivers/clock.c **** 
+ 122:../drivers/clock.c **** /***************************************************************************//**
+ 123:../drivers/clock.c ****  * @brief Initialize system CLOCK
+ 124:../drivers/clock.c ****  *
+ 125:../drivers/clock.c ****  * @param[in] init
+ 126:../drivers/clock.c ****  *   CLOCK initialization structure with start date and RTC frequency.
+ 127:../drivers/clock.c ****  *
+ 128:../drivers/clock.c ****  ******************************************************************************/
+ 129:../drivers/clock.c **** void clockInit(Clock_Init_TypeDef *init)
+ 130:../drivers/clock.c **** {
+ 193              		.loc 2 130 0
+ 194              		.cfi_startproc
+ 195              		@ args = 0, pretend = 0, frame = 8
+ 196              		@ frame_needed = 0, uses_anonymous_args = 0
+ 197 0000 00B5     		push	{lr}
+ 198              		.cfi_def_cfa_offset 4
+ARM GAS  /tmp/ccALEiNQ.s 			page 8
+
+
+ 199              		.cfi_offset 14, -4
+ 200 0002 83B0     		sub	sp, sp, #12
+ 201              		.cfi_def_cfa_offset 16
+ 202 0004 0190     		str	r0, [sp, #4]
+ 131:../drivers/clock.c ****   /* Store configuration variables */
+ 132:../drivers/clock.c ****   rtcCountsPerSec = init->rtcCountsPerSec;
+ 203              		.loc 2 132 0
+ 204 0006 019B     		ldr	r3, [sp, #4]
+ 205 0008 5B6A     		ldr	r3, [r3, #36]
+ 206 000a 9AB2     		uxth	r2, r3
+ 207 000c 104B     		ldr	r3, .L9
+ 208 000e 1A80     		strh	r2, [r3]	@ movhi
+ 133:../drivers/clock.c **** 
+ 134:../drivers/clock.c ****   /* Reset overflow counter */
+ 135:../drivers/clock.c ****   rtcOverflowCounter = 0;
+ 209              		.loc 2 135 0
+ 210 0010 104B     		ldr	r3, .L9+4
+ 211 0012 0022     		movs	r2, #0
+ 212 0014 1A60     		str	r2, [r3]
+ 136:../drivers/clock.c **** 
+ 137:../drivers/clock.c ****   /* Calculate overflow interval based on RTC counter width and frequency */
+ 138:../drivers/clock.c ****   rtcOverflowInterval   = ((0x00FFFFFF+1) / rtcCountsPerSec);
+ 213              		.loc 2 138 0
+ 214 0016 0E4B     		ldr	r3, .L9
+ 215 0018 1B88     		ldrh	r3, [r3]
+ 216 001a 4FF08072 		mov	r2, #16777216
+ 217 001e 92FBF3F3 		sdiv	r3, r2, r3
+ 218 0022 1A46     		mov	r2, r3
+ 219 0024 0C4B     		ldr	r3, .L9+8
+ 220 0026 1A60     		str	r2, [r3]
+ 139:../drivers/clock.c ****   rtcOverflowIntervalR  = ((0x00FFFFFF+1) % rtcCountsPerSec); /* remainder */
+ 221              		.loc 2 139 0
+ 222 0028 094B     		ldr	r3, .L9
+ 223 002a 1B88     		ldrh	r3, [r3]
+ 224 002c 1A46     		mov	r2, r3
+ 225 002e 4FF08073 		mov	r3, #16777216
+ 226 0032 93FBF2F1 		sdiv	r1, r3, r2
+ 227 0036 02FB01F2 		mul	r2, r2, r1
+ 228 003a 9B1A     		subs	r3, r3, r2
+ 229 003c 1A46     		mov	r2, r3
+ 230 003e 074B     		ldr	r3, .L9+12
+ 231 0040 1A60     		str	r2, [r3]
+ 140:../drivers/clock.c **** 
+ 141:../drivers/clock.c ****   /* Set epoch offset */
+ 142:../drivers/clock.c ****   clockSetStartCalendar(&init->startDate);
+ 232              		.loc 2 142 0
+ 233 0042 019B     		ldr	r3, [sp, #4]
+ 234 0044 1846     		mov	r0, r3
+ 235 0046 FFF7FEFF 		bl	clockSetStartCalendar
+ 143:../drivers/clock.c **** }
+ 236              		.loc 2 143 0
+ 237 004a 03B0     		add	sp, sp, #12
+ 238              		@ sp needed
+ 239 004c 5DF804FB 		ldr	pc, [sp], #4
+ 240              	.L10:
+ 241              		.align	2
+ 242              	.L9:
+ARM GAS  /tmp/ccALEiNQ.s 			page 9
+
+
+ 243 0050 00000000 		.word	rtcCountsPerSec
+ 244 0054 00000000 		.word	rtcOverflowCounter
+ 245 0058 00000000 		.word	rtcOverflowInterval
+ 246 005c 00000000 		.word	rtcOverflowIntervalR
+ 247              		.cfi_endproc
+ 248              	.LFE68:
+ 250              		.section	.text.clockSetStartCalendar,"ax",%progbits
+ 251              		.align	2
+ 252              		.global	clockSetStartCalendar
+ 253              		.thumb
+ 254              		.thumb_func
+ 256              	clockSetStartCalendar:
+ 257              	.LFB69:
+ 144:../drivers/clock.c **** 
+ 145:../drivers/clock.c **** 
+ 146:../drivers/clock.c **** 
+ 147:../drivers/clock.c **** /***************************************************************************//**
+ 148:../drivers/clock.c ****  * @brief Set the epoch offset
+ 149:../drivers/clock.c ****  *
+ 150:../drivers/clock.c ****  * @param[in] timeptr
+ 151:../drivers/clock.c ****  *   Calendar struct which is converted to unix time and used as new epoch
+ 152:../drivers/clock.c ****  *   offset
+ 153:../drivers/clock.c ****  *
+ 154:../drivers/clock.c ****  ******************************************************************************/
+ 155:../drivers/clock.c **** void clockSetStartCalendar(struct tm * timeptr)
+ 156:../drivers/clock.c **** {
+ 258              		.loc 2 156 0
+ 259              		.cfi_startproc
+ 260              		@ args = 0, pretend = 0, frame = 8
+ 261              		@ frame_needed = 0, uses_anonymous_args = 0
+ 262 0000 00B5     		push	{lr}
+ 263              		.cfi_def_cfa_offset 4
+ 264              		.cfi_offset 14, -4
+ 265 0002 83B0     		sub	sp, sp, #12
+ 266              		.cfi_def_cfa_offset 16
+ 267 0004 0190     		str	r0, [sp, #4]
+ 157:../drivers/clock.c ****   timeptr->tm_isdst = 0;		// always 0 for mktime()
+ 268              		.loc 2 157 0
+ 269 0006 019B     		ldr	r3, [sp, #4]
+ 270 0008 0022     		movs	r2, #0
+ 271 000a 1A62     		str	r2, [r3, #32]
+ 158:../drivers/clock.c ****   g_rtcStartTime = mktime(timeptr);
+ 272              		.loc 2 158 0
+ 273 000c 0198     		ldr	r0, [sp, #4]
+ 274 000e FFF7FEFF 		bl	mktime
+ 275 0012 0246     		mov	r2, r0
+ 276 0014 024B     		ldr	r3, .L12
+ 277 0016 1A60     		str	r2, [r3]
+ 159:../drivers/clock.c **** }
+ 278              		.loc 2 159 0
+ 279 0018 03B0     		add	sp, sp, #12
+ 280              		@ sp needed
+ 281 001a 5DF804FB 		ldr	pc, [sp], #4
+ 282              	.L13:
+ 283 001e 00BF     		.align	2
+ 284              	.L12:
+ 285 0020 00000000 		.word	g_rtcStartTime
+ARM GAS  /tmp/ccALEiNQ.s 			page 10
+
+
+ 286              		.cfi_endproc
+ 287              	.LFE69:
+ 289              		.section	.text.clockSetStartTime,"ax",%progbits
+ 290              		.align	2
+ 291              		.global	clockSetStartTime
+ 292              		.thumb
+ 293              		.thumb_func
+ 295              	clockSetStartTime:
+ 296              	.LFB70:
+ 160:../drivers/clock.c **** 
+ 161:../drivers/clock.c **** 
+ 162:../drivers/clock.c **** 
+ 163:../drivers/clock.c **** /***************************************************************************//**
+ 164:../drivers/clock.c ****  * @brief Set the epoch offset
+ 165:../drivers/clock.c ****  *
+ 166:../drivers/clock.c ****  * @param[in] offset
+ 167:../drivers/clock.c ****  *   Unix time when the counter was started
+ 168:../drivers/clock.c ****  *
+ 169:../drivers/clock.c ****  ******************************************************************************/
+ 170:../drivers/clock.c **** void clockSetStartTime(time_t offset)
+ 171:../drivers/clock.c **** {
+ 297              		.loc 2 171 0
+ 298              		.cfi_startproc
+ 299              		@ args = 0, pretend = 0, frame = 8
+ 300              		@ frame_needed = 0, uses_anonymous_args = 0
+ 301              		@ link register save eliminated.
+ 302 0000 82B0     		sub	sp, sp, #8
+ 303              		.cfi_def_cfa_offset 8
+ 304 0002 0190     		str	r0, [sp, #4]
+ 172:../drivers/clock.c ****   g_rtcStartTime = offset;
+ 305              		.loc 2 172 0
+ 306 0004 024B     		ldr	r3, .L15
+ 307 0006 019A     		ldr	r2, [sp, #4]
+ 308 0008 1A60     		str	r2, [r3]
+ 173:../drivers/clock.c **** }
+ 309              		.loc 2 173 0
+ 310 000a 02B0     		add	sp, sp, #8
+ 311              		@ sp needed
+ 312 000c 7047     		bx	lr
+ 313              	.L16:
+ 314 000e 00BF     		.align	2
+ 315              	.L15:
+ 316 0010 00000000 		.word	g_rtcStartTime
+ 317              		.cfi_endproc
+ 318              	.LFE70:
+ 320              		.section	.text.clockGetStartTime,"ax",%progbits
+ 321              		.align	2
+ 322              		.global	clockGetStartTime
+ 323              		.thumb
+ 324              		.thumb_func
+ 326              	clockGetStartTime:
+ 327              	.LFB71:
+ 174:../drivers/clock.c **** 
+ 175:../drivers/clock.c **** 
+ 176:../drivers/clock.c **** 
+ 177:../drivers/clock.c **** /***************************************************************************//**
+ 178:../drivers/clock.c ****  * @brief Get the epoch offset
+ARM GAS  /tmp/ccALEiNQ.s 			page 11
+
+
+ 179:../drivers/clock.c ****  *
+ 180:../drivers/clock.c ****  * @return
+ 181:../drivers/clock.c ****  *   Unix time when the counter was started
+ 182:../drivers/clock.c ****  *
+ 183:../drivers/clock.c ****  ******************************************************************************/
+ 184:../drivers/clock.c **** time_t clockGetStartTime(void)
+ 185:../drivers/clock.c **** {
+ 328              		.loc 2 185 0
+ 329              		.cfi_startproc
+ 330              		@ args = 0, pretend = 0, frame = 0
+ 331              		@ frame_needed = 0, uses_anonymous_args = 0
+ 332              		@ link register save eliminated.
+ 186:../drivers/clock.c ****   return g_rtcStartTime;
+ 333              		.loc 2 186 0
+ 334 0000 014B     		ldr	r3, .L19
+ 335 0002 1B68     		ldr	r3, [r3]
+ 187:../drivers/clock.c **** }
+ 336              		.loc 2 187 0
+ 337 0004 1846     		mov	r0, r3
+ 338 0006 7047     		bx	lr
+ 339              	.L20:
+ 340              		.align	2
+ 341              	.L19:
+ 342 0008 00000000 		.word	g_rtcStartTime
+ 343              		.cfi_endproc
+ 344              	.LFE71:
+ 346              		.section	.text.clockOverflow,"ax",%progbits
+ 347              		.align	2
+ 348              		.global	clockOverflow
+ 349              		.thumb
+ 350              		.thumb_func
+ 352              	clockOverflow:
+ 353              	.LFB72:
+ 188:../drivers/clock.c **** 
+ 189:../drivers/clock.c **** 
+ 190:../drivers/clock.c **** 
+ 191:../drivers/clock.c **** 
+ 192:../drivers/clock.c **** 
+ 193:../drivers/clock.c **** 
+ 194:../drivers/clock.c **** /***************************************************************************//**
+ 195:../drivers/clock.c ****  * @brief Call this function on counter overflow to let CLOCK know how many
+ 196:../drivers/clock.c ****  *        overflows has occurred since start time
+ 197:../drivers/clock.c ****  *
+ 198:../drivers/clock.c ****  ******************************************************************************/
+ 199:../drivers/clock.c **** uint32_t clockOverflow(void)
+ 200:../drivers/clock.c **** {
+ 354              		.loc 2 200 0
+ 355              		.cfi_startproc
+ 356              		@ args = 0, pretend = 0, frame = 0
+ 357              		@ frame_needed = 0, uses_anonymous_args = 0
+ 358              		@ link register save eliminated.
+ 201:../drivers/clock.c ****   rtcOverflowCounter++;
+ 359              		.loc 2 201 0
+ 360 0000 044B     		ldr	r3, .L23
+ 361 0002 1B68     		ldr	r3, [r3]
+ 362 0004 5A1C     		adds	r2, r3, #1
+ 363 0006 034B     		ldr	r3, .L23
+ARM GAS  /tmp/ccALEiNQ.s 			page 12
+
+
+ 364 0008 1A60     		str	r2, [r3]
+ 202:../drivers/clock.c ****   return rtcOverflowCounter;
+ 365              		.loc 2 202 0
+ 366 000a 024B     		ldr	r3, .L23
+ 367 000c 1B68     		ldr	r3, [r3]
+ 203:../drivers/clock.c **** }
+ 368              		.loc 2 203 0
+ 369 000e 1846     		mov	r0, r3
+ 370 0010 7047     		bx	lr
+ 371              	.L24:
+ 372 0012 00BF     		.align	2
+ 373              	.L23:
+ 374 0014 00000000 		.word	rtcOverflowCounter
+ 375              		.cfi_endproc
+ 376              	.LFE72:
+ 378              		.section	.text.clockSetOverflowCounter,"ax",%progbits
+ 379              		.align	2
+ 380              		.global	clockSetOverflowCounter
+ 381              		.thumb
+ 382              		.thumb_func
+ 384              	clockSetOverflowCounter:
+ 385              	.LFB73:
+ 204:../drivers/clock.c **** 
+ 205:../drivers/clock.c **** 
+ 206:../drivers/clock.c **** 
+ 207:../drivers/clock.c **** /***************************************************************************//**
+ 208:../drivers/clock.c ****  * @brief Initialize the overflow counter.
+ 209:../drivers/clock.c ****  *
+ 210:../drivers/clock.c ****  ******************************************************************************/
+ 211:../drivers/clock.c **** void clockSetOverflowCounter(uint32_t of)
+ 212:../drivers/clock.c **** {
+ 386              		.loc 2 212 0
+ 387              		.cfi_startproc
+ 388              		@ args = 0, pretend = 0, frame = 8
+ 389              		@ frame_needed = 0, uses_anonymous_args = 0
+ 390              		@ link register save eliminated.
+ 391 0000 82B0     		sub	sp, sp, #8
+ 392              		.cfi_def_cfa_offset 8
+ 393 0002 0190     		str	r0, [sp, #4]
+ 213:../drivers/clock.c ****   rtcOverflowCounter = of;
+ 394              		.loc 2 213 0
+ 395 0004 024B     		ldr	r3, .L26
+ 396 0006 019A     		ldr	r2, [sp, #4]
+ 397 0008 1A60     		str	r2, [r3]
+ 214:../drivers/clock.c **** }
+ 398              		.loc 2 214 0
+ 399 000a 02B0     		add	sp, sp, #8
+ 400              		@ sp needed
+ 401 000c 7047     		bx	lr
+ 402              	.L27:
+ 403 000e 00BF     		.align	2
+ 404              	.L26:
+ 405 0010 00000000 		.word	rtcOverflowCounter
+ 406              		.cfi_endproc
+ 407              	.LFE73:
+ 409              		.section	.text.clockGetOverflowCounter,"ax",%progbits
+ 410              		.align	2
+ARM GAS  /tmp/ccALEiNQ.s 			page 13
+
+
+ 411              		.global	clockGetOverflowCounter
+ 412              		.thumb
+ 413              		.thumb_func
+ 415              	clockGetOverflowCounter:
+ 416              	.LFB74:
+ 215:../drivers/clock.c **** 
+ 216:../drivers/clock.c **** 
+ 217:../drivers/clock.c **** 
+ 218:../drivers/clock.c **** /***************************************************************************//**
+ 219:../drivers/clock.c ****  * @brief Get current value of the overflow counter.
+ 220:../drivers/clock.c ****  *
+ 221:../drivers/clock.c ****  ******************************************************************************/
+ 222:../drivers/clock.c **** uint32_t clockGetOverflowCounter(void)
+ 223:../drivers/clock.c **** {
+ 417              		.loc 2 223 0
+ 418              		.cfi_startproc
+ 419              		@ args = 0, pretend = 0, frame = 0
+ 420              		@ frame_needed = 0, uses_anonymous_args = 0
+ 421              		@ link register save eliminated.
+ 224:../drivers/clock.c ****   return rtcOverflowCounter;
+ 422              		.loc 2 224 0
+ 423 0000 014B     		ldr	r3, .L30
+ 424 0002 1B68     		ldr	r3, [r3]
+ 225:../drivers/clock.c **** }
+ 425              		.loc 2 225 0
+ 426 0004 1846     		mov	r0, r3
+ 427 0006 7047     		bx	lr
+ 428              	.L31:
+ 429              		.align	2
+ 430              	.L30:
+ 431 0008 00000000 		.word	rtcOverflowCounter
+ 432              		.cfi_endproc
+ 433              	.LFE74:
+ 435              		.text
+ 436              	.Letext0:
+ 437              		.file 3 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 438              		.file 4 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/sys/types.h"
+ 439              		.file 5 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/time.h"
+ 440              		.file 6 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 441              		.file 7 "../Device/EnergyMicro/EFM32G/Include/efm32g_rtc.h"
+ 442              		.file 8 "../drivers/clock.h"
+ 443              		.file 9 "../CMSIS/Include/core_cm3.h"

@@ -1,0 +1,2293 @@
+ARM GAS  /tmp/ccy9eJxb.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"em_i2c.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.BITBAND_Peripheral,"ax",%progbits
+  19              		.align	2
+  20              		.thumb
+  21              		.thumb_func
+  23              	BITBAND_Peripheral:
+  24              	.LFB66:
+  25              		.file 1 "../emlib/inc/em_bitband.h"
+   1:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+   2:../emlib/inc/em_bitband.h ****  * @file
+   3:../emlib/inc/em_bitband.h ****  * @brief Bitband Peripheral API
+   4:../emlib/inc/em_bitband.h ****  * @author Energy Micro AS
+   5:../emlib/inc/em_bitband.h ****  * @version 3.20.2
+   6:../emlib/inc/em_bitband.h ****  *******************************************************************************
+   7:../emlib/inc/em_bitband.h ****  * @section License
+   8:../emlib/inc/em_bitband.h ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/inc/em_bitband.h ****  *******************************************************************************
+  10:../emlib/inc/em_bitband.h ****  *
+  11:../emlib/inc/em_bitband.h ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/inc/em_bitband.h ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/inc/em_bitband.h ****  * freely, subject to the following restrictions:
+  14:../emlib/inc/em_bitband.h ****  *
+  15:../emlib/inc/em_bitband.h ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/inc/em_bitband.h ****  *    claim that you wrote the original software.
+  17:../emlib/inc/em_bitband.h ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/inc/em_bitband.h ****  *    misrepresented as being the original software.
+  19:../emlib/inc/em_bitband.h ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/inc/em_bitband.h ****  *
+  21:../emlib/inc/em_bitband.h ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/inc/em_bitband.h ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/inc/em_bitband.h ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/inc/em_bitband.h ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/inc/em_bitband.h ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/inc/em_bitband.h ****  * of any proprietary rights of a third party.
+  27:../emlib/inc/em_bitband.h ****  *
+  28:../emlib/inc/em_bitband.h ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/inc/em_bitband.h ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/inc/em_bitband.h ****  * arising from your use of this Software.
+  31:../emlib/inc/em_bitband.h ****  *
+  32:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  33:../emlib/inc/em_bitband.h **** #ifndef __EM_BITBAND_H
+ARM GAS  /tmp/ccy9eJxb.s 			page 2
+
+
+  34:../emlib/inc/em_bitband.h **** #define __EM_BITBAND_H
+  35:../emlib/inc/em_bitband.h **** 
+  36:../emlib/inc/em_bitband.h **** #include "em_device.h"
+  37:../emlib/inc/em_bitband.h **** #ifdef __cplusplus
+  38:../emlib/inc/em_bitband.h **** extern "C" {
+  39:../emlib/inc/em_bitband.h **** #endif
+  40:../emlib/inc/em_bitband.h **** 
+  41:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+  42:../emlib/inc/em_bitband.h ****  * @addtogroup EM_Library
+  43:../emlib/inc/em_bitband.h ****  * @{
+  44:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  45:../emlib/inc/em_bitband.h **** 
+  46:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+  47:../emlib/inc/em_bitband.h ****  * @addtogroup BITBAND
+  48:../emlib/inc/em_bitband.h ****  * @brief BITBAND Peripheral API
+  49:../emlib/inc/em_bitband.h ****  * @{
+  50:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  51:../emlib/inc/em_bitband.h **** 
+  52:../emlib/inc/em_bitband.h **** /***************************************************************************//**
+  53:../emlib/inc/em_bitband.h ****  * @brief
+  54:../emlib/inc/em_bitband.h ****  *   Perform bit-band operation on peripheral memory location.
+  55:../emlib/inc/em_bitband.h ****  *
+  56:../emlib/inc/em_bitband.h ****  * @details
+  57:../emlib/inc/em_bitband.h ****  *   Bit-banding provides atomic read-modify-write cycle for single bit
+  58:../emlib/inc/em_bitband.h ****  *   modification. Please refer to the reference manual for further details
+  59:../emlib/inc/em_bitband.h ****  *   about bit-banding.
+  60:../emlib/inc/em_bitband.h ****  *
+  61:../emlib/inc/em_bitband.h ****  * @note
+  62:../emlib/inc/em_bitband.h ****  *   This function is only atomic on cores which fully support bitbanding.
+  63:../emlib/inc/em_bitband.h ****  *
+  64:../emlib/inc/em_bitband.h ****  * @param[in] addr Peripheral address location to modify bit in.
+  65:../emlib/inc/em_bitband.h ****  *
+  66:../emlib/inc/em_bitband.h ****  * @param[in] bit Bit position to modify, 0-31.
+  67:../emlib/inc/em_bitband.h ****  *
+  68:../emlib/inc/em_bitband.h ****  * @param[in] val Value to set bit to, 0 or 1.
+  69:../emlib/inc/em_bitband.h ****  ******************************************************************************/
+  70:../emlib/inc/em_bitband.h **** __STATIC_INLINE void BITBAND_Peripheral(volatile uint32_t *addr,
+  71:../emlib/inc/em_bitband.h ****                                         uint32_t bit,
+  72:../emlib/inc/em_bitband.h ****                                         uint32_t val)
+  73:../emlib/inc/em_bitband.h **** {
+  26              		.loc 1 73 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 24
+  29              		@ frame_needed = 0, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 86B0     		sub	sp, sp, #24
+  32              		.cfi_def_cfa_offset 24
+  33 0002 0390     		str	r0, [sp, #12]
+  34 0004 0291     		str	r1, [sp, #8]
+  35 0006 0192     		str	r2, [sp, #4]
+  74:../emlib/inc/em_bitband.h **** #if defined(BITBAND_PER_BASE)
+  75:../emlib/inc/em_bitband.h ****   uint32_t tmp =
+  76:../emlib/inc/em_bitband.h ****     BITBAND_PER_BASE + (((uint32_t)addr - PER_MEM_BASE) * 32) + (bit * 4);
+  36              		.loc 1 76 0
+  37 0008 039B     		ldr	r3, [sp, #12]
+  38 000a 03F10473 		add	r3, r3, #34603008
+  39 000e DA00     		lsls	r2, r3, #3
+ARM GAS  /tmp/ccy9eJxb.s 			page 3
+
+
+  40 0010 029B     		ldr	r3, [sp, #8]
+  41 0012 1344     		add	r3, r3, r2
+  75:../emlib/inc/em_bitband.h ****   uint32_t tmp =
+  42              		.loc 1 75 0
+  43 0014 9B00     		lsls	r3, r3, #2
+  44 0016 0593     		str	r3, [sp, #20]
+  77:../emlib/inc/em_bitband.h **** 
+  78:../emlib/inc/em_bitband.h ****   *((volatile uint32_t *)tmp) = (uint32_t)val;
+  45              		.loc 1 78 0
+  46 0018 059B     		ldr	r3, [sp, #20]
+  47 001a 019A     		ldr	r2, [sp, #4]
+  48 001c 1A60     		str	r2, [r3]
+  79:../emlib/inc/em_bitband.h **** #else
+  80:../emlib/inc/em_bitband.h ****   uint32_t tmp = *addr;
+  81:../emlib/inc/em_bitband.h ****   /* Make sure val is not more than 1, because we only want to set one bit. */
+  82:../emlib/inc/em_bitband.h ****   val &= 0x1;
+  83:../emlib/inc/em_bitband.h ****   *addr = (tmp & ~(1 << bit)) | (val << bit);
+  84:../emlib/inc/em_bitband.h **** #endif /* defined(BITBAND_PER_BASE) */
+  85:../emlib/inc/em_bitband.h **** }
+  49              		.loc 1 85 0
+  50 001e 06B0     		add	sp, sp, #24
+  51              		@ sp needed
+  52 0020 7047     		bx	lr
+  53              		.cfi_endproc
+  54              	.LFE66:
+  56 0022 00BF     		.section	.rodata.i2cNSum,"a",%progbits
+  57              		.align	2
+  60              	i2cNSum:
+  61 0000 08       		.byte	8
+  62 0001 09       		.byte	9
+  63 0002 11       		.byte	17
+  64 0003 08       		.byte	8
+  65              		.section	.bss.i2cTransfer,"aw",%nobits
+  66              		.align	2
+  69              	i2cTransfer:
+  70 0000 00000000 		.space	12
+  70      00000000 
+  70      00000000 
+  71              		.section	.text.I2C_BusFreqGet,"ax",%progbits
+  72              		.align	2
+  73              		.global	I2C_BusFreqGet
+  74              		.thumb
+  75              		.thumb_func
+  77              	I2C_BusFreqGet:
+  78              	.LFB80:
+  79              		.file 2 "../emlib/src/em_i2c.c"
+   1:../emlib/src/em_i2c.c **** /***************************************************************************//**
+   2:../emlib/src/em_i2c.c ****  * @file
+   3:../emlib/src/em_i2c.c ****  * @brief Inter-integrated Circuit (I2C) Peripheral API
+   4:../emlib/src/em_i2c.c ****  * @author Energy Micro AS
+   5:../emlib/src/em_i2c.c ****  * @version 3.20.2
+   6:../emlib/src/em_i2c.c ****  *******************************************************************************
+   7:../emlib/src/em_i2c.c ****  * @section License
+   8:../emlib/src/em_i2c.c ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/src/em_i2c.c ****  *******************************************************************************
+  10:../emlib/src/em_i2c.c ****  *
+  11:../emlib/src/em_i2c.c ****  * Permission is granted to anyone to use this software for any purpose,
+ARM GAS  /tmp/ccy9eJxb.s 			page 4
+
+
+  12:../emlib/src/em_i2c.c ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/src/em_i2c.c ****  * freely, subject to the following restrictions:
+  14:../emlib/src/em_i2c.c ****  *
+  15:../emlib/src/em_i2c.c ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/src/em_i2c.c ****  *    claim that you wrote the original software.
+  17:../emlib/src/em_i2c.c ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/src/em_i2c.c ****  *    misrepresented as being the original software.
+  19:../emlib/src/em_i2c.c ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/src/em_i2c.c ****  *
+  21:../emlib/src/em_i2c.c ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/src/em_i2c.c ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/src/em_i2c.c ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/src/em_i2c.c ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/src/em_i2c.c ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/src/em_i2c.c ****  * of any proprietary rights of a third party.
+  27:../emlib/src/em_i2c.c ****  *
+  28:../emlib/src/em_i2c.c ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/src/em_i2c.c ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/src/em_i2c.c ****  * arising from your use of this Software.
+  31:../emlib/src/em_i2c.c ****  *
+  32:../emlib/src/em_i2c.c ****  ******************************************************************************/
+  33:../emlib/src/em_i2c.c **** #include "em_i2c.h"
+  34:../emlib/src/em_i2c.c **** #if defined(I2C_COUNT) && (I2C_COUNT > 0)
+  35:../emlib/src/em_i2c.c **** 
+  36:../emlib/src/em_i2c.c **** #include "em_cmu.h"
+  37:../emlib/src/em_i2c.c **** #include "em_bitband.h"
+  38:../emlib/src/em_i2c.c **** #include "em_assert.h"
+  39:../emlib/src/em_i2c.c **** 
+  40:../emlib/src/em_i2c.c **** /***************************************************************************//**
+  41:../emlib/src/em_i2c.c ****  * @addtogroup EM_Library
+  42:../emlib/src/em_i2c.c ****  * @{
+  43:../emlib/src/em_i2c.c ****  ******************************************************************************/
+  44:../emlib/src/em_i2c.c **** 
+  45:../emlib/src/em_i2c.c **** /***************************************************************************//**
+  46:../emlib/src/em_i2c.c ****  * @addtogroup I2C
+  47:../emlib/src/em_i2c.c ****  * @brief Inter-integrated Circuit (I2C) Peripheral API
+  48:../emlib/src/em_i2c.c ****  * @{
+  49:../emlib/src/em_i2c.c ****  ******************************************************************************/
+  50:../emlib/src/em_i2c.c **** 
+  51:../emlib/src/em_i2c.c **** /*******************************************************************************
+  52:../emlib/src/em_i2c.c ****  *******************************   DEFINES   ***********************************
+  53:../emlib/src/em_i2c.c ****  ******************************************************************************/
+  54:../emlib/src/em_i2c.c **** 
+  55:../emlib/src/em_i2c.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  56:../emlib/src/em_i2c.c **** 
+  57:../emlib/src/em_i2c.c **** #if (I2C_COUNT == 1)
+  58:../emlib/src/em_i2c.c **** /** Validation of I2C register block pointer reference for assert statements. */
+  59:../emlib/src/em_i2c.c **** #define I2C_REF_VALID(ref)    ((ref) == I2C0)
+  60:../emlib/src/em_i2c.c **** 
+  61:../emlib/src/em_i2c.c **** #elif (I2C_COUNT == 2)
+  62:../emlib/src/em_i2c.c **** /** Validation of I2C register block pointer reference for assert statements. */
+  63:../emlib/src/em_i2c.c **** #define I2C_REF_VALID(ref)    ((ref == I2C0) || (ref == I2C1))
+  64:../emlib/src/em_i2c.c **** #endif
+  65:../emlib/src/em_i2c.c **** 
+  66:../emlib/src/em_i2c.c **** /** Error flags indicating I2C transfer has failed somehow. */
+  67:../emlib/src/em_i2c.c **** /* Notice that I2C_IF_TXOF (transmit overflow) is not really possible with */
+  68:../emlib/src/em_i2c.c **** /* this SW supporting master mode. Likewise for I2C_IF_RXUF (receive underflow) */
+ARM GAS  /tmp/ccy9eJxb.s 			page 5
+
+
+  69:../emlib/src/em_i2c.c **** /* RXUF is only likely to occur with this SW if using a debugger peeking into */
+  70:../emlib/src/em_i2c.c **** /* RXDATA register. Thus, we ignore those types of fault. */
+  71:../emlib/src/em_i2c.c **** #define I2C_IF_ERRORS    (I2C_IF_BUSERR | I2C_IF_ARBLOST)
+  72:../emlib/src/em_i2c.c **** 
+  73:../emlib/src/em_i2c.c **** /** @endcond */
+  74:../emlib/src/em_i2c.c **** 
+  75:../emlib/src/em_i2c.c **** /*******************************************************************************
+  76:../emlib/src/em_i2c.c ****  ********************************   ENUMS   ************************************
+  77:../emlib/src/em_i2c.c ****  ******************************************************************************/
+  78:../emlib/src/em_i2c.c **** 
+  79:../emlib/src/em_i2c.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  80:../emlib/src/em_i2c.c **** 
+  81:../emlib/src/em_i2c.c **** /** Master mode transfer states. */
+  82:../emlib/src/em_i2c.c **** typedef enum
+  83:../emlib/src/em_i2c.c **** {
+  84:../emlib/src/em_i2c.c ****   i2cStateStartAddrSend,       /**< Send start + (first part of) address. */
+  85:../emlib/src/em_i2c.c ****   i2cStateAddrWFAckNack,       /**< Wait for ACK/NACK on (first part of) address. */
+  86:../emlib/src/em_i2c.c ****   i2cStateAddrWF2ndAckNack,    /**< Wait for ACK/NACK on second part of 10 bit address. */
+  87:../emlib/src/em_i2c.c ****   i2cStateRStartAddrSend,      /**< Send repeated start + (first part of) address. */
+  88:../emlib/src/em_i2c.c ****   i2cStateRAddrWFAckNack,      /**< Wait for ACK/NACK on address sent after repeated start. */
+  89:../emlib/src/em_i2c.c ****   i2cStateDataSend,            /**< Send data. */
+  90:../emlib/src/em_i2c.c ****   i2cStateDataWFAckNack,       /**< Wait for ACK/NACK on data sent. */
+  91:../emlib/src/em_i2c.c ****   i2cStateWFData,              /**< Wait for data. */
+  92:../emlib/src/em_i2c.c ****   i2cStateWFStopSent,          /**< Wait for STOP to have been transmitted. */
+  93:../emlib/src/em_i2c.c ****   i2cStateDone                 /**< Transfer completed successfully. */
+  94:../emlib/src/em_i2c.c **** } I2C_TransferState_TypeDef;
+  95:../emlib/src/em_i2c.c **** 
+  96:../emlib/src/em_i2c.c **** /** @endcond */
+  97:../emlib/src/em_i2c.c **** 
+  98:../emlib/src/em_i2c.c **** /*******************************************************************************
+  99:../emlib/src/em_i2c.c ****  *******************************   STRUCTS   ***********************************
+ 100:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 101:../emlib/src/em_i2c.c **** 
+ 102:../emlib/src/em_i2c.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+ 103:../emlib/src/em_i2c.c **** 
+ 104:../emlib/src/em_i2c.c **** /** Structure used to store state information on an ongoing master mode transfer. */
+ 105:../emlib/src/em_i2c.c **** typedef struct
+ 106:../emlib/src/em_i2c.c **** {
+ 107:../emlib/src/em_i2c.c ****   /** Current state. */
+ 108:../emlib/src/em_i2c.c ****   I2C_TransferState_TypeDef  state;
+ 109:../emlib/src/em_i2c.c **** 
+ 110:../emlib/src/em_i2c.c ****   /** Result return code. */
+ 111:../emlib/src/em_i2c.c ****   I2C_TransferReturn_TypeDef result;
+ 112:../emlib/src/em_i2c.c **** 
+ 113:../emlib/src/em_i2c.c ****   /** Offset in current sequence buffer. */
+ 114:../emlib/src/em_i2c.c ****   uint16_t                   offset;
+ 115:../emlib/src/em_i2c.c **** 
+ 116:../emlib/src/em_i2c.c ****   /* Index to current sequence buffer in use. */
+ 117:../emlib/src/em_i2c.c ****   uint8_t                    bufIndx;
+ 118:../emlib/src/em_i2c.c **** 
+ 119:../emlib/src/em_i2c.c ****   /** Reference to I2C transfer sequence definition provided by user. */
+ 120:../emlib/src/em_i2c.c ****   I2C_TransferSeq_TypeDef    *seq;
+ 121:../emlib/src/em_i2c.c **** } I2C_Transfer_TypeDef;
+ 122:../emlib/src/em_i2c.c **** 
+ 123:../emlib/src/em_i2c.c **** /** @endcond */
+ 124:../emlib/src/em_i2c.c **** 
+ 125:../emlib/src/em_i2c.c **** /*******************************************************************************
+ARM GAS  /tmp/ccy9eJxb.s 			page 6
+
+
+ 126:../emlib/src/em_i2c.c ****  *****************************   LOCAL DATA   *******^**************************
+ 127:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 128:../emlib/src/em_i2c.c **** 
+ 129:../emlib/src/em_i2c.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+ 130:../emlib/src/em_i2c.c **** 
+ 131:../emlib/src/em_i2c.c **** /**
+ 132:../emlib/src/em_i2c.c ****  * Lookup table for Nlow + Nhigh setting defined by CLHR. Set undefined
+ 133:../emlib/src/em_i2c.c ****  * index (0x3) to reflect default setting just in case.
+ 134:../emlib/src/em_i2c.c ****  */
+ 135:../emlib/src/em_i2c.c **** static const uint8_t i2cNSum[] = { 4 + 4, 6 + 3, 11 + 6, 4 + 4 };
+ 136:../emlib/src/em_i2c.c **** 
+ 137:../emlib/src/em_i2c.c **** /** Transfer state info for ongoing master mode transfer */
+ 138:../emlib/src/em_i2c.c **** static I2C_Transfer_TypeDef i2cTransfer[I2C_COUNT];
+ 139:../emlib/src/em_i2c.c **** 
+ 140:../emlib/src/em_i2c.c **** /** @endcond */
+ 141:../emlib/src/em_i2c.c **** 
+ 142:../emlib/src/em_i2c.c **** /*******************************************************************************
+ 143:../emlib/src/em_i2c.c ****  **************************   GLOBAL FUNCTIONS   *******************************
+ 144:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 145:../emlib/src/em_i2c.c **** 
+ 146:../emlib/src/em_i2c.c **** /***************************************************************************//**
+ 147:../emlib/src/em_i2c.c ****  * @brief
+ 148:../emlib/src/em_i2c.c ****  *   Get current configured I2C bus frequency.
+ 149:../emlib/src/em_i2c.c ****  *
+ 150:../emlib/src/em_i2c.c ****  * @details
+ 151:../emlib/src/em_i2c.c ****  *   This frequency is only of relevance when acting as master.
+ 152:../emlib/src/em_i2c.c ****  *
+ 153:../emlib/src/em_i2c.c ****  * @param[in] i2c
+ 154:../emlib/src/em_i2c.c ****  *   Pointer to I2C peripheral register block.
+ 155:../emlib/src/em_i2c.c ****  *
+ 156:../emlib/src/em_i2c.c ****  * @return
+ 157:../emlib/src/em_i2c.c ****  *   Current I2C frequency in Hz.
+ 158:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 159:../emlib/src/em_i2c.c **** uint32_t I2C_BusFreqGet(I2C_TypeDef *i2c)
+ 160:../emlib/src/em_i2c.c **** {
+  80              		.loc 2 160 0
+  81              		.cfi_startproc
+  82              		@ args = 0, pretend = 0, frame = 16
+  83              		@ frame_needed = 0, uses_anonymous_args = 0
+  84 0000 00B5     		push	{lr}
+  85              		.cfi_def_cfa_offset 4
+  86              		.cfi_offset 14, -4
+  87 0002 85B0     		sub	sp, sp, #20
+  88              		.cfi_def_cfa_offset 24
+  89 0004 0190     		str	r0, [sp, #4]
+ 161:../emlib/src/em_i2c.c ****   uint32_t hfperclk;
+ 162:../emlib/src/em_i2c.c ****   uint32_t n;
+ 163:../emlib/src/em_i2c.c **** 
+ 164:../emlib/src/em_i2c.c ****   /* Max frequency is given by fSCL = fHFPERCLK/((Nlow + Nhigh)(DIV + 1) + 4) */
+ 165:../emlib/src/em_i2c.c ****   hfperclk = CMU_ClockFreqGet(cmuClock_HFPER);
+  90              		.loc 2 165 0
+  91 0006 0D48     		ldr	r0, .L4
+  92 0008 FFF7FEFF 		bl	CMU_ClockFreqGet
+  93 000c 0390     		str	r0, [sp, #12]
+ 166:../emlib/src/em_i2c.c ****   n        = (uint32_t)(i2cNSum[(i2c->CTRL & _I2C_CTRL_CLHR_MASK) >> _I2C_CTRL_CLHR_SHIFT]);
+  94              		.loc 2 166 0
+  95 000e 019B     		ldr	r3, [sp, #4]
+ARM GAS  /tmp/ccy9eJxb.s 			page 7
+
+
+  96 0010 1B68     		ldr	r3, [r3]
+  97 0012 03F44073 		and	r3, r3, #768
+  98 0016 1B0A     		lsrs	r3, r3, #8
+  99 0018 094A     		ldr	r2, .L4+4
+ 100 001a D35C     		ldrb	r3, [r2, r3]	@ zero_extendqisi2
+ 101 001c 0293     		str	r3, [sp, #8]
+ 167:../emlib/src/em_i2c.c **** 
+ 168:../emlib/src/em_i2c.c ****   return(hfperclk / ((n * (i2c->CLKDIV + 1)) + 4));
+ 102              		.loc 2 168 0
+ 103 001e 019B     		ldr	r3, [sp, #4]
+ 104 0020 1B69     		ldr	r3, [r3, #16]
+ 105 0022 0133     		adds	r3, r3, #1
+ 106 0024 029A     		ldr	r2, [sp, #8]
+ 107 0026 02FB03F3 		mul	r3, r2, r3
+ 108 002a 0433     		adds	r3, r3, #4
+ 109 002c 039A     		ldr	r2, [sp, #12]
+ 110 002e B2FBF3F3 		udiv	r3, r2, r3
+ 169:../emlib/src/em_i2c.c **** }
+ 111              		.loc 2 169 0
+ 112 0032 1846     		mov	r0, r3
+ 113 0034 05B0     		add	sp, sp, #20
+ 114              		@ sp needed
+ 115 0036 5DF804FB 		ldr	pc, [sp], #4
+ 116              	.L5:
+ 117 003a 00BF     		.align	2
+ 118              	.L4:
+ 119 003c 10810200 		.word	164112
+ 120 0040 00000000 		.word	i2cNSum
+ 121              		.cfi_endproc
+ 122              	.LFE80:
+ 124              		.section	.rodata
+ 125              		.align	2
+ 126              	.LC0:
+ 127 0000 2E2E2F65 		.ascii	"../emlib/src/em_i2c.c\000"
+ 127      6D6C6962 
+ 127      2F737263 
+ 127      2F656D5F 
+ 127      6932632E 
+ 128 0016 0000     		.section	.text.I2C_BusFreqSet,"ax",%progbits
+ 129              		.align	2
+ 130              		.global	I2C_BusFreqSet
+ 131              		.thumb
+ 132              		.thumb_func
+ 134              	I2C_BusFreqSet:
+ 135              	.LFB81:
+ 170:../emlib/src/em_i2c.c **** 
+ 171:../emlib/src/em_i2c.c **** 
+ 172:../emlib/src/em_i2c.c **** /***************************************************************************//**
+ 173:../emlib/src/em_i2c.c ****  * @brief
+ 174:../emlib/src/em_i2c.c ****  *   Set I2C bus frequency.
+ 175:../emlib/src/em_i2c.c ****  *
+ 176:../emlib/src/em_i2c.c ****  * @details
+ 177:../emlib/src/em_i2c.c ****  *   The bus frequency is only of relevance when acting as a master. The bus
+ 178:../emlib/src/em_i2c.c ****  *   frequency should not be set higher than the max frequency accepted by the
+ 179:../emlib/src/em_i2c.c ****  *   slowest device on the bus.
+ 180:../emlib/src/em_i2c.c ****  *
+ 181:../emlib/src/em_i2c.c ****  *   Notice that due to asymmetric requirements on low and high I2C clock
+ARM GAS  /tmp/ccy9eJxb.s 			page 8
+
+
+ 182:../emlib/src/em_i2c.c ****  *   cycles by the I2C specification, the actual max frequency allowed in order
+ 183:../emlib/src/em_i2c.c ****  *   to comply with the specification may be somewhat lower than expected.
+ 184:../emlib/src/em_i2c.c ****  *
+ 185:../emlib/src/em_i2c.c ****  *   Please refer to the reference manual, details on I2C clock generation,
+ 186:../emlib/src/em_i2c.c ****  *   for max allowed theoretical frequencies for different modes.
+ 187:../emlib/src/em_i2c.c ****  *
+ 188:../emlib/src/em_i2c.c ****  * @param[in] i2c
+ 189:../emlib/src/em_i2c.c ****  *   Pointer to I2C peripheral register block.
+ 190:../emlib/src/em_i2c.c ****  *
+ 191:../emlib/src/em_i2c.c ****  * @param[in] refFreq
+ 192:../emlib/src/em_i2c.c ****  *   I2C reference clock frequency in Hz that will be used. If set to 0,
+ 193:../emlib/src/em_i2c.c ****  *   the currently configured reference clock is assumed. Setting it to a higher
+ 194:../emlib/src/em_i2c.c ****  *   than actual configured value only has the consequence of reducing the real
+ 195:../emlib/src/em_i2c.c ****  *   I2C frequency.
+ 196:../emlib/src/em_i2c.c ****  *
+ 197:../emlib/src/em_i2c.c ****  * @param[in] freq
+ 198:../emlib/src/em_i2c.c ****  *   Bus frequency to set (actual bus speed may be lower due to integer
+ 199:../emlib/src/em_i2c.c ****  *   prescaling). Safe (according to I2C specification) max frequencies for
+ 200:../emlib/src/em_i2c.c ****  *   standard, fast and fast+ modes are available using I2C_FREQ_ defines.
+ 201:../emlib/src/em_i2c.c ****  *   (Using I2C_FREQ_ defines requires corresponding setting of @p type.)
+ 202:../emlib/src/em_i2c.c ****  *   Slowest slave device on bus must always be considered.
+ 203:../emlib/src/em_i2c.c ****  *
+ 204:../emlib/src/em_i2c.c ****  * @param[in] type
+ 205:../emlib/src/em_i2c.c ****  *   Clock low to high ratio type to use. If not using i2cClockHLRStandard,
+ 206:../emlib/src/em_i2c.c ****  *   make sure all devices on the bus support the specified mode. Using a
+ 207:../emlib/src/em_i2c.c ****  *   non-standard ratio is useful to achieve higher bus clock in fast and
+ 208:../emlib/src/em_i2c.c ****  *   fast+ modes.
+ 209:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 210:../emlib/src/em_i2c.c **** void I2C_BusFreqSet(I2C_TypeDef *i2c,
+ 211:../emlib/src/em_i2c.c ****                     uint32_t refFreq,
+ 212:../emlib/src/em_i2c.c ****                     uint32_t freq,
+ 213:../emlib/src/em_i2c.c ****                     I2C_ClockHLR_TypeDef type)
+ 214:../emlib/src/em_i2c.c **** {
+ 136              		.loc 2 214 0
+ 137              		.cfi_startproc
+ 138              		@ args = 0, pretend = 0, frame = 24
+ 139              		@ frame_needed = 0, uses_anonymous_args = 0
+ 140 0000 00B5     		push	{lr}
+ 141              		.cfi_def_cfa_offset 4
+ 142              		.cfi_offset 14, -4
+ 143 0002 87B0     		sub	sp, sp, #28
+ 144              		.cfi_def_cfa_offset 32
+ 145 0004 0390     		str	r0, [sp, #12]
+ 146 0006 0291     		str	r1, [sp, #8]
+ 147 0008 0192     		str	r2, [sp, #4]
+ 148 000a 8DF80330 		strb	r3, [sp, #3]
+ 215:../emlib/src/em_i2c.c ****   uint32_t n;
+ 216:../emlib/src/em_i2c.c ****   uint32_t div;
+ 217:../emlib/src/em_i2c.c **** 
+ 218:../emlib/src/em_i2c.c ****   /* Avoid divide by 0 */
+ 219:../emlib/src/em_i2c.c ****   EFM_ASSERT(freq);
+ 149              		.loc 2 219 0
+ 150 000e 019B     		ldr	r3, [sp, #4]
+ 151 0010 002B     		cmp	r3, #0
+ 152 0012 03D1     		bne	.L7
+ 153              		.loc 2 219 0 is_stmt 0 discriminator 1
+ 154 0014 2248     		ldr	r0, .L13
+ARM GAS  /tmp/ccy9eJxb.s 			page 9
+
+
+ 155 0016 DB21     		movs	r1, #219
+ 156 0018 FFF7FEFF 		bl	assertEFM
+ 157              	.L7:
+ 220:../emlib/src/em_i2c.c ****   if (!freq)
+ 158              		.loc 2 220 0 is_stmt 1
+ 159 001c 019B     		ldr	r3, [sp, #4]
+ 160 001e 002B     		cmp	r3, #0
+ 161 0020 00D1     		bne	.L8
+ 221:../emlib/src/em_i2c.c ****   {
+ 222:../emlib/src/em_i2c.c ****     return;
+ 162              		.loc 2 222 0
+ 163 0022 3AE0     		b	.L6
+ 164              	.L8:
+ 223:../emlib/src/em_i2c.c ****   }
+ 224:../emlib/src/em_i2c.c **** 
+ 225:../emlib/src/em_i2c.c ****   /* Set the CLHR (clock low to high ratio). */
+ 226:../emlib/src/em_i2c.c ****   i2c->CTRL &= ~_I2C_CTRL_CLHR_MASK;
+ 165              		.loc 2 226 0
+ 166 0024 039B     		ldr	r3, [sp, #12]
+ 167 0026 1B68     		ldr	r3, [r3]
+ 168 0028 23F44072 		bic	r2, r3, #768
+ 169 002c 039B     		ldr	r3, [sp, #12]
+ 170 002e 1A60     		str	r2, [r3]
+ 227:../emlib/src/em_i2c.c ****   i2c->CTRL |= type <<_I2C_CTRL_CLHR_SHIFT;
+ 171              		.loc 2 227 0
+ 172 0030 039B     		ldr	r3, [sp, #12]
+ 173 0032 1A68     		ldr	r2, [r3]
+ 174 0034 9DF80330 		ldrb	r3, [sp, #3]	@ zero_extendqisi2
+ 175 0038 1B02     		lsls	r3, r3, #8
+ 176 003a 1A43     		orrs	r2, r2, r3
+ 177 003c 039B     		ldr	r3, [sp, #12]
+ 178 003e 1A60     		str	r2, [r3]
+ 228:../emlib/src/em_i2c.c **** 
+ 229:../emlib/src/em_i2c.c ****   /* Frequency is given by fSCL = fHFPERCLK/((Nlow + Nhigh)(DIV + 1) + 4), thus */
+ 230:../emlib/src/em_i2c.c ****   /* DIV = ((fHFPERCLK - 4fSCL)/((Nlow + Nhigh)fSCL)) - 1 */
+ 231:../emlib/src/em_i2c.c **** 
+ 232:../emlib/src/em_i2c.c ****   if (!refFreq)
+ 179              		.loc 2 232 0
+ 180 0040 029B     		ldr	r3, [sp, #8]
+ 181 0042 002B     		cmp	r3, #0
+ 182 0044 03D1     		bne	.L10
+ 233:../emlib/src/em_i2c.c ****   {
+ 234:../emlib/src/em_i2c.c ****     refFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+ 183              		.loc 2 234 0
+ 184 0046 1748     		ldr	r0, .L13+4
+ 185 0048 FFF7FEFF 		bl	CMU_ClockFreqGet
+ 186 004c 0290     		str	r0, [sp, #8]
+ 187              	.L10:
+ 235:../emlib/src/em_i2c.c ****   }
+ 236:../emlib/src/em_i2c.c ****   n = (uint32_t)(i2cNSum[type]);
+ 188              		.loc 2 236 0
+ 189 004e 9DF80330 		ldrb	r3, [sp, #3]	@ zero_extendqisi2
+ 190 0052 154A     		ldr	r2, .L13+8
+ 191 0054 D35C     		ldrb	r3, [r2, r3]	@ zero_extendqisi2
+ 192 0056 0493     		str	r3, [sp, #16]
+ 237:../emlib/src/em_i2c.c **** 
+ 238:../emlib/src/em_i2c.c ****   div = (refFreq - (4 * freq)) / (n * freq);
+ARM GAS  /tmp/ccy9eJxb.s 			page 10
+
+
+ 193              		.loc 2 238 0
+ 194 0058 019B     		ldr	r3, [sp, #4]
+ 195 005a 9B00     		lsls	r3, r3, #2
+ 196 005c 029A     		ldr	r2, [sp, #8]
+ 197 005e D21A     		subs	r2, r2, r3
+ 198 0060 049B     		ldr	r3, [sp, #16]
+ 199 0062 0199     		ldr	r1, [sp, #4]
+ 200 0064 01FB03F3 		mul	r3, r1, r3
+ 201 0068 B2FBF3F3 		udiv	r3, r2, r3
+ 202 006c 0593     		str	r3, [sp, #20]
+ 239:../emlib/src/em_i2c.c **** 
+ 240:../emlib/src/em_i2c.c ****   /* Clock divisor must be at least 1 in slave mode according to reference */
+ 241:../emlib/src/em_i2c.c ****   /* manual (in which case there is normally no need to set bus frequency). */
+ 242:../emlib/src/em_i2c.c ****   if ((i2c->CTRL & I2C_CTRL_SLAVE) && !div)
+ 203              		.loc 2 242 0
+ 204 006e 039B     		ldr	r3, [sp, #12]
+ 205 0070 1B68     		ldr	r3, [r3]
+ 206 0072 03F00203 		and	r3, r3, #2
+ 207 0076 002B     		cmp	r3, #0
+ 208 0078 04D0     		beq	.L11
+ 209              		.loc 2 242 0 is_stmt 0 discriminator 1
+ 210 007a 059B     		ldr	r3, [sp, #20]
+ 211 007c 002B     		cmp	r3, #0
+ 212 007e 01D1     		bne	.L11
+ 243:../emlib/src/em_i2c.c ****   {
+ 244:../emlib/src/em_i2c.c ****     div = 1;
+ 213              		.loc 2 244 0 is_stmt 1
+ 214 0080 0123     		movs	r3, #1
+ 215 0082 0593     		str	r3, [sp, #20]
+ 216              	.L11:
+ 245:../emlib/src/em_i2c.c ****   }
+ 246:../emlib/src/em_i2c.c **** 
+ 247:../emlib/src/em_i2c.c ****   EFM_ASSERT(div <= _I2C_CLKDIV_DIV_MASK);
+ 217              		.loc 2 247 0
+ 218 0084 059B     		ldr	r3, [sp, #20]
+ 219 0086 B3F5007F 		cmp	r3, #512
+ 220 008a 03D3     		bcc	.L12
+ 221              		.loc 2 247 0 is_stmt 0 discriminator 1
+ 222 008c 0448     		ldr	r0, .L13
+ 223 008e F721     		movs	r1, #247
+ 224 0090 FFF7FEFF 		bl	assertEFM
+ 225              	.L12:
+ 248:../emlib/src/em_i2c.c ****   i2c->CLKDIV = div;
+ 226              		.loc 2 248 0 is_stmt 1
+ 227 0094 039B     		ldr	r3, [sp, #12]
+ 228 0096 059A     		ldr	r2, [sp, #20]
+ 229 0098 1A61     		str	r2, [r3, #16]
+ 230              	.L6:
+ 249:../emlib/src/em_i2c.c **** }
+ 231              		.loc 2 249 0
+ 232 009a 07B0     		add	sp, sp, #28
+ 233              		@ sp needed
+ 234 009c 5DF804FB 		ldr	pc, [sp], #4
+ 235              	.L14:
+ 236              		.align	2
+ 237              	.L13:
+ 238 00a0 00000000 		.word	.LC0
+ARM GAS  /tmp/ccy9eJxb.s 			page 11
+
+
+ 239 00a4 10810200 		.word	164112
+ 240 00a8 00000000 		.word	i2cNSum
+ 241              		.cfi_endproc
+ 242              	.LFE81:
+ 244              		.section	.text.I2C_Enable,"ax",%progbits
+ 245              		.align	2
+ 246              		.global	I2C_Enable
+ 247              		.thumb
+ 248              		.thumb_func
+ 250              	I2C_Enable:
+ 251              	.LFB82:
+ 250:../emlib/src/em_i2c.c **** 
+ 251:../emlib/src/em_i2c.c **** 
+ 252:../emlib/src/em_i2c.c **** /***************************************************************************//**
+ 253:../emlib/src/em_i2c.c ****  * @brief
+ 254:../emlib/src/em_i2c.c ****  *   Enable/disable I2C.
+ 255:../emlib/src/em_i2c.c ****  *
+ 256:../emlib/src/em_i2c.c ****  * @note
+ 257:../emlib/src/em_i2c.c ****  *   After enabling the I2C (from being disabled), the I2C is in BUSY state.
+ 258:../emlib/src/em_i2c.c ****  *
+ 259:../emlib/src/em_i2c.c ****  * @param[in] i2c
+ 260:../emlib/src/em_i2c.c ****  *   Pointer to I2C peripheral register block.
+ 261:../emlib/src/em_i2c.c ****  *
+ 262:../emlib/src/em_i2c.c ****  * @param[in] enable
+ 263:../emlib/src/em_i2c.c ****  *   true to enable counting, false to disable.
+ 264:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 265:../emlib/src/em_i2c.c **** void I2C_Enable(I2C_TypeDef *i2c, bool enable)
+ 266:../emlib/src/em_i2c.c **** {
+ 252              		.loc 2 266 0
+ 253              		.cfi_startproc
+ 254              		@ args = 0, pretend = 0, frame = 8
+ 255              		@ frame_needed = 0, uses_anonymous_args = 0
+ 256 0000 00B5     		push	{lr}
+ 257              		.cfi_def_cfa_offset 4
+ 258              		.cfi_offset 14, -4
+ 259 0002 83B0     		sub	sp, sp, #12
+ 260              		.cfi_def_cfa_offset 16
+ 261 0004 0190     		str	r0, [sp, #4]
+ 262 0006 0B46     		mov	r3, r1
+ 263 0008 8DF80330 		strb	r3, [sp, #3]
+ 267:../emlib/src/em_i2c.c ****   EFM_ASSERT(I2C_REF_VALID(i2c));
+ 264              		.loc 2 267 0
+ 265 000c 019A     		ldr	r2, [sp, #4]
+ 266 000e 094B     		ldr	r3, .L17
+ 267 0010 9A42     		cmp	r2, r3
+ 268 0012 04D0     		beq	.L16
+ 269              		.loc 2 267 0 is_stmt 0 discriminator 1
+ 270 0014 0848     		ldr	r0, .L17+4
+ 271 0016 40F20B11 		movw	r1, #267
+ 272 001a FFF7FEFF 		bl	assertEFM
+ 273              	.L16:
+ 268:../emlib/src/em_i2c.c **** 
+ 269:../emlib/src/em_i2c.c ****   BITBAND_Peripheral(&(i2c->CTRL), _I2C_CTRL_EN_SHIFT, (unsigned int)enable);
+ 274              		.loc 2 269 0 is_stmt 1
+ 275 001e 019A     		ldr	r2, [sp, #4]
+ 276 0020 9DF80330 		ldrb	r3, [sp, #3]	@ zero_extendqisi2
+ 277 0024 1046     		mov	r0, r2
+ARM GAS  /tmp/ccy9eJxb.s 			page 12
+
+
+ 278 0026 0021     		movs	r1, #0
+ 279 0028 1A46     		mov	r2, r3
+ 280 002a FFF7FEFF 		bl	BITBAND_Peripheral
+ 270:../emlib/src/em_i2c.c **** }
+ 281              		.loc 2 270 0
+ 282 002e 03B0     		add	sp, sp, #12
+ 283              		@ sp needed
+ 284 0030 5DF804FB 		ldr	pc, [sp], #4
+ 285              	.L18:
+ 286              		.align	2
+ 287              	.L17:
+ 288 0034 00A00040 		.word	1073782784
+ 289 0038 00000000 		.word	.LC0
+ 290              		.cfi_endproc
+ 291              	.LFE82:
+ 293              		.section	.text.I2C_Init,"ax",%progbits
+ 294              		.align	2
+ 295              		.global	I2C_Init
+ 296              		.thumb
+ 297              		.thumb_func
+ 299              	I2C_Init:
+ 300              	.LFB83:
+ 271:../emlib/src/em_i2c.c **** 
+ 272:../emlib/src/em_i2c.c **** 
+ 273:../emlib/src/em_i2c.c **** /***************************************************************************//**
+ 274:../emlib/src/em_i2c.c ****  * @brief
+ 275:../emlib/src/em_i2c.c ****  *   Initialize I2C.
+ 276:../emlib/src/em_i2c.c ****  *
+ 277:../emlib/src/em_i2c.c ****  * @param[in] i2c
+ 278:../emlib/src/em_i2c.c ****  *   Pointer to I2C peripheral register block.
+ 279:../emlib/src/em_i2c.c ****  *
+ 280:../emlib/src/em_i2c.c ****  * @param[in] init
+ 281:../emlib/src/em_i2c.c ****  *   Pointer to I2C initialization structure.
+ 282:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 283:../emlib/src/em_i2c.c **** void I2C_Init(I2C_TypeDef *i2c, const I2C_Init_TypeDef *init)
+ 284:../emlib/src/em_i2c.c **** {
+ 301              		.loc 2 284 0
+ 302              		.cfi_startproc
+ 303              		@ args = 0, pretend = 0, frame = 8
+ 304              		@ frame_needed = 0, uses_anonymous_args = 0
+ 305 0000 00B5     		push	{lr}
+ 306              		.cfi_def_cfa_offset 4
+ 307              		.cfi_offset 14, -4
+ 308 0002 83B0     		sub	sp, sp, #12
+ 309              		.cfi_def_cfa_offset 16
+ 310 0004 0190     		str	r0, [sp, #4]
+ 311 0006 0091     		str	r1, [sp]
+ 285:../emlib/src/em_i2c.c ****   EFM_ASSERT(I2C_REF_VALID(i2c));
+ 312              		.loc 2 285 0
+ 313 0008 019A     		ldr	r2, [sp, #4]
+ 314 000a 174B     		ldr	r3, .L23
+ 315 000c 9A42     		cmp	r2, r3
+ 316 000e 04D0     		beq	.L20
+ 317              		.loc 2 285 0 is_stmt 0 discriminator 1
+ 318 0010 1648     		ldr	r0, .L23+4
+ 319 0012 40F21D11 		movw	r1, #285
+ 320 0016 FFF7FEFF 		bl	assertEFM
+ARM GAS  /tmp/ccy9eJxb.s 			page 13
+
+
+ 321              	.L20:
+ 286:../emlib/src/em_i2c.c **** 
+ 287:../emlib/src/em_i2c.c ****   i2c->IEN = 0;
+ 322              		.loc 2 287 0 is_stmt 1
+ 323 001a 019B     		ldr	r3, [sp, #4]
+ 324 001c 0022     		movs	r2, #0
+ 325 001e 5A63     		str	r2, [r3, #52]
+ 288:../emlib/src/em_i2c.c ****   i2c->IFC = _I2C_IFC_MASK;
+ 326              		.loc 2 288 0
+ 327 0020 019B     		ldr	r3, [sp, #4]
+ 328 0022 134A     		ldr	r2, .L23+8
+ 329 0024 1A63     		str	r2, [r3, #48]
+ 289:../emlib/src/em_i2c.c **** 
+ 290:../emlib/src/em_i2c.c ****   BITBAND_Peripheral(&(i2c->CTRL),
+ 330              		.loc 2 290 0
+ 331 0026 019A     		ldr	r2, [sp, #4]
+ 291:../emlib/src/em_i2c.c ****                      _I2C_CTRL_SLAVE_SHIFT,
+ 292:../emlib/src/em_i2c.c ****                      init->master? 0 : 1);
+ 332              		.loc 2 292 0
+ 333 0028 009B     		ldr	r3, [sp]
+ 334 002a 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 290:../emlib/src/em_i2c.c ****   BITBAND_Peripheral(&(i2c->CTRL),
+ 335              		.loc 2 290 0
+ 336 002c 002B     		cmp	r3, #0
+ 337 002e 01D0     		beq	.L21
+ 290:../emlib/src/em_i2c.c ****   BITBAND_Peripheral(&(i2c->CTRL),
+ 338              		.loc 2 290 0 is_stmt 0 discriminator 1
+ 339 0030 0023     		movs	r3, #0
+ 340 0032 00E0     		b	.L22
+ 341              	.L21:
+ 290:../emlib/src/em_i2c.c ****   BITBAND_Peripheral(&(i2c->CTRL),
+ 342              		.loc 2 290 0 discriminator 2
+ 343 0034 0123     		movs	r3, #1
+ 344              	.L22:
+ 290:../emlib/src/em_i2c.c ****   BITBAND_Peripheral(&(i2c->CTRL),
+ 345              		.loc 2 290 0 discriminator 3
+ 346 0036 1046     		mov	r0, r2
+ 347 0038 0121     		movs	r1, #1
+ 348 003a 1A46     		mov	r2, r3
+ 349 003c FFF7FEFF 		bl	BITBAND_Peripheral
+ 293:../emlib/src/em_i2c.c **** 
+ 294:../emlib/src/em_i2c.c ****   I2C_BusFreqSet(i2c, init->refFreq, init->freq, init->clhr);
+ 350              		.loc 2 294 0 is_stmt 1 discriminator 3
+ 351 0040 009B     		ldr	r3, [sp]
+ 352 0042 5968     		ldr	r1, [r3, #4]
+ 353 0044 009B     		ldr	r3, [sp]
+ 354 0046 9A68     		ldr	r2, [r3, #8]
+ 355 0048 009B     		ldr	r3, [sp]
+ 356 004a 1B7B     		ldrb	r3, [r3, #12]	@ zero_extendqisi2
+ 357 004c 0198     		ldr	r0, [sp, #4]
+ 358 004e FFF7FEFF 		bl	I2C_BusFreqSet
+ 295:../emlib/src/em_i2c.c **** 
+ 296:../emlib/src/em_i2c.c ****   BITBAND_Peripheral(&(i2c->CTRL),
+ 359              		.loc 2 296 0 discriminator 3
+ 360 0052 019A     		ldr	r2, [sp, #4]
+ 297:../emlib/src/em_i2c.c ****                      _I2C_CTRL_EN_SHIFT,
+ 298:../emlib/src/em_i2c.c ****                      (unsigned int)(init->enable));
+ARM GAS  /tmp/ccy9eJxb.s 			page 14
+
+
+ 361              		.loc 2 298 0 discriminator 3
+ 362 0054 009B     		ldr	r3, [sp]
+ 363 0056 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 296:../emlib/src/em_i2c.c ****   BITBAND_Peripheral(&(i2c->CTRL),
+ 364              		.loc 2 296 0 discriminator 3
+ 365 0058 1046     		mov	r0, r2
+ 366 005a 0021     		movs	r1, #0
+ 367 005c 1A46     		mov	r2, r3
+ 368 005e FFF7FEFF 		bl	BITBAND_Peripheral
+ 299:../emlib/src/em_i2c.c **** }
+ 369              		.loc 2 299 0 discriminator 3
+ 370 0062 03B0     		add	sp, sp, #12
+ 371              		@ sp needed
+ 372 0064 5DF804FB 		ldr	pc, [sp], #4
+ 373              	.L24:
+ 374              		.align	2
+ 375              	.L23:
+ 376 0068 00A00040 		.word	1073782784
+ 377 006c 00000000 		.word	.LC0
+ 378 0070 CFFF0100 		.word	131023
+ 379              		.cfi_endproc
+ 380              	.LFE83:
+ 382              		.section	.text.I2C_Reset,"ax",%progbits
+ 383              		.align	2
+ 384              		.global	I2C_Reset
+ 385              		.thumb
+ 386              		.thumb_func
+ 388              	I2C_Reset:
+ 389              	.LFB84:
+ 300:../emlib/src/em_i2c.c **** 
+ 301:../emlib/src/em_i2c.c **** 
+ 302:../emlib/src/em_i2c.c **** /***************************************************************************//**
+ 303:../emlib/src/em_i2c.c ****  * @brief
+ 304:../emlib/src/em_i2c.c ****  *   Reset I2C to same state as after a HW reset.
+ 305:../emlib/src/em_i2c.c ****  *
+ 306:../emlib/src/em_i2c.c ****  * @note
+ 307:../emlib/src/em_i2c.c ****  *   The ROUTE register is NOT reset by this function, in order to allow for
+ 308:../emlib/src/em_i2c.c ****  *   centralized setup of this feature.
+ 309:../emlib/src/em_i2c.c ****  *
+ 310:../emlib/src/em_i2c.c ****  * @param[in] i2c
+ 311:../emlib/src/em_i2c.c ****  *   Pointer to I2C peripheral register block.
+ 312:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 313:../emlib/src/em_i2c.c **** void I2C_Reset(I2C_TypeDef *i2c)
+ 314:../emlib/src/em_i2c.c **** {
+ 390              		.loc 2 314 0
+ 391              		.cfi_startproc
+ 392              		@ args = 0, pretend = 0, frame = 8
+ 393              		@ frame_needed = 0, uses_anonymous_args = 0
+ 394              		@ link register save eliminated.
+ 395 0000 82B0     		sub	sp, sp, #8
+ 396              		.cfi_def_cfa_offset 8
+ 397 0002 0190     		str	r0, [sp, #4]
+ 315:../emlib/src/em_i2c.c ****   i2c->CTRL      = _I2C_CTRL_RESETVALUE;
+ 398              		.loc 2 315 0
+ 399 0004 019B     		ldr	r3, [sp, #4]
+ 400 0006 0022     		movs	r2, #0
+ 401 0008 1A60     		str	r2, [r3]
+ARM GAS  /tmp/ccy9eJxb.s 			page 15
+
+
+ 316:../emlib/src/em_i2c.c ****   i2c->CLKDIV    = _I2C_CLKDIV_RESETVALUE;
+ 402              		.loc 2 316 0
+ 403 000a 019B     		ldr	r3, [sp, #4]
+ 404 000c 0022     		movs	r2, #0
+ 405 000e 1A61     		str	r2, [r3, #16]
+ 317:../emlib/src/em_i2c.c ****   i2c->SADDR     = _I2C_SADDR_RESETVALUE;
+ 406              		.loc 2 317 0
+ 407 0010 019B     		ldr	r3, [sp, #4]
+ 408 0012 0022     		movs	r2, #0
+ 409 0014 5A61     		str	r2, [r3, #20]
+ 318:../emlib/src/em_i2c.c ****   i2c->SADDRMASK = _I2C_SADDRMASK_RESETVALUE;
+ 410              		.loc 2 318 0
+ 411 0016 019B     		ldr	r3, [sp, #4]
+ 412 0018 0022     		movs	r2, #0
+ 413 001a 9A61     		str	r2, [r3, #24]
+ 319:../emlib/src/em_i2c.c ****   i2c->IEN       = _I2C_IEN_RESETVALUE;
+ 414              		.loc 2 319 0
+ 415 001c 019B     		ldr	r3, [sp, #4]
+ 416 001e 0022     		movs	r2, #0
+ 417 0020 5A63     		str	r2, [r3, #52]
+ 320:../emlib/src/em_i2c.c ****   i2c->IFC       = _I2C_IFC_MASK;
+ 418              		.loc 2 320 0
+ 419 0022 019B     		ldr	r3, [sp, #4]
+ 420 0024 014A     		ldr	r2, .L26
+ 421 0026 1A63     		str	r2, [r3, #48]
+ 321:../emlib/src/em_i2c.c ****   /* Do not reset route register, setting should be done independently */
+ 322:../emlib/src/em_i2c.c **** }
+ 422              		.loc 2 322 0
+ 423 0028 02B0     		add	sp, sp, #8
+ 424              		@ sp needed
+ 425 002a 7047     		bx	lr
+ 426              	.L27:
+ 427              		.align	2
+ 428              	.L26:
+ 429 002c CFFF0100 		.word	131023
+ 430              		.cfi_endproc
+ 431              	.LFE84:
+ 433              		.section	.text.I2C_Transfer,"ax",%progbits
+ 434              		.align	2
+ 435              		.global	I2C_Transfer
+ 436              		.thumb
+ 437              		.thumb_func
+ 439              	I2C_Transfer:
+ 440              	.LFB85:
+ 323:../emlib/src/em_i2c.c **** 
+ 324:../emlib/src/em_i2c.c **** 
+ 325:../emlib/src/em_i2c.c **** /***************************************************************************//**
+ 326:../emlib/src/em_i2c.c ****  * @brief
+ 327:../emlib/src/em_i2c.c ****  *   Continue an initiated I2C transfer (single master mode only).
+ 328:../emlib/src/em_i2c.c ****  *
+ 329:../emlib/src/em_i2c.c ****  * @details
+ 330:../emlib/src/em_i2c.c ****  *   This function is used repeatedly after a I2C_TransferInit() in order to
+ 331:../emlib/src/em_i2c.c ****  *   complete a transfer. It may be used in polled mode as the below example
+ 332:../emlib/src/em_i2c.c ****  *   shows:
+ 333:../emlib/src/em_i2c.c ****  * @verbatim
+ 334:../emlib/src/em_i2c.c ****  * I2C_TransferReturn_TypeDef ret;
+ 335:../emlib/src/em_i2c.c ****  *
+ARM GAS  /tmp/ccy9eJxb.s 			page 16
+
+
+ 336:../emlib/src/em_i2c.c ****  * // Do a polled transfer
+ 337:../emlib/src/em_i2c.c ****  * ret = I2C_TransferInit(I2C0, seq);
+ 338:../emlib/src/em_i2c.c ****  * while (ret == i2cTransferInProgress)
+ 339:../emlib/src/em_i2c.c ****  * {
+ 340:../emlib/src/em_i2c.c ****  *   ret = I2C_Transfer(I2C0);
+ 341:../emlib/src/em_i2c.c ****  * }
+ 342:../emlib/src/em_i2c.c ****  * @endverbatim
+ 343:../emlib/src/em_i2c.c ****  *  It may also be used in interrupt driven mode, where this function is invoked
+ 344:../emlib/src/em_i2c.c ****  *  from the interrupt handler. Notice that if used in interrupt mode, NVIC
+ 345:../emlib/src/em_i2c.c ****  *  interrupts must be configured and enabled for the I2C bus used. I2C
+ 346:../emlib/src/em_i2c.c ****  *  peripheral specific interrupts are managed by this SW.
+ 347:../emlib/src/em_i2c.c ****  *
+ 348:../emlib/src/em_i2c.c ****  * @note
+ 349:../emlib/src/em_i2c.c ****  *   Only single master mode is supported.
+ 350:../emlib/src/em_i2c.c ****  *
+ 351:../emlib/src/em_i2c.c ****  * @param[in] i2c
+ 352:../emlib/src/em_i2c.c ****  *   Pointer to I2C peripheral register block.
+ 353:../emlib/src/em_i2c.c ****  *
+ 354:../emlib/src/em_i2c.c ****  * @return
+ 355:../emlib/src/em_i2c.c ****  *   Returns status for ongoing transfer.
+ 356:../emlib/src/em_i2c.c ****  *   @li #i2cTransferInProgress - indicates that transfer not finished.
+ 357:../emlib/src/em_i2c.c ****  *   @li #i2cTransferDone - transfer completed successfully.
+ 358:../emlib/src/em_i2c.c ****  *   @li otherwise some sort of error has occurred.
+ 359:../emlib/src/em_i2c.c ****  *
+ 360:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 361:../emlib/src/em_i2c.c **** I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
+ 362:../emlib/src/em_i2c.c **** {
+ 441              		.loc 2 362 0
+ 442              		.cfi_startproc
+ 443              		@ args = 0, pretend = 0, frame = 32
+ 444              		@ frame_needed = 0, uses_anonymous_args = 0
+ 445 0000 00B5     		push	{lr}
+ 446              		.cfi_def_cfa_offset 4
+ 447              		.cfi_offset 14, -4
+ 448 0002 89B0     		sub	sp, sp, #36
+ 449              		.cfi_def_cfa_offset 40
+ 450 0004 0190     		str	r0, [sp, #4]
+ 363:../emlib/src/em_i2c.c ****   uint32_t                tmp;
+ 364:../emlib/src/em_i2c.c ****   uint32_t                pending;
+ 365:../emlib/src/em_i2c.c ****   I2C_Transfer_TypeDef    *transfer;
+ 366:../emlib/src/em_i2c.c ****   I2C_TransferSeq_TypeDef *seq;
+ 367:../emlib/src/em_i2c.c **** 
+ 368:../emlib/src/em_i2c.c ****   EFM_ASSERT(I2C_REF_VALID(i2c));
+ 451              		.loc 2 368 0
+ 452 0006 019A     		ldr	r2, [sp, #4]
+ 453 0008 994B     		ldr	r3, .L81
+ 454 000a 9A42     		cmp	r2, r3
+ 455 000c 04D0     		beq	.L29
+ 456              		.loc 2 368 0 is_stmt 0 discriminator 1
+ 457 000e 9948     		ldr	r0, .L81+4
+ 458 0010 4FF4B871 		mov	r1, #368
+ 459 0014 FFF7FEFF 		bl	assertEFM
+ 460              	.L29:
+ 369:../emlib/src/em_i2c.c **** 
+ 370:../emlib/src/em_i2c.c ****   /* Support up to 2 I2C buses */
+ 371:../emlib/src/em_i2c.c ****   if (i2c == I2C0)
+ 461              		.loc 2 371 0 is_stmt 1
+ARM GAS  /tmp/ccy9eJxb.s 			page 17
+
+
+ 462 0018 019A     		ldr	r2, [sp, #4]
+ 463 001a 954B     		ldr	r3, .L81
+ 464 001c 9A42     		cmp	r2, r3
+ 465 001e 05D1     		bne	.L30
+ 372:../emlib/src/em_i2c.c ****   {
+ 373:../emlib/src/em_i2c.c ****     transfer = i2cTransfer;
+ 466              		.loc 2 373 0
+ 467 0020 954B     		ldr	r3, .L81+8
+ 468 0022 0693     		str	r3, [sp, #24]
+ 374:../emlib/src/em_i2c.c ****   }
+ 375:../emlib/src/em_i2c.c **** #if (I2C_COUNT > 1)
+ 376:../emlib/src/em_i2c.c ****   else if (i2c == I2C1)
+ 377:../emlib/src/em_i2c.c ****   {
+ 378:../emlib/src/em_i2c.c ****     transfer = i2cTransfer + 1;
+ 379:../emlib/src/em_i2c.c ****   }
+ 380:../emlib/src/em_i2c.c **** #endif
+ 381:../emlib/src/em_i2c.c ****   else
+ 382:../emlib/src/em_i2c.c ****   {
+ 383:../emlib/src/em_i2c.c ****     return(i2cTransferUsageFault);
+ 384:../emlib/src/em_i2c.c ****   }
+ 385:../emlib/src/em_i2c.c **** 
+ 386:../emlib/src/em_i2c.c ****   seq = transfer->seq;
+ 469              		.loc 2 386 0
+ 470 0024 069B     		ldr	r3, [sp, #24]
+ 471 0026 9B68     		ldr	r3, [r3, #8]
+ 472 0028 0593     		str	r3, [sp, #20]
+ 473 002a 01E0     		b	.L77
+ 474              	.L30:
+ 383:../emlib/src/em_i2c.c ****     return(i2cTransferUsageFault);
+ 475              		.loc 2 383 0
+ 476 002c FC23     		movs	r3, #252
+ 477 002e FDE1     		b	.L32
+ 478              	.L77:
+ 387:../emlib/src/em_i2c.c ****   for (;; )
+ 388:../emlib/src/em_i2c.c ****   {
+ 389:../emlib/src/em_i2c.c ****     pending = i2c->IF;
+ 479              		.loc 2 389 0
+ 480 0030 019B     		ldr	r3, [sp, #4]
+ 481 0032 9B6A     		ldr	r3, [r3, #40]
+ 482 0034 0493     		str	r3, [sp, #16]
+ 390:../emlib/src/em_i2c.c **** 
+ 391:../emlib/src/em_i2c.c ****     /* If some sort of fault, abort transfer. */
+ 392:../emlib/src/em_i2c.c ****     if (pending & I2C_IF_ERRORS)
+ 483              		.loc 2 392 0
+ 484 0036 049B     		ldr	r3, [sp, #16]
+ 485 0038 03F4C063 		and	r3, r3, #1536
+ 486 003c 002B     		cmp	r3, #0
+ 487 003e 14D0     		beq	.L33
+ 393:../emlib/src/em_i2c.c ****     {
+ 394:../emlib/src/em_i2c.c ****       if (pending & I2C_IF_ARBLOST)
+ 488              		.loc 2 394 0
+ 489 0040 049B     		ldr	r3, [sp, #16]
+ 490 0042 03F40073 		and	r3, r3, #512
+ 491 0046 002B     		cmp	r3, #0
+ 492 0048 03D0     		beq	.L34
+ 395:../emlib/src/em_i2c.c ****       {
+ 396:../emlib/src/em_i2c.c ****         /* If arbitration fault, it indicates either a slave device */
+ARM GAS  /tmp/ccy9eJxb.s 			page 18
+
+
+ 397:../emlib/src/em_i2c.c ****         /* not responding as expected, or other master which is not */
+ 398:../emlib/src/em_i2c.c ****         /* supported by this SW. */
+ 399:../emlib/src/em_i2c.c ****         transfer->result = i2cTransferArbLost;
+ 493              		.loc 2 399 0
+ 494 004a 069B     		ldr	r3, [sp, #24]
+ 495 004c FD22     		movs	r2, #253
+ 496 004e 5A70     		strb	r2, [r3, #1]
+ 497 0050 07E0     		b	.L35
+ 498              	.L34:
+ 400:../emlib/src/em_i2c.c ****       }
+ 401:../emlib/src/em_i2c.c ****       else if (pending & I2C_IF_BUSERR)
+ 499              		.loc 2 401 0
+ 500 0052 049B     		ldr	r3, [sp, #16]
+ 501 0054 03F48063 		and	r3, r3, #1024
+ 502 0058 002B     		cmp	r3, #0
+ 503 005a 02D0     		beq	.L35
+ 402:../emlib/src/em_i2c.c ****       {
+ 403:../emlib/src/em_i2c.c ****         /* A bus error indicates a misplaced start or stop, which should */
+ 404:../emlib/src/em_i2c.c ****         /* not occur in master mode controlled by this SW. */
+ 405:../emlib/src/em_i2c.c ****         transfer->result = i2cTransferBusErr;
+ 504              		.loc 2 405 0
+ 505 005c 069B     		ldr	r3, [sp, #24]
+ 506 005e FE22     		movs	r2, #254
+ 507 0060 5A70     		strb	r2, [r3, #1]
+ 508              	.L35:
+ 406:../emlib/src/em_i2c.c ****       }
+ 407:../emlib/src/em_i2c.c **** 
+ 408:../emlib/src/em_i2c.c ****       /* If error situation occurred, it is difficult to know */
+ 409:../emlib/src/em_i2c.c ****       /* exact cause and how to resolve. It will be up to a wrapper */
+ 410:../emlib/src/em_i2c.c ****       /* to determine how to handle a fault/recovery if possible. */
+ 411:../emlib/src/em_i2c.c ****       transfer->state = i2cStateDone;
+ 509              		.loc 2 411 0
+ 510 0062 069B     		ldr	r3, [sp, #24]
+ 511 0064 0922     		movs	r2, #9
+ 512 0066 1A70     		strb	r2, [r3]
+ 412:../emlib/src/em_i2c.c ****       goto done;
+ 513              		.loc 2 412 0
+ 514 0068 CCE1     		b	.L36
+ 515              	.L33:
+ 413:../emlib/src/em_i2c.c ****     }
+ 414:../emlib/src/em_i2c.c **** 
+ 415:../emlib/src/em_i2c.c ****     switch (transfer->state)
+ 516              		.loc 2 415 0
+ 517 006a 069B     		ldr	r3, [sp, #24]
+ 518 006c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 519 006e 082B     		cmp	r3, #8
+ 520 0070 00F2C081 		bhi	.L37
+ 521 0074 01A2     		adr	r2, .L39
+ 522 0076 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 523 007a 00BF     		.p2align 2
+ 524              	.L39:
+ 525 007c A1000000 		.word	.L38+1
+ 526 0080 F3000000 		.word	.L40+1
+ 527 0084 79010000 		.word	.L41+1
+ 528 0088 CB010000 		.word	.L42+1
+ 529 008c 1D020000 		.word	.L43+1
+ 530 0090 7D020000 		.word	.L44+1
+ARM GAS  /tmp/ccy9eJxb.s 			page 19
+
+
+ 531 0094 05030000 		.word	.L45+1
+ 532 0098 43030000 		.word	.L46+1
+ 533 009c D9030000 		.word	.L47+1
+ 534              		.p2align 1
+ 535              	.L38:
+ 416:../emlib/src/em_i2c.c ****     {
+ 417:../emlib/src/em_i2c.c ****     /***************************************************/
+ 418:../emlib/src/em_i2c.c ****     /* Send first start+address (first byte if 10 bit) */
+ 419:../emlib/src/em_i2c.c ****     /***************************************************/
+ 420:../emlib/src/em_i2c.c ****     case i2cStateStartAddrSend:
+ 421:../emlib/src/em_i2c.c ****       if (seq->flags & I2C_FLAG_10BIT_ADDR)
+ 536              		.loc 2 421 0
+ 537 00a0 059B     		ldr	r3, [sp, #20]
+ 538 00a2 5B88     		ldrh	r3, [r3, #2]
+ 539 00a4 03F01003 		and	r3, r3, #16
+ 540 00a8 002B     		cmp	r3, #0
+ 541 00aa 09D0     		beq	.L48
+ 422:../emlib/src/em_i2c.c ****       {
+ 423:../emlib/src/em_i2c.c ****         tmp = (((uint32_t)(seq->addr) >> 8) & 0x06) | 0xf0;
+ 542              		.loc 2 423 0
+ 543 00ac 059B     		ldr	r3, [sp, #20]
+ 544 00ae 1B88     		ldrh	r3, [r3]
+ 545 00b0 1B0A     		lsrs	r3, r3, #8
+ 546 00b2 9BB2     		uxth	r3, r3
+ 547 00b4 03F00603 		and	r3, r3, #6
+ 548 00b8 43F0F003 		orr	r3, r3, #240
+ 549 00bc 0793     		str	r3, [sp, #28]
+ 550 00be 0EE0     		b	.L49
+ 551              	.L48:
+ 424:../emlib/src/em_i2c.c **** 
+ 425:../emlib/src/em_i2c.c ****         /* In 10 bit address mode, the address following the first */
+ 426:../emlib/src/em_i2c.c ****         /* start always indicate write. */
+ 427:../emlib/src/em_i2c.c ****       }
+ 428:../emlib/src/em_i2c.c ****       else
+ 429:../emlib/src/em_i2c.c ****       {
+ 430:../emlib/src/em_i2c.c ****         tmp = (uint32_t)(seq->addr) & 0xfe;
+ 552              		.loc 2 430 0
+ 553 00c0 059B     		ldr	r3, [sp, #20]
+ 554 00c2 1B88     		ldrh	r3, [r3]
+ 555 00c4 03F0FE03 		and	r3, r3, #254
+ 556 00c8 0793     		str	r3, [sp, #28]
+ 431:../emlib/src/em_i2c.c **** 
+ 432:../emlib/src/em_i2c.c ****         if (seq->flags & I2C_FLAG_READ)
+ 557              		.loc 2 432 0
+ 558 00ca 059B     		ldr	r3, [sp, #20]
+ 559 00cc 5B88     		ldrh	r3, [r3, #2]
+ 560 00ce 03F00203 		and	r3, r3, #2
+ 561 00d2 002B     		cmp	r3, #0
+ 562 00d4 03D0     		beq	.L49
+ 433:../emlib/src/em_i2c.c ****         {
+ 434:../emlib/src/em_i2c.c ****           /* Indicate read request */
+ 435:../emlib/src/em_i2c.c ****           tmp |= 1;
+ 563              		.loc 2 435 0
+ 564 00d6 079B     		ldr	r3, [sp, #28]
+ 565 00d8 43F00103 		orr	r3, r3, #1
+ 566 00dc 0793     		str	r3, [sp, #28]
+ 567              	.L49:
+ARM GAS  /tmp/ccy9eJxb.s 			page 20
+
+
+ 436:../emlib/src/em_i2c.c ****         }
+ 437:../emlib/src/em_i2c.c ****       }
+ 438:../emlib/src/em_i2c.c **** 
+ 439:../emlib/src/em_i2c.c ****       transfer->state = i2cStateAddrWFAckNack;
+ 568              		.loc 2 439 0
+ 569 00de 069B     		ldr	r3, [sp, #24]
+ 570 00e0 0122     		movs	r2, #1
+ 571 00e2 1A70     		strb	r2, [r3]
+ 440:../emlib/src/em_i2c.c ****       i2c->TXDATA     = tmp; /* Data not transmitted until START sent */
+ 572              		.loc 2 440 0
+ 573 00e4 019B     		ldr	r3, [sp, #4]
+ 574 00e6 079A     		ldr	r2, [sp, #28]
+ 575 00e8 5A62     		str	r2, [r3, #36]
+ 441:../emlib/src/em_i2c.c ****       i2c->CMD        = I2C_CMD_START;
+ 576              		.loc 2 441 0
+ 577 00ea 019B     		ldr	r3, [sp, #4]
+ 578 00ec 0122     		movs	r2, #1
+ 579 00ee 5A60     		str	r2, [r3, #4]
+ 442:../emlib/src/em_i2c.c ****       goto done;
+ 580              		.loc 2 442 0
+ 581 00f0 88E1     		b	.L36
+ 582              	.L40:
+ 443:../emlib/src/em_i2c.c **** 
+ 444:../emlib/src/em_i2c.c ****     /*******************************************************/
+ 445:../emlib/src/em_i2c.c ****     /* Wait for ACK/NACK on address (first byte if 10 bit) */
+ 446:../emlib/src/em_i2c.c ****     /*******************************************************/
+ 447:../emlib/src/em_i2c.c ****     case i2cStateAddrWFAckNack:
+ 448:../emlib/src/em_i2c.c ****       if (pending & I2C_IF_NACK)
+ 583              		.loc 2 448 0
+ 584 00f2 049B     		ldr	r3, [sp, #16]
+ 585 00f4 03F08003 		and	r3, r3, #128
+ 586 00f8 002B     		cmp	r3, #0
+ 587 00fa 0CD0     		beq	.L50
+ 449:../emlib/src/em_i2c.c ****       {
+ 450:../emlib/src/em_i2c.c ****         i2c->IFC         = I2C_IFC_NACK;
+ 588              		.loc 2 450 0
+ 589 00fc 019B     		ldr	r3, [sp, #4]
+ 590 00fe 8022     		movs	r2, #128
+ 591 0100 1A63     		str	r2, [r3, #48]
+ 451:../emlib/src/em_i2c.c ****         transfer->result = i2cTransferNack;
+ 592              		.loc 2 451 0
+ 593 0102 069B     		ldr	r3, [sp, #24]
+ 594 0104 FF22     		movs	r2, #255
+ 595 0106 5A70     		strb	r2, [r3, #1]
+ 452:../emlib/src/em_i2c.c ****         transfer->state  = i2cStateWFStopSent;
+ 596              		.loc 2 452 0
+ 597 0108 069B     		ldr	r3, [sp, #24]
+ 598 010a 0822     		movs	r2, #8
+ 599 010c 1A70     		strb	r2, [r3]
+ 453:../emlib/src/em_i2c.c ****         i2c->CMD         = I2C_CMD_STOP;
+ 600              		.loc 2 453 0
+ 601 010e 019B     		ldr	r3, [sp, #4]
+ 602 0110 0222     		movs	r2, #2
+ 603 0112 5A60     		str	r2, [r3, #4]
+ 604 0114 2FE0     		b	.L51
+ 605              	.L50:
+ 454:../emlib/src/em_i2c.c ****       }
+ARM GAS  /tmp/ccy9eJxb.s 			page 21
+
+
+ 455:../emlib/src/em_i2c.c ****       else if (pending & I2C_IF_ACK)
+ 606              		.loc 2 455 0
+ 607 0116 049B     		ldr	r3, [sp, #16]
+ 608 0118 03F04003 		and	r3, r3, #64
+ 609 011c 002B     		cmp	r3, #0
+ 610 011e 2AD0     		beq	.L51
+ 456:../emlib/src/em_i2c.c ****       {
+ 457:../emlib/src/em_i2c.c ****         i2c->IFC = I2C_IFC_ACK;
+ 611              		.loc 2 457 0
+ 612 0120 019B     		ldr	r3, [sp, #4]
+ 613 0122 4022     		movs	r2, #64
+ 614 0124 1A63     		str	r2, [r3, #48]
+ 458:../emlib/src/em_i2c.c **** 
+ 459:../emlib/src/em_i2c.c ****         /* If 10 bit address, send 2nd byte of address. */
+ 460:../emlib/src/em_i2c.c ****         if (seq->flags & I2C_FLAG_10BIT_ADDR)
+ 615              		.loc 2 460 0
+ 616 0126 059B     		ldr	r3, [sp, #20]
+ 617 0128 5B88     		ldrh	r3, [r3, #2]
+ 618 012a 03F01003 		and	r3, r3, #16
+ 619 012e 002B     		cmp	r3, #0
+ 620 0130 08D0     		beq	.L52
+ 461:../emlib/src/em_i2c.c ****         {
+ 462:../emlib/src/em_i2c.c ****           transfer->state = i2cStateAddrWF2ndAckNack;
+ 621              		.loc 2 462 0
+ 622 0132 069B     		ldr	r3, [sp, #24]
+ 623 0134 0222     		movs	r2, #2
+ 624 0136 1A70     		strb	r2, [r3]
+ 463:../emlib/src/em_i2c.c ****           i2c->TXDATA     = (uint32_t)(seq->addr) & 0xff;
+ 625              		.loc 2 463 0
+ 626 0138 059B     		ldr	r3, [sp, #20]
+ 627 013a 1B88     		ldrh	r3, [r3]
+ 628 013c DAB2     		uxtb	r2, r3
+ 629 013e 019B     		ldr	r3, [sp, #4]
+ 630 0140 5A62     		str	r2, [r3, #36]
+ 631 0142 18E0     		b	.L51
+ 632              	.L52:
+ 464:../emlib/src/em_i2c.c ****         }
+ 465:../emlib/src/em_i2c.c ****         else
+ 466:../emlib/src/em_i2c.c ****         {
+ 467:../emlib/src/em_i2c.c ****           /* Determine whether receiving or sending data */
+ 468:../emlib/src/em_i2c.c ****           if (seq->flags & I2C_FLAG_READ)
+ 633              		.loc 2 468 0
+ 634 0144 059B     		ldr	r3, [sp, #20]
+ 635 0146 5B88     		ldrh	r3, [r3, #2]
+ 636 0148 03F00203 		and	r3, r3, #2
+ 637 014c 002B     		cmp	r3, #0
+ 638 014e 0ED0     		beq	.L53
+ 469:../emlib/src/em_i2c.c ****           {
+ 470:../emlib/src/em_i2c.c ****             transfer->state = i2cStateWFData;
+ 639              		.loc 2 470 0
+ 640 0150 069B     		ldr	r3, [sp, #24]
+ 641 0152 0722     		movs	r2, #7
+ 642 0154 1A70     		strb	r2, [r3]
+ 471:../emlib/src/em_i2c.c ****             if(seq->buf[transfer->bufIndx].len==1)
+ 643              		.loc 2 471 0
+ 644 0156 069B     		ldr	r3, [sp, #24]
+ 645 0158 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ARM GAS  /tmp/ccy9eJxb.s 			page 22
+
+
+ 646 015a 059A     		ldr	r2, [sp, #20]
+ 647 015c DB00     		lsls	r3, r3, #3
+ 648 015e 1344     		add	r3, r3, r2
+ 649 0160 1B89     		ldrh	r3, [r3, #8]
+ 650 0162 012B     		cmp	r3, #1
+ 651 0164 07D1     		bne	.L51
+ 472:../emlib/src/em_i2c.c ****             {
+ 473:../emlib/src/em_i2c.c ****               i2c->CMD  = I2C_CMD_NACK;
+ 652              		.loc 2 473 0
+ 653 0166 019B     		ldr	r3, [sp, #4]
+ 654 0168 0822     		movs	r2, #8
+ 655 016a 5A60     		str	r2, [r3, #4]
+ 474:../emlib/src/em_i2c.c ****             }
+ 475:../emlib/src/em_i2c.c ****           }
+ 476:../emlib/src/em_i2c.c ****           else
+ 477:../emlib/src/em_i2c.c ****           {
+ 478:../emlib/src/em_i2c.c ****             transfer->state = i2cStateDataSend;
+ 479:../emlib/src/em_i2c.c ****             continue;
+ 480:../emlib/src/em_i2c.c ****           }
+ 481:../emlib/src/em_i2c.c ****         }
+ 482:../emlib/src/em_i2c.c ****       }
+ 483:../emlib/src/em_i2c.c ****       goto done;
+ 656              		.loc 2 483 0
+ 657 016c 4AE1     		b	.L36
+ 658              	.L53:
+ 478:../emlib/src/em_i2c.c ****             transfer->state = i2cStateDataSend;
+ 659              		.loc 2 478 0
+ 660 016e 069B     		ldr	r3, [sp, #24]
+ 661 0170 0522     		movs	r2, #5
+ 662 0172 1A70     		strb	r2, [r3]
+ 479:../emlib/src/em_i2c.c ****             continue;
+ 663              		.loc 2 479 0
+ 664 0174 45E1     		b	.L55
+ 665              	.L51:
+ 666              		.loc 2 483 0
+ 667 0176 45E1     		b	.L36
+ 668              	.L41:
+ 484:../emlib/src/em_i2c.c **** 
+ 485:../emlib/src/em_i2c.c ****     /******************************************************/
+ 486:../emlib/src/em_i2c.c ****     /* Wait for ACK/NACK on second byte of 10 bit address */
+ 487:../emlib/src/em_i2c.c ****     /******************************************************/
+ 488:../emlib/src/em_i2c.c ****     case i2cStateAddrWF2ndAckNack:
+ 489:../emlib/src/em_i2c.c ****       if (pending & I2C_IF_NACK)
+ 669              		.loc 2 489 0
+ 670 0178 049B     		ldr	r3, [sp, #16]
+ 671 017a 03F08003 		and	r3, r3, #128
+ 672 017e 002B     		cmp	r3, #0
+ 673 0180 0CD0     		beq	.L56
+ 490:../emlib/src/em_i2c.c ****       {
+ 491:../emlib/src/em_i2c.c ****         i2c->IFC         = I2C_IFC_NACK;
+ 674              		.loc 2 491 0
+ 675 0182 019B     		ldr	r3, [sp, #4]
+ 676 0184 8022     		movs	r2, #128
+ 677 0186 1A63     		str	r2, [r3, #48]
+ 492:../emlib/src/em_i2c.c ****         transfer->result = i2cTransferNack;
+ 678              		.loc 2 492 0
+ 679 0188 069B     		ldr	r3, [sp, #24]
+ARM GAS  /tmp/ccy9eJxb.s 			page 23
+
+
+ 680 018a FF22     		movs	r2, #255
+ 681 018c 5A70     		strb	r2, [r3, #1]
+ 493:../emlib/src/em_i2c.c ****         transfer->state  = i2cStateWFStopSent;
+ 682              		.loc 2 493 0
+ 683 018e 069B     		ldr	r3, [sp, #24]
+ 684 0190 0822     		movs	r2, #8
+ 685 0192 1A70     		strb	r2, [r3]
+ 494:../emlib/src/em_i2c.c ****         i2c->CMD         = I2C_CMD_STOP;
+ 686              		.loc 2 494 0
+ 687 0194 019B     		ldr	r3, [sp, #4]
+ 688 0196 0222     		movs	r2, #2
+ 689 0198 5A60     		str	r2, [r3, #4]
+ 690 019a 15E0     		b	.L57
+ 691              	.L56:
+ 495:../emlib/src/em_i2c.c ****       }
+ 496:../emlib/src/em_i2c.c ****       else if (pending & I2C_IF_ACK)
+ 692              		.loc 2 496 0
+ 693 019c 049B     		ldr	r3, [sp, #16]
+ 694 019e 03F04003 		and	r3, r3, #64
+ 695 01a2 002B     		cmp	r3, #0
+ 696 01a4 10D0     		beq	.L57
+ 497:../emlib/src/em_i2c.c ****       {
+ 498:../emlib/src/em_i2c.c ****         i2c->IFC = I2C_IFC_ACK;
+ 697              		.loc 2 498 0
+ 698 01a6 019B     		ldr	r3, [sp, #4]
+ 699 01a8 4022     		movs	r2, #64
+ 700 01aa 1A63     		str	r2, [r3, #48]
+ 499:../emlib/src/em_i2c.c **** 
+ 500:../emlib/src/em_i2c.c ****         /* If using plain read sequence with 10 bit address, switch to send */
+ 501:../emlib/src/em_i2c.c ****         /* repeated start. */
+ 502:../emlib/src/em_i2c.c ****         if (seq->flags & I2C_FLAG_READ)
+ 701              		.loc 2 502 0
+ 702 01ac 059B     		ldr	r3, [sp, #20]
+ 703 01ae 5B88     		ldrh	r3, [r3, #2]
+ 704 01b0 03F00203 		and	r3, r3, #2
+ 705 01b4 002B     		cmp	r3, #0
+ 706 01b6 03D0     		beq	.L58
+ 503:../emlib/src/em_i2c.c ****         {
+ 504:../emlib/src/em_i2c.c ****           transfer->state = i2cStateRStartAddrSend;
+ 707              		.loc 2 504 0
+ 708 01b8 069B     		ldr	r3, [sp, #24]
+ 709 01ba 0322     		movs	r2, #3
+ 710 01bc 1A70     		strb	r2, [r3]
+ 505:../emlib/src/em_i2c.c ****         }
+ 506:../emlib/src/em_i2c.c ****         /* Otherwise expected to write 0 or more bytes */
+ 507:../emlib/src/em_i2c.c ****         else
+ 508:../emlib/src/em_i2c.c ****         {
+ 509:../emlib/src/em_i2c.c ****           transfer->state = i2cStateDataSend;
+ 510:../emlib/src/em_i2c.c ****         }
+ 511:../emlib/src/em_i2c.c ****         continue;
+ 711              		.loc 2 511 0
+ 712 01be 20E1     		b	.L55
+ 713              	.L58:
+ 509:../emlib/src/em_i2c.c ****           transfer->state = i2cStateDataSend;
+ 714              		.loc 2 509 0
+ 715 01c0 069B     		ldr	r3, [sp, #24]
+ 716 01c2 0522     		movs	r2, #5
+ARM GAS  /tmp/ccy9eJxb.s 			page 24
+
+
+ 717 01c4 1A70     		strb	r2, [r3]
+ 718              		.loc 2 511 0
+ 719 01c6 1CE1     		b	.L55
+ 720              	.L57:
+ 512:../emlib/src/em_i2c.c ****       }
+ 513:../emlib/src/em_i2c.c ****       goto done;
+ 721              		.loc 2 513 0
+ 722 01c8 1CE1     		b	.L36
+ 723              	.L42:
+ 514:../emlib/src/em_i2c.c **** 
+ 515:../emlib/src/em_i2c.c ****     /*******************************/
+ 516:../emlib/src/em_i2c.c ****     /* Send repeated start+address */
+ 517:../emlib/src/em_i2c.c ****     /*******************************/
+ 518:../emlib/src/em_i2c.c ****     case i2cStateRStartAddrSend:
+ 519:../emlib/src/em_i2c.c ****       if (seq->flags & I2C_FLAG_10BIT_ADDR)
+ 724              		.loc 2 519 0
+ 725 01ca 059B     		ldr	r3, [sp, #20]
+ 726 01cc 5B88     		ldrh	r3, [r3, #2]
+ 727 01ce 03F01003 		and	r3, r3, #16
+ 728 01d2 002B     		cmp	r3, #0
+ 729 01d4 09D0     		beq	.L60
+ 520:../emlib/src/em_i2c.c ****       {
+ 521:../emlib/src/em_i2c.c ****         tmp = ((seq->addr >> 8) & 0x06) | 0xf0;
+ 730              		.loc 2 521 0
+ 731 01d6 059B     		ldr	r3, [sp, #20]
+ 732 01d8 1B88     		ldrh	r3, [r3]
+ 733 01da 1B0A     		lsrs	r3, r3, #8
+ 734 01dc 9BB2     		uxth	r3, r3
+ 735 01de 03F00603 		and	r3, r3, #6
+ 736 01e2 43F0F003 		orr	r3, r3, #240
+ 737 01e6 0793     		str	r3, [sp, #28]
+ 738 01e8 04E0     		b	.L61
+ 739              	.L60:
+ 522:../emlib/src/em_i2c.c ****       }
+ 523:../emlib/src/em_i2c.c ****       else
+ 524:../emlib/src/em_i2c.c ****       {
+ 525:../emlib/src/em_i2c.c ****         tmp = seq->addr & 0xfe;
+ 740              		.loc 2 525 0
+ 741 01ea 059B     		ldr	r3, [sp, #20]
+ 742 01ec 1B88     		ldrh	r3, [r3]
+ 743 01ee 03F0FE03 		and	r3, r3, #254
+ 744 01f2 0793     		str	r3, [sp, #28]
+ 745              	.L61:
+ 526:../emlib/src/em_i2c.c ****       }
+ 527:../emlib/src/em_i2c.c **** 
+ 528:../emlib/src/em_i2c.c ****       /* If this is a write+read combined sequence, then read is about to start */
+ 529:../emlib/src/em_i2c.c ****       if (seq->flags & I2C_FLAG_WRITE_READ)
+ 746              		.loc 2 529 0
+ 747 01f4 059B     		ldr	r3, [sp, #20]
+ 748 01f6 5B88     		ldrh	r3, [r3, #2]
+ 749 01f8 03F00403 		and	r3, r3, #4
+ 750 01fc 002B     		cmp	r3, #0
+ 751 01fe 03D0     		beq	.L62
+ 530:../emlib/src/em_i2c.c ****       {
+ 531:../emlib/src/em_i2c.c ****         /* Indicate read request */
+ 532:../emlib/src/em_i2c.c ****         tmp |= 1;
+ 752              		.loc 2 532 0
+ARM GAS  /tmp/ccy9eJxb.s 			page 25
+
+
+ 753 0200 079B     		ldr	r3, [sp, #28]
+ 754 0202 43F00103 		orr	r3, r3, #1
+ 755 0206 0793     		str	r3, [sp, #28]
+ 756              	.L62:
+ 533:../emlib/src/em_i2c.c ****       }
+ 534:../emlib/src/em_i2c.c **** 
+ 535:../emlib/src/em_i2c.c ****       transfer->state = i2cStateRAddrWFAckNack;
+ 757              		.loc 2 535 0
+ 758 0208 069B     		ldr	r3, [sp, #24]
+ 759 020a 0422     		movs	r2, #4
+ 760 020c 1A70     		strb	r2, [r3]
+ 536:../emlib/src/em_i2c.c ****       /* We have to write START cmd first since repeated start, otherwise */
+ 537:../emlib/src/em_i2c.c ****       /* data would be sent first. */
+ 538:../emlib/src/em_i2c.c ****       i2c->CMD    = I2C_CMD_START;
+ 761              		.loc 2 538 0
+ 762 020e 019B     		ldr	r3, [sp, #4]
+ 763 0210 0122     		movs	r2, #1
+ 764 0212 5A60     		str	r2, [r3, #4]
+ 539:../emlib/src/em_i2c.c ****       i2c->TXDATA = tmp;
+ 765              		.loc 2 539 0
+ 766 0214 019B     		ldr	r3, [sp, #4]
+ 767 0216 079A     		ldr	r2, [sp, #28]
+ 768 0218 5A62     		str	r2, [r3, #36]
+ 540:../emlib/src/em_i2c.c ****       goto done;
+ 769              		.loc 2 540 0
+ 770 021a F3E0     		b	.L36
+ 771              	.L43:
+ 541:../emlib/src/em_i2c.c **** 
+ 542:../emlib/src/em_i2c.c ****     /**********************************************************************/
+ 543:../emlib/src/em_i2c.c ****     /* Wait for ACK/NACK on repeated start+address (first byte if 10 bit) */
+ 544:../emlib/src/em_i2c.c ****     /**********************************************************************/
+ 545:../emlib/src/em_i2c.c ****     case i2cStateRAddrWFAckNack:
+ 546:../emlib/src/em_i2c.c ****       if (pending & I2C_IF_NACK)
+ 772              		.loc 2 546 0
+ 773 021c 049B     		ldr	r3, [sp, #16]
+ 774 021e 03F08003 		and	r3, r3, #128
+ 775 0222 002B     		cmp	r3, #0
+ 776 0224 0CD0     		beq	.L63
+ 547:../emlib/src/em_i2c.c ****       {
+ 548:../emlib/src/em_i2c.c ****         i2c->IFC         = I2C_IFC_NACK;
+ 777              		.loc 2 548 0
+ 778 0226 019B     		ldr	r3, [sp, #4]
+ 779 0228 8022     		movs	r2, #128
+ 780 022a 1A63     		str	r2, [r3, #48]
+ 549:../emlib/src/em_i2c.c ****         transfer->result = i2cTransferNack;
+ 781              		.loc 2 549 0
+ 782 022c 069B     		ldr	r3, [sp, #24]
+ 783 022e FF22     		movs	r2, #255
+ 784 0230 5A70     		strb	r2, [r3, #1]
+ 550:../emlib/src/em_i2c.c ****         transfer->state  = i2cStateWFStopSent;
+ 785              		.loc 2 550 0
+ 786 0232 069B     		ldr	r3, [sp, #24]
+ 787 0234 0822     		movs	r2, #8
+ 788 0236 1A70     		strb	r2, [r3]
+ 551:../emlib/src/em_i2c.c ****         i2c->CMD         = I2C_CMD_STOP;
+ 789              		.loc 2 551 0
+ 790 0238 019B     		ldr	r3, [sp, #4]
+ARM GAS  /tmp/ccy9eJxb.s 			page 26
+
+
+ 791 023a 0222     		movs	r2, #2
+ 792 023c 5A60     		str	r2, [r3, #4]
+ 793 023e 15E0     		b	.L64
+ 794              	.L63:
+ 552:../emlib/src/em_i2c.c ****       }
+ 553:../emlib/src/em_i2c.c ****       else if (pending & I2C_IF_ACK)
+ 795              		.loc 2 553 0
+ 796 0240 049B     		ldr	r3, [sp, #16]
+ 797 0242 03F04003 		and	r3, r3, #64
+ 798 0246 002B     		cmp	r3, #0
+ 799 0248 10D0     		beq	.L64
+ 554:../emlib/src/em_i2c.c ****       {
+ 555:../emlib/src/em_i2c.c ****         i2c->IFC = I2C_IFC_ACK;
+ 800              		.loc 2 555 0
+ 801 024a 019B     		ldr	r3, [sp, #4]
+ 802 024c 4022     		movs	r2, #64
+ 803 024e 1A63     		str	r2, [r3, #48]
+ 556:../emlib/src/em_i2c.c **** 
+ 557:../emlib/src/em_i2c.c ****         /* Determine whether receiving or sending data */
+ 558:../emlib/src/em_i2c.c ****         if (seq->flags & I2C_FLAG_WRITE_READ)
+ 804              		.loc 2 558 0
+ 805 0250 059B     		ldr	r3, [sp, #20]
+ 806 0252 5B88     		ldrh	r3, [r3, #2]
+ 807 0254 03F00403 		and	r3, r3, #4
+ 808 0258 002B     		cmp	r3, #0
+ 809 025a 03D0     		beq	.L65
+ 559:../emlib/src/em_i2c.c ****         {
+ 560:../emlib/src/em_i2c.c ****           transfer->state = i2cStateWFData;
+ 810              		.loc 2 560 0
+ 811 025c 069B     		ldr	r3, [sp, #24]
+ 812 025e 0722     		movs	r2, #7
+ 813 0260 1A70     		strb	r2, [r3]
+ 814 0262 03E0     		b	.L64
+ 815              	.L65:
+ 561:../emlib/src/em_i2c.c ****         }
+ 562:../emlib/src/em_i2c.c ****         else
+ 563:../emlib/src/em_i2c.c ****         {
+ 564:../emlib/src/em_i2c.c ****           transfer->state = i2cStateDataSend;
+ 816              		.loc 2 564 0
+ 817 0264 069B     		ldr	r3, [sp, #24]
+ 818 0266 0522     		movs	r2, #5
+ 819 0268 1A70     		strb	r2, [r3]
+ 565:../emlib/src/em_i2c.c ****           continue;
+ 820              		.loc 2 565 0
+ 821 026a CAE0     		b	.L55
+ 822              	.L64:
+ 566:../emlib/src/em_i2c.c ****         }
+ 567:../emlib/src/em_i2c.c ****       }
+ 568:../emlib/src/em_i2c.c ****       goto done;
+ 823              		.loc 2 568 0
+ 824 026c CAE0     		b	.L36
+ 825              	.L82:
+ 826 026e 00BF     		.align	2
+ 827              	.L81:
+ 828 0270 00A00040 		.word	1073782784
+ 829 0274 00000000 		.word	.LC0
+ 830 0278 00000000 		.word	i2cTransfer
+ARM GAS  /tmp/ccy9eJxb.s 			page 27
+
+
+ 831              	.L44:
+ 569:../emlib/src/em_i2c.c **** 
+ 570:../emlib/src/em_i2c.c ****     /*****************************/
+ 571:../emlib/src/em_i2c.c ****     /* Send a data byte to slave */
+ 572:../emlib/src/em_i2c.c ****     /*****************************/
+ 573:../emlib/src/em_i2c.c ****     case i2cStateDataSend:
+ 574:../emlib/src/em_i2c.c ****       /* Reached end of data buffer? */
+ 575:../emlib/src/em_i2c.c ****       if (transfer->offset >= seq->buf[transfer->bufIndx].len)
+ 832              		.loc 2 575 0
+ 833 027c 069B     		ldr	r3, [sp, #24]
+ 834 027e 5A88     		ldrh	r2, [r3, #2]
+ 835 0280 069B     		ldr	r3, [sp, #24]
+ 836 0282 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 837 0284 0599     		ldr	r1, [sp, #20]
+ 838 0286 DB00     		lsls	r3, r3, #3
+ 839 0288 0B44     		add	r3, r3, r1
+ 840 028a 1B89     		ldrh	r3, [r3, #8]
+ 841 028c 9A42     		cmp	r2, r3
+ 842 028e 24D3     		bcc	.L66
+ 576:../emlib/src/em_i2c.c ****       {
+ 577:../emlib/src/em_i2c.c ****         /* Move to next message part */
+ 578:../emlib/src/em_i2c.c ****         transfer->offset = 0;
+ 843              		.loc 2 578 0
+ 844 0290 069B     		ldr	r3, [sp, #24]
+ 845 0292 0022     		movs	r2, #0
+ 846 0294 5A80     		strh	r2, [r3, #2]	@ movhi
+ 579:../emlib/src/em_i2c.c ****         transfer->bufIndx++;
+ 847              		.loc 2 579 0
+ 848 0296 069B     		ldr	r3, [sp, #24]
+ 849 0298 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 850 029a 0133     		adds	r3, r3, #1
+ 851 029c DAB2     		uxtb	r2, r3
+ 852 029e 069B     		ldr	r3, [sp, #24]
+ 853 02a0 1A71     		strb	r2, [r3, #4]
+ 580:../emlib/src/em_i2c.c **** 
+ 581:../emlib/src/em_i2c.c ****         /* Send repeated start when switching to read mode on 2nd buffer */
+ 582:../emlib/src/em_i2c.c ****         if (seq->flags & I2C_FLAG_WRITE_READ)
+ 854              		.loc 2 582 0
+ 855 02a2 059B     		ldr	r3, [sp, #20]
+ 856 02a4 5B88     		ldrh	r3, [r3, #2]
+ 857 02a6 03F00403 		and	r3, r3, #4
+ 858 02aa 002B     		cmp	r3, #0
+ 859 02ac 03D0     		beq	.L67
+ 583:../emlib/src/em_i2c.c ****         {
+ 584:../emlib/src/em_i2c.c ****           transfer->state = i2cStateRStartAddrSend;
+ 860              		.loc 2 584 0
+ 861 02ae 069B     		ldr	r3, [sp, #24]
+ 862 02b0 0322     		movs	r2, #3
+ 863 02b2 1A70     		strb	r2, [r3]
+ 585:../emlib/src/em_i2c.c ****           continue;
+ 864              		.loc 2 585 0
+ 865 02b4 A5E0     		b	.L55
+ 866              	.L67:
+ 586:../emlib/src/em_i2c.c ****         }
+ 587:../emlib/src/em_i2c.c **** 
+ 588:../emlib/src/em_i2c.c ****         /* Only writing from one buffer, or finished both buffers */
+ 589:../emlib/src/em_i2c.c ****         if ((seq->flags & I2C_FLAG_WRITE) || (transfer->bufIndx > 1))
+ARM GAS  /tmp/ccy9eJxb.s 			page 28
+
+
+ 867              		.loc 2 589 0
+ 868 02b6 059B     		ldr	r3, [sp, #20]
+ 869 02b8 5B88     		ldrh	r3, [r3, #2]
+ 870 02ba 03F00103 		and	r3, r3, #1
+ 871 02be 002B     		cmp	r3, #0
+ 872 02c0 03D1     		bne	.L68
+ 873              		.loc 2 589 0 is_stmt 0 discriminator 1
+ 874 02c2 069B     		ldr	r3, [sp, #24]
+ 875 02c4 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 876 02c6 012B     		cmp	r3, #1
+ 877 02c8 06D9     		bls	.L69
+ 878              	.L68:
+ 590:../emlib/src/em_i2c.c ****         {
+ 591:../emlib/src/em_i2c.c ****           transfer->state = i2cStateWFStopSent;
+ 879              		.loc 2 591 0 is_stmt 1
+ 880 02ca 069B     		ldr	r3, [sp, #24]
+ 881 02cc 0822     		movs	r2, #8
+ 882 02ce 1A70     		strb	r2, [r3]
+ 592:../emlib/src/em_i2c.c ****           i2c->CMD        = I2C_CMD_STOP;
+ 883              		.loc 2 592 0
+ 884 02d0 019B     		ldr	r3, [sp, #4]
+ 885 02d2 0222     		movs	r2, #2
+ 886 02d4 5A60     		str	r2, [r3, #4]
+ 593:../emlib/src/em_i2c.c ****           goto done;
+ 887              		.loc 2 593 0
+ 888 02d6 95E0     		b	.L36
+ 889              	.L69:
+ 594:../emlib/src/em_i2c.c ****         }
+ 595:../emlib/src/em_i2c.c **** 
+ 596:../emlib/src/em_i2c.c ****         /* Reprocess in case next buffer is empty */
+ 597:../emlib/src/em_i2c.c ****         continue;
+ 890              		.loc 2 597 0
+ 891 02d8 93E0     		b	.L55
+ 892              	.L66:
+ 598:../emlib/src/em_i2c.c ****       }
+ 599:../emlib/src/em_i2c.c **** 
+ 600:../emlib/src/em_i2c.c ****       /* Send byte */
+ 601:../emlib/src/em_i2c.c ****       i2c->TXDATA     = (uint32_t)(seq->buf[transfer->bufIndx].data[transfer->offset++]);
+ 893              		.loc 2 601 0
+ 894 02da 069B     		ldr	r3, [sp, #24]
+ 895 02dc 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 896 02de 059A     		ldr	r2, [sp, #20]
+ 897 02e0 DB00     		lsls	r3, r3, #3
+ 898 02e2 1344     		add	r3, r3, r2
+ 899 02e4 5A68     		ldr	r2, [r3, #4]
+ 900 02e6 069B     		ldr	r3, [sp, #24]
+ 901 02e8 5B88     		ldrh	r3, [r3, #2]
+ 902 02ea 591C     		adds	r1, r3, #1
+ 903 02ec 88B2     		uxth	r0, r1
+ 904 02ee 0699     		ldr	r1, [sp, #24]
+ 905 02f0 4880     		strh	r0, [r1, #2]	@ movhi
+ 906 02f2 1344     		add	r3, r3, r2
+ 907 02f4 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 908 02f6 1A46     		mov	r2, r3
+ 909 02f8 019B     		ldr	r3, [sp, #4]
+ 910 02fa 5A62     		str	r2, [r3, #36]
+ 602:../emlib/src/em_i2c.c ****       transfer->state = i2cStateDataWFAckNack;
+ARM GAS  /tmp/ccy9eJxb.s 			page 29
+
+
+ 911              		.loc 2 602 0
+ 912 02fc 069B     		ldr	r3, [sp, #24]
+ 913 02fe 0622     		movs	r2, #6
+ 914 0300 1A70     		strb	r2, [r3]
+ 603:../emlib/src/em_i2c.c ****       goto done;
+ 915              		.loc 2 603 0
+ 916 0302 7FE0     		b	.L36
+ 917              	.L45:
+ 604:../emlib/src/em_i2c.c **** 
+ 605:../emlib/src/em_i2c.c ****     /*********************************************************/
+ 606:../emlib/src/em_i2c.c ****     /* Wait for ACK/NACK from slave after sending data to it */
+ 607:../emlib/src/em_i2c.c ****     /*********************************************************/
+ 608:../emlib/src/em_i2c.c ****     case i2cStateDataWFAckNack:
+ 609:../emlib/src/em_i2c.c ****       if (pending & I2C_IF_NACK)
+ 918              		.loc 2 609 0
+ 919 0304 049B     		ldr	r3, [sp, #16]
+ 920 0306 03F08003 		and	r3, r3, #128
+ 921 030a 002B     		cmp	r3, #0
+ 922 030c 0CD0     		beq	.L70
+ 610:../emlib/src/em_i2c.c ****       {
+ 611:../emlib/src/em_i2c.c ****         i2c->IFC         = I2C_IFC_NACK;
+ 923              		.loc 2 611 0
+ 924 030e 019B     		ldr	r3, [sp, #4]
+ 925 0310 8022     		movs	r2, #128
+ 926 0312 1A63     		str	r2, [r3, #48]
+ 612:../emlib/src/em_i2c.c ****         transfer->result = i2cTransferNack;
+ 927              		.loc 2 612 0
+ 928 0314 069B     		ldr	r3, [sp, #24]
+ 929 0316 FF22     		movs	r2, #255
+ 930 0318 5A70     		strb	r2, [r3, #1]
+ 613:../emlib/src/em_i2c.c ****         transfer->state  = i2cStateWFStopSent;
+ 931              		.loc 2 613 0
+ 932 031a 069B     		ldr	r3, [sp, #24]
+ 933 031c 0822     		movs	r2, #8
+ 934 031e 1A70     		strb	r2, [r3]
+ 614:../emlib/src/em_i2c.c ****         i2c->CMD         = I2C_CMD_STOP;
+ 935              		.loc 2 614 0
+ 936 0320 019B     		ldr	r3, [sp, #4]
+ 937 0322 0222     		movs	r2, #2
+ 938 0324 5A60     		str	r2, [r3, #4]
+ 939 0326 0BE0     		b	.L71
+ 940              	.L70:
+ 615:../emlib/src/em_i2c.c ****       }
+ 616:../emlib/src/em_i2c.c ****       else if (pending & I2C_IF_ACK)
+ 941              		.loc 2 616 0
+ 942 0328 049B     		ldr	r3, [sp, #16]
+ 943 032a 03F04003 		and	r3, r3, #64
+ 944 032e 002B     		cmp	r3, #0
+ 945 0330 06D0     		beq	.L71
+ 617:../emlib/src/em_i2c.c ****       {
+ 618:../emlib/src/em_i2c.c ****         i2c->IFC        = I2C_IFC_ACK;
+ 946              		.loc 2 618 0
+ 947 0332 019B     		ldr	r3, [sp, #4]
+ 948 0334 4022     		movs	r2, #64
+ 949 0336 1A63     		str	r2, [r3, #48]
+ 619:../emlib/src/em_i2c.c ****         transfer->state = i2cStateDataSend;
+ 950              		.loc 2 619 0
+ARM GAS  /tmp/ccy9eJxb.s 			page 30
+
+
+ 951 0338 069B     		ldr	r3, [sp, #24]
+ 952 033a 0522     		movs	r2, #5
+ 953 033c 1A70     		strb	r2, [r3]
+ 620:../emlib/src/em_i2c.c ****         continue;
+ 954              		.loc 2 620 0
+ 955 033e 60E0     		b	.L55
+ 956              	.L71:
+ 621:../emlib/src/em_i2c.c ****       }
+ 622:../emlib/src/em_i2c.c ****       goto done;
+ 957              		.loc 2 622 0
+ 958 0340 60E0     		b	.L36
+ 959              	.L46:
+ 623:../emlib/src/em_i2c.c **** 
+ 624:../emlib/src/em_i2c.c ****     /****************************/
+ 625:../emlib/src/em_i2c.c ****     /* Wait for data from slave */
+ 626:../emlib/src/em_i2c.c ****     /****************************/
+ 627:../emlib/src/em_i2c.c ****     case i2cStateWFData:
+ 628:../emlib/src/em_i2c.c ****       if (pending & I2C_IF_RXDATAV)
+ 960              		.loc 2 628 0
+ 961 0342 049B     		ldr	r3, [sp, #16]
+ 962 0344 03F02003 		and	r3, r3, #32
+ 963 0348 002B     		cmp	r3, #0
+ 964 034a 44D0     		beq	.L72
+ 965              	.LBB2:
+ 629:../emlib/src/em_i2c.c ****       {
+ 630:../emlib/src/em_i2c.c ****         uint8_t       data;
+ 631:../emlib/src/em_i2c.c ****         unsigned int  rxLen = seq->buf[transfer->bufIndx].len;
+ 966              		.loc 2 631 0
+ 967 034c 069B     		ldr	r3, [sp, #24]
+ 968 034e 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 969 0350 059A     		ldr	r2, [sp, #20]
+ 970 0352 DB00     		lsls	r3, r3, #3
+ 971 0354 1344     		add	r3, r3, r2
+ 972 0356 1B89     		ldrh	r3, [r3, #8]
+ 973 0358 0393     		str	r3, [sp, #12]
+ 632:../emlib/src/em_i2c.c **** 
+ 633:../emlib/src/em_i2c.c ****         /* Must read out data in order to not block further progress */
+ 634:../emlib/src/em_i2c.c ****         data = (uint8_t)(i2c->RXDATA);
+ 974              		.loc 2 634 0
+ 975 035a 019B     		ldr	r3, [sp, #4]
+ 976 035c DB69     		ldr	r3, [r3, #28]
+ 977 035e 8DF80B30 		strb	r3, [sp, #11]
+ 635:../emlib/src/em_i2c.c **** 
+ 636:../emlib/src/em_i2c.c ****         /* Make sure not storing beyond end of buffer just in case */
+ 637:../emlib/src/em_i2c.c ****         if (transfer->offset < rxLen)
+ 978              		.loc 2 637 0
+ 979 0362 069B     		ldr	r3, [sp, #24]
+ 980 0364 5B88     		ldrh	r3, [r3, #2]
+ 981 0366 1A46     		mov	r2, r3
+ 982 0368 039B     		ldr	r3, [sp, #12]
+ 983 036a 9A42     		cmp	r2, r3
+ 984 036c 0FD2     		bcs	.L73
+ 638:../emlib/src/em_i2c.c ****         {
+ 639:../emlib/src/em_i2c.c ****           seq->buf[transfer->bufIndx].data[transfer->offset++] = data;
+ 985              		.loc 2 639 0
+ 986 036e 069B     		ldr	r3, [sp, #24]
+ 987 0370 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ARM GAS  /tmp/ccy9eJxb.s 			page 31
+
+
+ 988 0372 059A     		ldr	r2, [sp, #20]
+ 989 0374 DB00     		lsls	r3, r3, #3
+ 990 0376 1344     		add	r3, r3, r2
+ 991 0378 5A68     		ldr	r2, [r3, #4]
+ 992 037a 069B     		ldr	r3, [sp, #24]
+ 993 037c 5B88     		ldrh	r3, [r3, #2]
+ 994 037e 591C     		adds	r1, r3, #1
+ 995 0380 88B2     		uxth	r0, r1
+ 996 0382 0699     		ldr	r1, [sp, #24]
+ 997 0384 4880     		strh	r0, [r1, #2]	@ movhi
+ 998 0386 1344     		add	r3, r3, r2
+ 999 0388 9DF80B20 		ldrb	r2, [sp, #11]
+ 1000 038c 1A70     		strb	r2, [r3]
+ 1001              	.L73:
+ 640:../emlib/src/em_i2c.c ****         }
+ 641:../emlib/src/em_i2c.c **** 
+ 642:../emlib/src/em_i2c.c ****         /* If we have read all requested data, then the sequence should end */
+ 643:../emlib/src/em_i2c.c ****         if (transfer->offset >= rxLen)
+ 1002              		.loc 2 643 0
+ 1003 038e 069B     		ldr	r3, [sp, #24]
+ 1004 0390 5B88     		ldrh	r3, [r3, #2]
+ 1005 0392 1A46     		mov	r2, r3
+ 1006 0394 039B     		ldr	r3, [sp, #12]
+ 1007 0396 9A42     		cmp	r2, r3
+ 1008 0398 0CD3     		bcc	.L74
+ 644:../emlib/src/em_i2c.c ****         {
+ 645:../emlib/src/em_i2c.c ****           /* If there is only one byte to receive we need to transmit the
+ 646:../emlib/src/em_i2c.c ****              NACK now, before the stop. */
+ 647:../emlib/src/em_i2c.c ****           if (1 == rxLen)
+ 1009              		.loc 2 647 0
+ 1010 039a 039B     		ldr	r3, [sp, #12]
+ 1011 039c 012B     		cmp	r3, #1
+ 1012 039e 02D1     		bne	.L75
+ 648:../emlib/src/em_i2c.c ****           {
+ 649:../emlib/src/em_i2c.c ****             i2c->CMD  = I2C_CMD_NACK;
+ 1013              		.loc 2 649 0
+ 1014 03a0 019B     		ldr	r3, [sp, #4]
+ 1015 03a2 0822     		movs	r2, #8
+ 1016 03a4 5A60     		str	r2, [r3, #4]
+ 1017              	.L75:
+ 650:../emlib/src/em_i2c.c ****           }
+ 651:../emlib/src/em_i2c.c ****             
+ 652:../emlib/src/em_i2c.c ****           transfer->state = i2cStateWFStopSent;
+ 1018              		.loc 2 652 0
+ 1019 03a6 069B     		ldr	r3, [sp, #24]
+ 1020 03a8 0822     		movs	r2, #8
+ 1021 03aa 1A70     		strb	r2, [r3]
+ 653:../emlib/src/em_i2c.c ****           i2c->CMD        = I2C_CMD_STOP;
+ 1022              		.loc 2 653 0
+ 1023 03ac 019B     		ldr	r3, [sp, #4]
+ 1024 03ae 0222     		movs	r2, #2
+ 1025 03b0 5A60     		str	r2, [r3, #4]
+ 1026 03b2 10E0     		b	.L72
+ 1027              	.L74:
+ 654:../emlib/src/em_i2c.c ****         }
+ 655:../emlib/src/em_i2c.c ****         else
+ 656:../emlib/src/em_i2c.c ****         {
+ARM GAS  /tmp/ccy9eJxb.s 			page 32
+
+
+ 657:../emlib/src/em_i2c.c ****           /* Send ACK and wait for next byte */
+ 658:../emlib/src/em_i2c.c ****           i2c->CMD = I2C_CMD_ACK;
+ 1028              		.loc 2 658 0
+ 1029 03b4 019B     		ldr	r3, [sp, #4]
+ 1030 03b6 0422     		movs	r2, #4
+ 1031 03b8 5A60     		str	r2, [r3, #4]
+ 659:../emlib/src/em_i2c.c **** 
+ 660:../emlib/src/em_i2c.c ****           if ( (1<rxLen) && (transfer->offset == (rxLen-1)) )
+ 1032              		.loc 2 660 0
+ 1033 03ba 039B     		ldr	r3, [sp, #12]
+ 1034 03bc 012B     		cmp	r3, #1
+ 1035 03be 0AD9     		bls	.L72
+ 1036              		.loc 2 660 0 is_stmt 0 discriminator 1
+ 1037 03c0 069B     		ldr	r3, [sp, #24]
+ 1038 03c2 5B88     		ldrh	r3, [r3, #2]
+ 1039 03c4 1A46     		mov	r2, r3
+ 1040 03c6 039B     		ldr	r3, [sp, #12]
+ 1041 03c8 013B     		subs	r3, r3, #1
+ 1042 03ca 9A42     		cmp	r2, r3
+ 1043 03cc 03D1     		bne	.L72
+ 661:../emlib/src/em_i2c.c ****           {
+ 662:../emlib/src/em_i2c.c ****             /* If there is more than one byte to receive and this is the next
+ 663:../emlib/src/em_i2c.c ****                to last byte we need to transmit the NACK now, before receiving
+ 664:../emlib/src/em_i2c.c ****                the last byte. */
+ 665:../emlib/src/em_i2c.c ****             i2c->CMD  = I2C_CMD_NACK;
+ 1044              		.loc 2 665 0 is_stmt 1
+ 1045 03ce 019B     		ldr	r3, [sp, #4]
+ 1046 03d0 0822     		movs	r2, #8
+ 1047 03d2 5A60     		str	r2, [r3, #4]
+ 1048              	.LBE2:
+ 666:../emlib/src/em_i2c.c ****           }
+ 667:../emlib/src/em_i2c.c ****         }
+ 668:../emlib/src/em_i2c.c ****       }
+ 669:../emlib/src/em_i2c.c ****       goto done;
+ 1049              		.loc 2 669 0
+ 1050 03d4 16E0     		b	.L36
+ 1051              	.L72:
+ 1052 03d6 15E0     		b	.L36
+ 1053              	.L47:
+ 670:../emlib/src/em_i2c.c **** 
+ 671:../emlib/src/em_i2c.c ****     /***********************************/
+ 672:../emlib/src/em_i2c.c ****     /* Wait for STOP to have been sent */
+ 673:../emlib/src/em_i2c.c ****     /***********************************/
+ 674:../emlib/src/em_i2c.c ****     case i2cStateWFStopSent:
+ 675:../emlib/src/em_i2c.c ****       if (pending & I2C_IF_MSTOP)
+ 1054              		.loc 2 675 0
+ 1055 03d8 049B     		ldr	r3, [sp, #16]
+ 1056 03da 03F48073 		and	r3, r3, #256
+ 1057 03de 002B     		cmp	r3, #0
+ 1058 03e0 07D0     		beq	.L76
+ 676:../emlib/src/em_i2c.c ****       {
+ 677:../emlib/src/em_i2c.c ****         i2c->IFC        = I2C_IFC_MSTOP;
+ 1059              		.loc 2 677 0
+ 1060 03e2 019B     		ldr	r3, [sp, #4]
+ 1061 03e4 4FF48072 		mov	r2, #256
+ 1062 03e8 1A63     		str	r2, [r3, #48]
+ 678:../emlib/src/em_i2c.c ****         transfer->state = i2cStateDone;
+ARM GAS  /tmp/ccy9eJxb.s 			page 33
+
+
+ 1063              		.loc 2 678 0
+ 1064 03ea 069B     		ldr	r3, [sp, #24]
+ 1065 03ec 0922     		movs	r2, #9
+ 1066 03ee 1A70     		strb	r2, [r3]
+ 679:../emlib/src/em_i2c.c ****       }
+ 680:../emlib/src/em_i2c.c ****       goto done;
+ 1067              		.loc 2 680 0
+ 1068 03f0 08E0     		b	.L36
+ 1069              	.L76:
+ 1070 03f2 07E0     		b	.L36
+ 1071              	.L37:
+ 681:../emlib/src/em_i2c.c **** 
+ 682:../emlib/src/em_i2c.c ****     /******************************/
+ 683:../emlib/src/em_i2c.c ****     /* Unexpected state, SW fault */
+ 684:../emlib/src/em_i2c.c ****     /******************************/
+ 685:../emlib/src/em_i2c.c ****     default:
+ 686:../emlib/src/em_i2c.c ****       transfer->result = i2cTransferSwFault;
+ 1072              		.loc 2 686 0
+ 1073 03f4 069B     		ldr	r3, [sp, #24]
+ 1074 03f6 FB22     		movs	r2, #251
+ 1075 03f8 5A70     		strb	r2, [r3, #1]
+ 687:../emlib/src/em_i2c.c ****       transfer->state  = i2cStateDone;
+ 1076              		.loc 2 687 0
+ 1077 03fa 069B     		ldr	r3, [sp, #24]
+ 1078 03fc 0922     		movs	r2, #9
+ 1079 03fe 1A70     		strb	r2, [r3]
+ 688:../emlib/src/em_i2c.c ****       goto done;
+ 1080              		.loc 2 688 0
+ 1081 0400 00E0     		b	.L36
+ 1082              	.L55:
+ 689:../emlib/src/em_i2c.c ****     }
+ 690:../emlib/src/em_i2c.c ****   }
+ 1083              		.loc 2 690 0
+ 1084 0402 15E6     		b	.L77
+ 1085              	.L36:
+ 691:../emlib/src/em_i2c.c **** 
+ 692:../emlib/src/em_i2c.c ****  done:
+ 693:../emlib/src/em_i2c.c **** 
+ 694:../emlib/src/em_i2c.c ****   if (transfer->state == i2cStateDone)
+ 1086              		.loc 2 694 0
+ 1087 0404 069B     		ldr	r3, [sp, #24]
+ 1088 0406 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1089 0408 092B     		cmp	r3, #9
+ 1090 040a 0BD1     		bne	.L78
+ 695:../emlib/src/em_i2c.c ****   {
+ 696:../emlib/src/em_i2c.c ****     /* Disable interrupt sources when done */
+ 697:../emlib/src/em_i2c.c ****     i2c->IEN = 0;
+ 1091              		.loc 2 697 0
+ 1092 040c 019B     		ldr	r3, [sp, #4]
+ 1093 040e 0022     		movs	r2, #0
+ 1094 0410 5A63     		str	r2, [r3, #52]
+ 698:../emlib/src/em_i2c.c **** 
+ 699:../emlib/src/em_i2c.c ****     /* Update result unless some fault already occurred */
+ 700:../emlib/src/em_i2c.c ****     if (transfer->result == i2cTransferInProgress)
+ 1095              		.loc 2 700 0
+ 1096 0412 069B     		ldr	r3, [sp, #24]
+ 1097 0414 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ARM GAS  /tmp/ccy9eJxb.s 			page 34
+
+
+ 1098 0416 5BB2     		sxtb	r3, r3
+ 1099 0418 012B     		cmp	r3, #1
+ 1100 041a 05D1     		bne	.L80
+ 701:../emlib/src/em_i2c.c ****     {
+ 702:../emlib/src/em_i2c.c ****       transfer->result = i2cTransferDone;
+ 1101              		.loc 2 702 0
+ 1102 041c 069B     		ldr	r3, [sp, #24]
+ 1103 041e 0022     		movs	r2, #0
+ 1104 0420 5A70     		strb	r2, [r3, #1]
+ 1105 0422 01E0     		b	.L80
+ 1106              	.L78:
+ 703:../emlib/src/em_i2c.c ****     }
+ 704:../emlib/src/em_i2c.c ****   }
+ 705:../emlib/src/em_i2c.c ****   /* Until transfer is done keep returning i2cTransferInProgress */
+ 706:../emlib/src/em_i2c.c ****   else
+ 707:../emlib/src/em_i2c.c ****   {
+ 708:../emlib/src/em_i2c.c ****     return(i2cTransferInProgress);
+ 1107              		.loc 2 708 0
+ 1108 0424 0123     		movs	r3, #1
+ 1109 0426 01E0     		b	.L32
+ 1110              	.L80:
+ 709:../emlib/src/em_i2c.c ****   }
+ 710:../emlib/src/em_i2c.c **** 
+ 711:../emlib/src/em_i2c.c ****   return transfer->result;
+ 1111              		.loc 2 711 0
+ 1112 0428 069B     		ldr	r3, [sp, #24]
+ 1113 042a 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 1114              	.L32:
+ 1115 042c 5BB2     		sxtb	r3, r3
+ 712:../emlib/src/em_i2c.c **** }
+ 1116              		.loc 2 712 0
+ 1117 042e 1846     		mov	r0, r3
+ 1118 0430 09B0     		add	sp, sp, #36
+ 1119              		@ sp needed
+ 1120 0432 5DF804FB 		ldr	pc, [sp], #4
+ 1121              		.cfi_endproc
+ 1122              	.LFE85:
+ 1124 0436 00BF     		.section	.text.I2C_TransferInit,"ax",%progbits
+ 1125              		.align	2
+ 1126              		.global	I2C_TransferInit
+ 1127              		.thumb
+ 1128              		.thumb_func
+ 1130              	I2C_TransferInit:
+ 1131              	.LFB86:
+ 713:../emlib/src/em_i2c.c **** 
+ 714:../emlib/src/em_i2c.c **** 
+ 715:../emlib/src/em_i2c.c **** /***************************************************************************//**
+ 716:../emlib/src/em_i2c.c ****  * @brief
+ 717:../emlib/src/em_i2c.c ****  *   Prepare and start an I2C transfer (single master mode only).
+ 718:../emlib/src/em_i2c.c ****  *
+ 719:../emlib/src/em_i2c.c ****  * @details
+ 720:../emlib/src/em_i2c.c ****  *   This function must be invoked in order to start an I2C transfer
+ 721:../emlib/src/em_i2c.c ****  *   sequence. In order to actually complete the transfer, I2C_Transfer() must
+ 722:../emlib/src/em_i2c.c ****  *   be used either in polled mode or by adding a small driver wrapper utilizing
+ 723:../emlib/src/em_i2c.c ****  *   interrupts.
+ 724:../emlib/src/em_i2c.c ****  *
+ 725:../emlib/src/em_i2c.c ****  * @note
+ARM GAS  /tmp/ccy9eJxb.s 			page 35
+
+
+ 726:../emlib/src/em_i2c.c ****  *   Only single master mode is supported.
+ 727:../emlib/src/em_i2c.c ****  *
+ 728:../emlib/src/em_i2c.c ****  * @param[in] i2c
+ 729:../emlib/src/em_i2c.c ****  *   Pointer to I2C peripheral register block.
+ 730:../emlib/src/em_i2c.c ****  *
+ 731:../emlib/src/em_i2c.c ****  * @param[in] seq
+ 732:../emlib/src/em_i2c.c ****  *   Pointer to sequence structure defining the I2C transfer to take place. The
+ 733:../emlib/src/em_i2c.c ****  *   referenced structure must exist until the transfer has fully completed.
+ 734:../emlib/src/em_i2c.c ****  *
+ 735:../emlib/src/em_i2c.c ****  * @return
+ 736:../emlib/src/em_i2c.c ****  *   Returns status for ongoing transfer:
+ 737:../emlib/src/em_i2c.c ****  *   @li #i2cTransferInProgress - indicates that transfer not finished.
+ 738:../emlib/src/em_i2c.c ****  *   @li otherwise some sort of error has occurred.
+ 739:../emlib/src/em_i2c.c ****  ******************************************************************************/
+ 740:../emlib/src/em_i2c.c **** I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
+ 741:../emlib/src/em_i2c.c ****                                             I2C_TransferSeq_TypeDef *seq)
+ 742:../emlib/src/em_i2c.c **** {
+ 1132              		.loc 2 742 0
+ 1133              		.cfi_startproc
+ 1134              		@ args = 0, pretend = 0, frame = 16
+ 1135              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1136 0000 00B5     		push	{lr}
+ 1137              		.cfi_def_cfa_offset 4
+ 1138              		.cfi_offset 14, -4
+ 1139 0002 85B0     		sub	sp, sp, #20
+ 1140              		.cfi_def_cfa_offset 24
+ 1141 0004 0190     		str	r0, [sp, #4]
+ 1142 0006 0091     		str	r1, [sp]
+ 743:../emlib/src/em_i2c.c ****   I2C_Transfer_TypeDef *transfer;
+ 744:../emlib/src/em_i2c.c **** 
+ 745:../emlib/src/em_i2c.c ****   EFM_ASSERT(I2C_REF_VALID(i2c));
+ 1143              		.loc 2 745 0
+ 1144 0008 019A     		ldr	r2, [sp, #4]
+ 1145 000a 314B     		ldr	r3, .L95
+ 1146 000c 9A42     		cmp	r2, r3
+ 1147 000e 04D0     		beq	.L84
+ 1148              		.loc 2 745 0 is_stmt 0 discriminator 1
+ 1149 0010 3048     		ldr	r0, .L95+4
+ 1150 0012 40F2E921 		movw	r1, #745
+ 1151 0016 FFF7FEFF 		bl	assertEFM
+ 1152              	.L84:
+ 746:../emlib/src/em_i2c.c ****   EFM_ASSERT(seq);
+ 1153              		.loc 2 746 0 is_stmt 1
+ 1154 001a 009B     		ldr	r3, [sp]
+ 1155 001c 002B     		cmp	r3, #0
+ 1156 001e 04D1     		bne	.L85
+ 1157              		.loc 2 746 0 is_stmt 0 discriminator 1
+ 1158 0020 2C48     		ldr	r0, .L95+4
+ 1159 0022 40F2EA21 		movw	r1, #746
+ 1160 0026 FFF7FEFF 		bl	assertEFM
+ 1161              	.L85:
+ 747:../emlib/src/em_i2c.c **** 
+ 748:../emlib/src/em_i2c.c ****   /* Support up to 2 I2C buses */
+ 749:../emlib/src/em_i2c.c ****   if (i2c == I2C0)
+ 1162              		.loc 2 749 0 is_stmt 1
+ 1163 002a 019A     		ldr	r2, [sp, #4]
+ 1164 002c 284B     		ldr	r3, .L95
+ARM GAS  /tmp/ccy9eJxb.s 			page 36
+
+
+ 1165 002e 9A42     		cmp	r2, r3
+ 1166 0030 08D1     		bne	.L86
+ 750:../emlib/src/em_i2c.c ****   {
+ 751:../emlib/src/em_i2c.c ****     transfer = i2cTransfer;
+ 1167              		.loc 2 751 0
+ 1168 0032 294B     		ldr	r3, .L95+8
+ 1169 0034 0393     		str	r3, [sp, #12]
+ 752:../emlib/src/em_i2c.c ****   }
+ 753:../emlib/src/em_i2c.c **** #if (I2C_COUNT > 1)
+ 754:../emlib/src/em_i2c.c ****   else if (i2c == I2C1)
+ 755:../emlib/src/em_i2c.c ****   {
+ 756:../emlib/src/em_i2c.c ****     transfer = i2cTransfer + 1;
+ 757:../emlib/src/em_i2c.c ****   }
+ 758:../emlib/src/em_i2c.c **** #endif
+ 759:../emlib/src/em_i2c.c ****   else
+ 760:../emlib/src/em_i2c.c ****   {
+ 761:../emlib/src/em_i2c.c ****     return(i2cTransferUsageFault);
+ 762:../emlib/src/em_i2c.c ****   }
+ 763:../emlib/src/em_i2c.c **** 
+ 764:../emlib/src/em_i2c.c ****   /* Check if in busy state. Since this SW assumes single master, we can */
+ 765:../emlib/src/em_i2c.c ****   /* just issue an abort. The BUSY state is normal after a reset. */
+ 766:../emlib/src/em_i2c.c ****   if (i2c->STATE & I2C_STATE_BUSY)
+ 1170              		.loc 2 766 0
+ 1171 0036 019B     		ldr	r3, [sp, #4]
+ 1172 0038 9B68     		ldr	r3, [r3, #8]
+ 1173 003a 03F00103 		and	r3, r3, #1
+ 1174 003e 002B     		cmp	r3, #0
+ 1175 0040 05D0     		beq	.L89
+ 1176 0042 01E0     		b	.L94
+ 1177              	.L86:
+ 761:../emlib/src/em_i2c.c ****     return(i2cTransferUsageFault);
+ 1178              		.loc 2 761 0
+ 1179 0044 FC23     		movs	r3, #252
+ 1180 0046 3DE0     		b	.L88
+ 1181              	.L94:
+ 767:../emlib/src/em_i2c.c ****   {
+ 768:../emlib/src/em_i2c.c ****     i2c->CMD = I2C_CMD_ABORT;
+ 1182              		.loc 2 768 0
+ 1183 0048 019B     		ldr	r3, [sp, #4]
+ 1184 004a 2022     		movs	r2, #32
+ 1185 004c 5A60     		str	r2, [r3, #4]
+ 1186              	.L89:
+ 769:../emlib/src/em_i2c.c ****   }
+ 770:../emlib/src/em_i2c.c **** 
+ 771:../emlib/src/em_i2c.c ****   /* Make sure user is not trying to read 0 bytes, it is not */
+ 772:../emlib/src/em_i2c.c ****   /* possible according to I2C spec, since slave will always start */
+ 773:../emlib/src/em_i2c.c ****   /* sending first byte ACK on address. The read operation can */
+ 774:../emlib/src/em_i2c.c ****   /* only be stopped by NACKing a received byte, ie minimum 1 byte. */
+ 775:../emlib/src/em_i2c.c ****   if (((seq->flags & I2C_FLAG_READ) && !(seq->buf[0].len)) ||
+ 1187              		.loc 2 775 0
+ 1188 004e 009B     		ldr	r3, [sp]
+ 1189 0050 5B88     		ldrh	r3, [r3, #2]
+ 1190 0052 03F00203 		and	r3, r3, #2
+ 1191 0056 002B     		cmp	r3, #0
+ 1192 0058 03D0     		beq	.L90
+ 1193              		.loc 2 775 0 is_stmt 0 discriminator 1
+ 1194 005a 009B     		ldr	r3, [sp]
+ARM GAS  /tmp/ccy9eJxb.s 			page 37
+
+
+ 1195 005c 1B89     		ldrh	r3, [r3, #8]
+ 1196 005e 002B     		cmp	r3, #0
+ 1197 0060 09D0     		beq	.L91
+ 1198              	.L90:
+ 776:../emlib/src/em_i2c.c ****       ((seq->flags & I2C_FLAG_WRITE_READ) && !(seq->buf[1].len))
+ 1199              		.loc 2 776 0 is_stmt 1 discriminator 2
+ 1200 0062 009B     		ldr	r3, [sp]
+ 1201 0064 5B88     		ldrh	r3, [r3, #2]
+ 1202 0066 03F00403 		and	r3, r3, #4
+ 775:../emlib/src/em_i2c.c ****   if (((seq->flags & I2C_FLAG_READ) && !(seq->buf[0].len)) ||
+ 1203              		.loc 2 775 0 discriminator 2
+ 1204 006a 002B     		cmp	r3, #0
+ 1205 006c 05D0     		beq	.L92
+ 1206              		.loc 2 776 0
+ 1207 006e 009B     		ldr	r3, [sp]
+ 1208 0070 1B8A     		ldrh	r3, [r3, #16]
+ 1209 0072 002B     		cmp	r3, #0
+ 1210 0074 01D1     		bne	.L92
+ 1211              	.L91:
+ 777:../emlib/src/em_i2c.c ****       )
+ 778:../emlib/src/em_i2c.c ****   {
+ 779:../emlib/src/em_i2c.c ****     return(i2cTransferUsageFault);
+ 1212              		.loc 2 779 0
+ 1213 0076 FC23     		movs	r3, #252
+ 1214 0078 24E0     		b	.L88
+ 1215              	.L92:
+ 780:../emlib/src/em_i2c.c ****   }
+ 781:../emlib/src/em_i2c.c **** 
+ 782:../emlib/src/em_i2c.c ****   /* Prepare for a transfer */
+ 783:../emlib/src/em_i2c.c ****   transfer->state   = i2cStateStartAddrSend;
+ 1216              		.loc 2 783 0
+ 1217 007a 039B     		ldr	r3, [sp, #12]
+ 1218 007c 0022     		movs	r2, #0
+ 1219 007e 1A70     		strb	r2, [r3]
+ 784:../emlib/src/em_i2c.c ****   transfer->result  = i2cTransferInProgress;
+ 1220              		.loc 2 784 0
+ 1221 0080 039B     		ldr	r3, [sp, #12]
+ 1222 0082 0122     		movs	r2, #1
+ 1223 0084 5A70     		strb	r2, [r3, #1]
+ 785:../emlib/src/em_i2c.c ****   transfer->offset  = 0;
+ 1224              		.loc 2 785 0
+ 1225 0086 039B     		ldr	r3, [sp, #12]
+ 1226 0088 0022     		movs	r2, #0
+ 1227 008a 5A80     		strh	r2, [r3, #2]	@ movhi
+ 786:../emlib/src/em_i2c.c ****   transfer->bufIndx = 0;
+ 1228              		.loc 2 786 0
+ 1229 008c 039B     		ldr	r3, [sp, #12]
+ 1230 008e 0022     		movs	r2, #0
+ 1231 0090 1A71     		strb	r2, [r3, #4]
+ 787:../emlib/src/em_i2c.c ****   transfer->seq     = seq;
+ 1232              		.loc 2 787 0
+ 1233 0092 039B     		ldr	r3, [sp, #12]
+ 1234 0094 009A     		ldr	r2, [sp]
+ 1235 0096 9A60     		str	r2, [r3, #8]
+ 788:../emlib/src/em_i2c.c **** 
+ 789:../emlib/src/em_i2c.c ****   /* Ensure buffers are empty */
+ 790:../emlib/src/em_i2c.c ****   i2c->CMD = I2C_CMD_CLEARPC | I2C_CMD_CLEARTX;
+ARM GAS  /tmp/ccy9eJxb.s 			page 38
+
+
+ 1236              		.loc 2 790 0
+ 1237 0098 019B     		ldr	r3, [sp, #4]
+ 1238 009a C022     		movs	r2, #192
+ 1239 009c 5A60     		str	r2, [r3, #4]
+ 791:../emlib/src/em_i2c.c ****   if (i2c->IF & I2C_IF_RXDATAV)
+ 1240              		.loc 2 791 0
+ 1241 009e 019B     		ldr	r3, [sp, #4]
+ 1242 00a0 9B6A     		ldr	r3, [r3, #40]
+ 1243 00a2 03F02003 		and	r3, r3, #32
+ 1244 00a6 002B     		cmp	r3, #0
+ 1245 00a8 01D0     		beq	.L93
+ 792:../emlib/src/em_i2c.c ****   {
+ 793:../emlib/src/em_i2c.c ****     i2c->RXDATA;
+ 1246              		.loc 2 793 0
+ 1247 00aa 019B     		ldr	r3, [sp, #4]
+ 1248 00ac DB69     		ldr	r3, [r3, #28]
+ 1249              	.L93:
+ 794:../emlib/src/em_i2c.c ****   }
+ 795:../emlib/src/em_i2c.c **** 
+ 796:../emlib/src/em_i2c.c ****   /* Clear all pending interrupts prior to starting transfer. */
+ 797:../emlib/src/em_i2c.c ****   i2c->IFC = _I2C_IFC_MASK;
+ 1250              		.loc 2 797 0
+ 1251 00ae 019B     		ldr	r3, [sp, #4]
+ 1252 00b0 0A4A     		ldr	r2, .L95+12
+ 1253 00b2 1A63     		str	r2, [r3, #48]
+ 798:../emlib/src/em_i2c.c **** 
+ 799:../emlib/src/em_i2c.c ****   /* Enable those interrupts we are interested in throughout transfer. */
+ 800:../emlib/src/em_i2c.c ****   /* Notice that the I2C interrupt must also be enabled in the NVIC, but */
+ 801:../emlib/src/em_i2c.c ****   /* that is left for an additional driver wrapper. */
+ 802:../emlib/src/em_i2c.c ****   i2c->IEN = I2C_IF_NACK | I2C_IF_ACK | I2C_IF_MSTOP |
+ 1254              		.loc 2 802 0
+ 1255 00b4 019B     		ldr	r3, [sp, #4]
+ 1256 00b6 4FF4FC62 		mov	r2, #2016
+ 1257 00ba 5A63     		str	r2, [r3, #52]
+ 803:../emlib/src/em_i2c.c ****              I2C_IF_RXDATAV | I2C_IF_ERRORS;
+ 804:../emlib/src/em_i2c.c **** 
+ 805:../emlib/src/em_i2c.c ****   /* Start transfer */
+ 806:../emlib/src/em_i2c.c ****   return(I2C_Transfer(i2c));
+ 1258              		.loc 2 806 0
+ 1259 00bc 0198     		ldr	r0, [sp, #4]
+ 1260 00be FFF7FEFF 		bl	I2C_Transfer
+ 1261 00c2 0346     		mov	r3, r0
+ 1262              	.L88:
+ 1263 00c4 5BB2     		sxtb	r3, r3
+ 807:../emlib/src/em_i2c.c **** }
+ 1264              		.loc 2 807 0
+ 1265 00c6 1846     		mov	r0, r3
+ 1266 00c8 05B0     		add	sp, sp, #20
+ 1267              		@ sp needed
+ 1268 00ca 5DF804FB 		ldr	pc, [sp], #4
+ 1269              	.L96:
+ 1270 00ce 00BF     		.align	2
+ 1271              	.L95:
+ 1272 00d0 00A00040 		.word	1073782784
+ 1273 00d4 00000000 		.word	.LC0
+ 1274 00d8 00000000 		.word	i2cTransfer
+ 1275 00dc CFFF0100 		.word	131023
+ARM GAS  /tmp/ccy9eJxb.s 			page 39
+
+
+ 1276              		.cfi_endproc
+ 1277              	.LFE86:
+ 1279              		.text
+ 1280              	.Letext0:
+ 1281              		.file 3 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 1282              		.file 4 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 1283              		.file 5 "../Device/EnergyMicro/EFM32G/Include/efm32g_i2c.h"
+ 1284              		.file 6 "../emlib/inc/em_i2c.h"
+ 1285              		.file 7 "../emlib/inc/em_cmu.h"
+ 1286              		.file 8 "../CMSIS/Include/core_cm3.h"

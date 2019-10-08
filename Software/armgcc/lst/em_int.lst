@@ -1,0 +1,31 @@
+ARM GAS  /tmp/ccG51hLg.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"em_int.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.global	INT_LockCnt
+  19              		.section	.bss.INT_LockCnt,"aw",%nobits
+  20              		.align	2
+  23              	INT_LockCnt:
+  24 0000 00000000 		.space	4
+  25              		.text
+  26              	.Letext0:
+  27              		.file 1 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+  28              		.file 2 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+  29              		.file 3 "../CMSIS/Include/core_cm3.h"
+  30              		.file 4 "../emlib/src/em_int.c"

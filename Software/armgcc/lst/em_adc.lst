@@ -1,0 +1,1586 @@
+ARM GAS  /tmp/ccAbY0bm.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"em_adc.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.ADC_CalibrateLoadScan,"ax",%progbits
+  19              		.align	2
+  20              		.thumb
+  21              		.thumb_func
+  23              	ADC_CalibrateLoadScan:
+  24              	.LFB79:
+  25              		.file 1 "../emlib/src/em_adc.c"
+   1:../emlib/src/em_adc.c **** /***************************************************************************//**
+   2:../emlib/src/em_adc.c ****  * @file
+   3:../emlib/src/em_adc.c ****  * @brief Analog to Digital Converter (ADC) Peripheral API
+   4:../emlib/src/em_adc.c ****  * @author Energy Micro AS
+   5:../emlib/src/em_adc.c ****  * @version 3.20.2
+   6:../emlib/src/em_adc.c ****  *******************************************************************************
+   7:../emlib/src/em_adc.c ****  * @section License
+   8:../emlib/src/em_adc.c ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/src/em_adc.c ****  *******************************************************************************
+  10:../emlib/src/em_adc.c ****  *
+  11:../emlib/src/em_adc.c ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/src/em_adc.c ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/src/em_adc.c ****  * freely, subject to the following restrictions:
+  14:../emlib/src/em_adc.c ****  *
+  15:../emlib/src/em_adc.c ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/src/em_adc.c ****  *    claim that you wrote the original software.
+  17:../emlib/src/em_adc.c ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/src/em_adc.c ****  *    misrepresented as being the original software.
+  19:../emlib/src/em_adc.c ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/src/em_adc.c ****  *
+  21:../emlib/src/em_adc.c ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/src/em_adc.c ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/src/em_adc.c ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/src/em_adc.c ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/src/em_adc.c ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/src/em_adc.c ****  * of any proprietary rights of a third party.
+  27:../emlib/src/em_adc.c ****  *
+  28:../emlib/src/em_adc.c ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/src/em_adc.c ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/src/em_adc.c ****  * arising from your use of this Software.
+  31:../emlib/src/em_adc.c ****  *
+  32:../emlib/src/em_adc.c ****  ******************************************************************************/
+  33:../emlib/src/em_adc.c **** #include "em_adc.h"
+ARM GAS  /tmp/ccAbY0bm.s 			page 2
+
+
+  34:../emlib/src/em_adc.c **** #if defined(ADC_COUNT) && (ADC_COUNT > 0)
+  35:../emlib/src/em_adc.c **** 
+  36:../emlib/src/em_adc.c **** #include "em_cmu.h"
+  37:../emlib/src/em_adc.c **** #include "em_assert.h"
+  38:../emlib/src/em_adc.c **** 
+  39:../emlib/src/em_adc.c **** /***************************************************************************//**
+  40:../emlib/src/em_adc.c ****  * @addtogroup EM_Library
+  41:../emlib/src/em_adc.c ****  * @{
+  42:../emlib/src/em_adc.c ****  ******************************************************************************/
+  43:../emlib/src/em_adc.c **** 
+  44:../emlib/src/em_adc.c **** /***************************************************************************//**
+  45:../emlib/src/em_adc.c ****  * @addtogroup ADC
+  46:../emlib/src/em_adc.c ****  * @brief Analog to Digital Converter (ADC) Peripheral API
+  47:../emlib/src/em_adc.c ****  * @{
+  48:../emlib/src/em_adc.c ****  ******************************************************************************/
+  49:../emlib/src/em_adc.c **** 
+  50:../emlib/src/em_adc.c **** /*******************************************************************************
+  51:../emlib/src/em_adc.c ****  *******************************   DEFINES   ***********************************
+  52:../emlib/src/em_adc.c ****  ******************************************************************************/
+  53:../emlib/src/em_adc.c **** 
+  54:../emlib/src/em_adc.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  55:../emlib/src/em_adc.c **** 
+  56:../emlib/src/em_adc.c **** /** Validation of ADC register block pointer reference for assert statements. */
+  57:../emlib/src/em_adc.c **** #define ADC_REF_VALID(ref)    ((ref) == ADC0)
+  58:../emlib/src/em_adc.c **** 
+  59:../emlib/src/em_adc.c **** /** Max ADC clock */
+  60:../emlib/src/em_adc.c **** #define ADC_MAX_CLOCK    13000000
+  61:../emlib/src/em_adc.c **** 
+  62:../emlib/src/em_adc.c **** /** Min ADC clock */
+  63:../emlib/src/em_adc.c **** #define ADC_MIN_CLOCK    32000
+  64:../emlib/src/em_adc.c **** 
+  65:../emlib/src/em_adc.c **** /** @endcond */
+  66:../emlib/src/em_adc.c **** 
+  67:../emlib/src/em_adc.c **** 
+  68:../emlib/src/em_adc.c **** /*******************************************************************************
+  69:../emlib/src/em_adc.c ****  ***************************   LOCAL FUNCTIONS   *******************************
+  70:../emlib/src/em_adc.c ****  ******************************************************************************/
+  71:../emlib/src/em_adc.c **** 
+  72:../emlib/src/em_adc.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  73:../emlib/src/em_adc.c **** 
+  74:../emlib/src/em_adc.c **** /***************************************************************************//**
+  75:../emlib/src/em_adc.c ****  * @brief
+  76:../emlib/src/em_adc.c ****  *   Load SCAN calibrate register with predefined values for a certain
+  77:../emlib/src/em_adc.c ****  *   reference.
+  78:../emlib/src/em_adc.c ****  *
+  79:../emlib/src/em_adc.c ****  * @details
+  80:../emlib/src/em_adc.c ****  *   During production, calibration values are made and stored in the device
+  81:../emlib/src/em_adc.c ****  *   information page for known references. Notice that for external references,
+  82:../emlib/src/em_adc.c ****  *   calibration values must be determined explicitly, and this function
+  83:../emlib/src/em_adc.c ****  *   will not modify the calibration register.
+  84:../emlib/src/em_adc.c ****  *
+  85:../emlib/src/em_adc.c ****  * @param[in] adc
+  86:../emlib/src/em_adc.c ****  *   Pointer to ADC peripheral register block.
+  87:../emlib/src/em_adc.c ****  *
+  88:../emlib/src/em_adc.c ****  * @param[in] ref
+  89:../emlib/src/em_adc.c ****  *   Reference to load calibrated values for. No values are loaded for
+  90:../emlib/src/em_adc.c ****  *   external references.
+ARM GAS  /tmp/ccAbY0bm.s 			page 3
+
+
+  91:../emlib/src/em_adc.c ****  ******************************************************************************/
+  92:../emlib/src/em_adc.c **** static void ADC_CalibrateLoadScan(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
+  93:../emlib/src/em_adc.c **** {
+  26              		.loc 1 93 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 16
+  29              		@ frame_needed = 0, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 84B0     		sub	sp, sp, #16
+  32              		.cfi_def_cfa_offset 16
+  33 0002 0190     		str	r0, [sp, #4]
+  34 0004 0B46     		mov	r3, r1
+  35 0006 8DF80330 		strb	r3, [sp, #3]
+  94:../emlib/src/em_adc.c ****   uint32_t cal;
+  95:../emlib/src/em_adc.c **** 
+  96:../emlib/src/em_adc.c ****   /* Load proper calibration data depending on selected reference */
+  97:../emlib/src/em_adc.c ****   /* NOTE: We use ...SCAN... defines below, they are the same as */
+  98:../emlib/src/em_adc.c ****   /* similar ...SINGLE... defines. */
+  99:../emlib/src/em_adc.c ****   switch (ref)
+  36              		.loc 1 99 0
+  37 000a 9DF80330 		ldrb	r3, [sp, #3]	@ zero_extendqisi2
+  38 000e 062B     		cmp	r3, #6
+  39 0010 00F28D80 		bhi	.L10
+  40 0014 01A2     		adr	r2, .L4
+  41 0016 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+  42 001a 00BF     		.p2align 2
+  43              	.L4:
+  44 001c 39000000 		.word	.L3+1
+  45 0020 71000000 		.word	.L5+1
+  46 0024 A3000000 		.word	.L6+1
+  47 0028 DB000000 		.word	.L7+1
+  48 002c 2F010000 		.word	.L10+1
+  49 0030 2F010000 		.word	.L10+1
+  50 0034 0D010000 		.word	.L8+1
+  51              		.p2align 1
+  52              	.L3:
+ 100:../emlib/src/em_adc.c ****   {
+ 101:../emlib/src/em_adc.c ****   case adcRef1V25:
+ 102:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~(_ADC_CAL_SCANOFFSET_MASK | _ADC_CAL_SCANGAIN_MASK);
+  53              		.loc 1 102 0
+  54 0038 019B     		ldr	r3, [sp, #4]
+  55 003a 5B6B     		ldr	r3, [r3, #52]
+  56 003c 23F0FE43 		bic	r3, r3, #2130706432
+  57 0040 23F4FE03 		bic	r3, r3, #8323072
+  58 0044 0393     		str	r3, [sp, #12]
+ 103:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_GAIN_MASK) >>
+  59              		.loc 1 103 0
+  60 0046 3B4B     		ldr	r3, .L11
+  61 0048 5B68     		ldr	r3, [r3, #4]
+  62 004a 03F4FE43 		and	r3, r3, #32512
+  63 004e 1B0A     		lsrs	r3, r3, #8
+ 104:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL0_1V25_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
+  64              		.loc 1 104 0
+  65 0050 1B06     		lsls	r3, r3, #24
+ 103:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_GAIN_MASK) >>
+  66              		.loc 1 103 0
+  67 0052 039A     		ldr	r2, [sp, #12]
+ARM GAS  /tmp/ccAbY0bm.s 			page 4
+
+
+  68 0054 1343     		orrs	r3, r3, r2
+  69 0056 0393     		str	r3, [sp, #12]
+ 105:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_OFFSET_MASK) >>
+  70              		.loc 1 105 0
+  71 0058 364B     		ldr	r3, .L11
+  72 005a 5B68     		ldr	r3, [r3, #4]
+  73 005c 03F07F03 		and	r3, r3, #127
+ 106:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL0_1V25_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+  74              		.loc 1 106 0
+  75 0060 1B04     		lsls	r3, r3, #16
+ 105:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_OFFSET_MASK) >>
+  76              		.loc 1 105 0
+  77 0062 039A     		ldr	r2, [sp, #12]
+  78 0064 1343     		orrs	r3, r3, r2
+  79 0066 0393     		str	r3, [sp, #12]
+ 107:../emlib/src/em_adc.c ****     adc->CAL = cal;
+  80              		.loc 1 107 0
+  81 0068 019B     		ldr	r3, [sp, #4]
+  82 006a 039A     		ldr	r2, [sp, #12]
+  83 006c 5A63     		str	r2, [r3, #52]
+ 108:../emlib/src/em_adc.c ****     break;
+  84              		.loc 1 108 0
+  85 006e 5FE0     		b	.L1
+  86              	.L5:
+ 109:../emlib/src/em_adc.c **** 
+ 110:../emlib/src/em_adc.c ****   case adcRef2V5:
+ 111:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~(_ADC_CAL_SCANOFFSET_MASK | _ADC_CAL_SCANGAIN_MASK);
+  87              		.loc 1 111 0
+  88 0070 019B     		ldr	r3, [sp, #4]
+  89 0072 5B6B     		ldr	r3, [r3, #52]
+  90 0074 23F0FE43 		bic	r3, r3, #2130706432
+  91 0078 23F4FE03 		bic	r3, r3, #8323072
+  92 007c 0393     		str	r3, [sp, #12]
+ 112:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_GAIN_MASK) >>
+  93              		.loc 1 112 0
+  94 007e 2D4B     		ldr	r3, .L11
+  95 0080 5B68     		ldr	r3, [r3, #4]
+ 113:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL0_2V5_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
+  96              		.loc 1 113 0
+  97 0082 03F0FE43 		and	r3, r3, #2130706432
+ 112:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_GAIN_MASK) >>
+  98              		.loc 1 112 0
+  99 0086 039A     		ldr	r2, [sp, #12]
+ 100 0088 1343     		orrs	r3, r3, r2
+ 101 008a 0393     		str	r3, [sp, #12]
+ 114:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_OFFSET_MASK) >>
+ 102              		.loc 1 114 0
+ 103 008c 294B     		ldr	r3, .L11
+ 104 008e 5B68     		ldr	r3, [r3, #4]
+ 115:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL0_2V5_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+ 105              		.loc 1 115 0
+ 106 0090 03F4FE03 		and	r3, r3, #8323072
+ 114:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_OFFSET_MASK) >>
+ 107              		.loc 1 114 0
+ 108 0094 039A     		ldr	r2, [sp, #12]
+ 109 0096 1343     		orrs	r3, r3, r2
+ 110 0098 0393     		str	r3, [sp, #12]
+ARM GAS  /tmp/ccAbY0bm.s 			page 5
+
+
+ 116:../emlib/src/em_adc.c ****     adc->CAL = cal;
+ 111              		.loc 1 116 0
+ 112 009a 019B     		ldr	r3, [sp, #4]
+ 113 009c 039A     		ldr	r2, [sp, #12]
+ 114 009e 5A63     		str	r2, [r3, #52]
+ 117:../emlib/src/em_adc.c ****     break;
+ 115              		.loc 1 117 0
+ 116 00a0 46E0     		b	.L1
+ 117              	.L6:
+ 118:../emlib/src/em_adc.c **** 
+ 119:../emlib/src/em_adc.c ****   case adcRefVDD:
+ 120:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~(_ADC_CAL_SCANOFFSET_MASK | _ADC_CAL_SCANGAIN_MASK);
+ 118              		.loc 1 120 0
+ 119 00a2 019B     		ldr	r3, [sp, #4]
+ 120 00a4 5B6B     		ldr	r3, [r3, #52]
+ 121 00a6 23F0FE43 		bic	r3, r3, #2130706432
+ 122 00aa 23F4FE03 		bic	r3, r3, #8323072
+ 123 00ae 0393     		str	r3, [sp, #12]
+ 121:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_GAIN_MASK) >>
+ 124              		.loc 1 121 0
+ 125 00b0 204B     		ldr	r3, .L11
+ 126 00b2 9B68     		ldr	r3, [r3, #8]
+ 127 00b4 03F4FE43 		and	r3, r3, #32512
+ 128 00b8 1B0A     		lsrs	r3, r3, #8
+ 122:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL1_VDD_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
+ 129              		.loc 1 122 0
+ 130 00ba 1B06     		lsls	r3, r3, #24
+ 121:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_GAIN_MASK) >>
+ 131              		.loc 1 121 0
+ 132 00bc 039A     		ldr	r2, [sp, #12]
+ 133 00be 1343     		orrs	r3, r3, r2
+ 134 00c0 0393     		str	r3, [sp, #12]
+ 123:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_OFFSET_MASK) >>
+ 135              		.loc 1 123 0
+ 136 00c2 1C4B     		ldr	r3, .L11
+ 137 00c4 9B68     		ldr	r3, [r3, #8]
+ 138 00c6 03F07F03 		and	r3, r3, #127
+ 124:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL1_VDD_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+ 139              		.loc 1 124 0
+ 140 00ca 1B04     		lsls	r3, r3, #16
+ 123:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_OFFSET_MASK) >>
+ 141              		.loc 1 123 0
+ 142 00cc 039A     		ldr	r2, [sp, #12]
+ 143 00ce 1343     		orrs	r3, r3, r2
+ 144 00d0 0393     		str	r3, [sp, #12]
+ 125:../emlib/src/em_adc.c ****     adc->CAL = cal;
+ 145              		.loc 1 125 0
+ 146 00d2 019B     		ldr	r3, [sp, #4]
+ 147 00d4 039A     		ldr	r2, [sp, #12]
+ 148 00d6 5A63     		str	r2, [r3, #52]
+ 126:../emlib/src/em_adc.c ****     break;
+ 149              		.loc 1 126 0
+ 150 00d8 2AE0     		b	.L1
+ 151              	.L7:
+ 127:../emlib/src/em_adc.c **** 
+ 128:../emlib/src/em_adc.c ****   case adcRef5VDIFF:
+ 129:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~(_ADC_CAL_SCANOFFSET_MASK | _ADC_CAL_SCANGAIN_MASK);
+ARM GAS  /tmp/ccAbY0bm.s 			page 6
+
+
+ 152              		.loc 1 129 0
+ 153 00da 019B     		ldr	r3, [sp, #4]
+ 154 00dc 5B6B     		ldr	r3, [r3, #52]
+ 155 00de 23F0FE43 		bic	r3, r3, #2130706432
+ 156 00e2 23F4FE03 		bic	r3, r3, #8323072
+ 157 00e6 0393     		str	r3, [sp, #12]
+ 130:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_GAIN_MASK) >>
+ 158              		.loc 1 130 0
+ 159 00e8 124B     		ldr	r3, .L11
+ 160 00ea 9B68     		ldr	r3, [r3, #8]
+ 131:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL1_5VDIFF_GAIN_SHIFT) << _ADC_CAL_SCANGAIN_SHIFT;
+ 161              		.loc 1 131 0
+ 162 00ec 03F0FE43 		and	r3, r3, #2130706432
+ 130:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_GAIN_MASK) >>
+ 163              		.loc 1 130 0
+ 164 00f0 039A     		ldr	r2, [sp, #12]
+ 165 00f2 1343     		orrs	r3, r3, r2
+ 166 00f4 0393     		str	r3, [sp, #12]
+ 132:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_MASK) >>
+ 167              		.loc 1 132 0
+ 168 00f6 0F4B     		ldr	r3, .L11
+ 169 00f8 9B68     		ldr	r3, [r3, #8]
+ 133:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+ 170              		.loc 1 133 0
+ 171 00fa 03F4FE03 		and	r3, r3, #8323072
+ 132:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_MASK) >>
+ 172              		.loc 1 132 0
+ 173 00fe 039A     		ldr	r2, [sp, #12]
+ 174 0100 1343     		orrs	r3, r3, r2
+ 175 0102 0393     		str	r3, [sp, #12]
+ 134:../emlib/src/em_adc.c ****     adc->CAL = cal;
+ 176              		.loc 1 134 0
+ 177 0104 019B     		ldr	r3, [sp, #4]
+ 178 0106 039A     		ldr	r2, [sp, #12]
+ 179 0108 5A63     		str	r2, [r3, #52]
+ 135:../emlib/src/em_adc.c ****     break;
+ 180              		.loc 1 135 0
+ 181 010a 11E0     		b	.L1
+ 182              	.L8:
+ 136:../emlib/src/em_adc.c **** 
+ 137:../emlib/src/em_adc.c ****   case adcRef2xVDD:
+ 138:../emlib/src/em_adc.c ****     /* Gain value not of relevance for this reference, leave as is */
+ 139:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~_ADC_CAL_SCANOFFSET_MASK;
+ 183              		.loc 1 139 0
+ 184 010c 019B     		ldr	r3, [sp, #4]
+ 185 010e 5B6B     		ldr	r3, [r3, #52]
+ 186 0110 23F4FE03 		bic	r3, r3, #8323072
+ 187 0114 0393     		str	r3, [sp, #12]
+ 140:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_MASK) >>
+ 188              		.loc 1 140 0
+ 189 0116 074B     		ldr	r3, .L11
+ 190 0118 DB68     		ldr	r3, [r3, #12]
+ 191 011a 03F07F03 		and	r3, r3, #127
+ 141:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_SHIFT) << _ADC_CAL_SCANOFFSET_SHIFT;
+ 192              		.loc 1 141 0
+ 193 011e 1B04     		lsls	r3, r3, #16
+ 140:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_MASK) >>
+ARM GAS  /tmp/ccAbY0bm.s 			page 7
+
+
+ 194              		.loc 1 140 0
+ 195 0120 039A     		ldr	r2, [sp, #12]
+ 196 0122 1343     		orrs	r3, r3, r2
+ 197 0124 0393     		str	r3, [sp, #12]
+ 142:../emlib/src/em_adc.c ****     adc->CAL = cal;
+ 198              		.loc 1 142 0
+ 199 0126 019B     		ldr	r3, [sp, #4]
+ 200 0128 039A     		ldr	r2, [sp, #12]
+ 201 012a 5A63     		str	r2, [r3, #52]
+ 143:../emlib/src/em_adc.c ****     break;
+ 202              		.loc 1 143 0
+ 203 012c 00E0     		b	.L1
+ 204              	.L10:
+ 144:../emlib/src/em_adc.c **** 
+ 145:../emlib/src/em_adc.c ****   /* For external references, the calibration must be determined for the */
+ 146:../emlib/src/em_adc.c ****   /* specific application and set explicitly. */
+ 147:../emlib/src/em_adc.c ****   default:
+ 148:../emlib/src/em_adc.c ****     break;
+ 205              		.loc 1 148 0
+ 206 012e 00BF     		nop
+ 207              	.L1:
+ 149:../emlib/src/em_adc.c ****   }
+ 150:../emlib/src/em_adc.c **** }
+ 208              		.loc 1 150 0
+ 209 0130 04B0     		add	sp, sp, #16
+ 210              		@ sp needed
+ 211 0132 7047     		bx	lr
+ 212              	.L12:
+ 213              		.align	2
+ 214              	.L11:
+ 215 0134 B081E00F 		.word	266371504
+ 216              		.cfi_endproc
+ 217              	.LFE79:
+ 219              		.section	.text.ADC_CalibrateLoadSingle,"ax",%progbits
+ 220              		.align	2
+ 221              		.thumb
+ 222              		.thumb_func
+ 224              	ADC_CalibrateLoadSingle:
+ 225              	.LFB80:
+ 151:../emlib/src/em_adc.c **** 
+ 152:../emlib/src/em_adc.c **** /***************************************************************************//**
+ 153:../emlib/src/em_adc.c ****  * @brief
+ 154:../emlib/src/em_adc.c ****  *   Load SINGLE calibrate register with predefined values for a certain
+ 155:../emlib/src/em_adc.c ****  *   reference.
+ 156:../emlib/src/em_adc.c ****  *
+ 157:../emlib/src/em_adc.c ****  * @details
+ 158:../emlib/src/em_adc.c ****  *   During production, calibration values are made and stored in the device
+ 159:../emlib/src/em_adc.c ****  *   information page for known references. Notice that for external references,
+ 160:../emlib/src/em_adc.c ****  *   calibration values must be determined explicitly, and this function
+ 161:../emlib/src/em_adc.c ****  *   will not modify the calibration register.
+ 162:../emlib/src/em_adc.c ****  *
+ 163:../emlib/src/em_adc.c ****  * @param[in] adc
+ 164:../emlib/src/em_adc.c ****  *   Pointer to ADC peripheral register block.
+ 165:../emlib/src/em_adc.c ****  *
+ 166:../emlib/src/em_adc.c ****  * @param[in] ref
+ 167:../emlib/src/em_adc.c ****  *   Reference to load calibrated values for. No values are loaded for
+ 168:../emlib/src/em_adc.c ****  *   external references.
+ARM GAS  /tmp/ccAbY0bm.s 			page 8
+
+
+ 169:../emlib/src/em_adc.c ****  ******************************************************************************/
+ 170:../emlib/src/em_adc.c **** static void ADC_CalibrateLoadSingle(ADC_TypeDef *adc, ADC_Ref_TypeDef ref)
+ 171:../emlib/src/em_adc.c **** {
+ 226              		.loc 1 171 0
+ 227              		.cfi_startproc
+ 228              		@ args = 0, pretend = 0, frame = 16
+ 229              		@ frame_needed = 0, uses_anonymous_args = 0
+ 230              		@ link register save eliminated.
+ 231 0000 84B0     		sub	sp, sp, #16
+ 232              		.cfi_def_cfa_offset 16
+ 233 0002 0190     		str	r0, [sp, #4]
+ 234 0004 0B46     		mov	r3, r1
+ 235 0006 8DF80330 		strb	r3, [sp, #3]
+ 172:../emlib/src/em_adc.c ****   uint32_t cal;
+ 173:../emlib/src/em_adc.c **** 
+ 174:../emlib/src/em_adc.c ****   /* Load proper calibration data depending on selected reference */
+ 175:../emlib/src/em_adc.c ****   /* NOTE: We use ...SCAN... defines below, they are the same as */
+ 176:../emlib/src/em_adc.c ****   /* similar ...SINGLE... defines. */
+ 177:../emlib/src/em_adc.c ****   switch (ref)
+ 236              		.loc 1 177 0
+ 237 000a 9DF80330 		ldrb	r3, [sp, #3]	@ zero_extendqisi2
+ 238 000e 062B     		cmp	r3, #6
+ 239 0010 00F28C80 		bhi	.L22
+ 240 0014 01A2     		adr	r2, .L16
+ 241 0016 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 242 001a 00BF     		.p2align 2
+ 243              	.L16:
+ 244 001c 39000000 		.word	.L15+1
+ 245 0020 6B000000 		.word	.L17+1
+ 246 0024 A3000000 		.word	.L18+1
+ 247 0028 D5000000 		.word	.L19+1
+ 248 002c 2D010000 		.word	.L22+1
+ 249 0030 2D010000 		.word	.L22+1
+ 250 0034 0D010000 		.word	.L20+1
+ 251              		.p2align 1
+ 252              	.L15:
+ 178:../emlib/src/em_adc.c ****   {
+ 179:../emlib/src/em_adc.c ****   case adcRef1V25:
+ 180:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
+ 253              		.loc 1 180 0
+ 254 0038 019B     		ldr	r3, [sp, #4]
+ 255 003a 5B6B     		ldr	r3, [r3, #52]
+ 256 003c 23F4FE43 		bic	r3, r3, #32512
+ 257 0040 23F07F03 		bic	r3, r3, #127
+ 258 0044 0393     		str	r3, [sp, #12]
+ 181:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_GAIN_MASK) >>
+ 259              		.loc 1 181 0
+ 260 0046 3B4B     		ldr	r3, .L23
+ 261 0048 5B68     		ldr	r3, [r3, #4]
+ 182:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL0_1V25_GAIN_SHIFT) << _ADC_CAL_SINGLEGAIN_SHIFT;
+ 262              		.loc 1 182 0
+ 263 004a 03F4FE43 		and	r3, r3, #32512
+ 181:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_GAIN_MASK) >>
+ 264              		.loc 1 181 0
+ 265 004e 039A     		ldr	r2, [sp, #12]
+ 266 0050 1343     		orrs	r3, r3, r2
+ 267 0052 0393     		str	r3, [sp, #12]
+ARM GAS  /tmp/ccAbY0bm.s 			page 9
+
+
+ 183:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_OFFSET_MASK) >>
+ 268              		.loc 1 183 0
+ 269 0054 374B     		ldr	r3, .L23
+ 270 0056 5B68     		ldr	r3, [r3, #4]
+ 184:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL0_1V25_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+ 271              		.loc 1 184 0
+ 272 0058 03F07F03 		and	r3, r3, #127
+ 183:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_1V25_OFFSET_MASK) >>
+ 273              		.loc 1 183 0
+ 274 005c 039A     		ldr	r2, [sp, #12]
+ 275 005e 1343     		orrs	r3, r3, r2
+ 276 0060 0393     		str	r3, [sp, #12]
+ 185:../emlib/src/em_adc.c ****     adc->CAL = cal;
+ 277              		.loc 1 185 0
+ 278 0062 019B     		ldr	r3, [sp, #4]
+ 279 0064 039A     		ldr	r2, [sp, #12]
+ 280 0066 5A63     		str	r2, [r3, #52]
+ 186:../emlib/src/em_adc.c ****     break;
+ 281              		.loc 1 186 0
+ 282 0068 61E0     		b	.L13
+ 283              	.L17:
+ 187:../emlib/src/em_adc.c **** 
+ 188:../emlib/src/em_adc.c ****   case adcRef2V5:
+ 189:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
+ 284              		.loc 1 189 0
+ 285 006a 019B     		ldr	r3, [sp, #4]
+ 286 006c 5B6B     		ldr	r3, [r3, #52]
+ 287 006e 23F4FE43 		bic	r3, r3, #32512
+ 288 0072 23F07F03 		bic	r3, r3, #127
+ 289 0076 0393     		str	r3, [sp, #12]
+ 190:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_GAIN_MASK) >>
+ 290              		.loc 1 190 0
+ 291 0078 2E4B     		ldr	r3, .L23
+ 292 007a 5B68     		ldr	r3, [r3, #4]
+ 293 007c 03F0FE43 		and	r3, r3, #2130706432
+ 294 0080 1B0E     		lsrs	r3, r3, #24
+ 191:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL0_2V5_GAIN_SHIFT) << _ADC_CAL_SINGLEGAIN_SHIFT;
+ 295              		.loc 1 191 0
+ 296 0082 1B02     		lsls	r3, r3, #8
+ 190:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_GAIN_MASK) >>
+ 297              		.loc 1 190 0
+ 298 0084 039A     		ldr	r2, [sp, #12]
+ 299 0086 1343     		orrs	r3, r3, r2
+ 300 0088 0393     		str	r3, [sp, #12]
+ 192:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_OFFSET_MASK) >>
+ 301              		.loc 1 192 0
+ 302 008a 2A4B     		ldr	r3, .L23
+ 303 008c 5B68     		ldr	r3, [r3, #4]
+ 304 008e 03F4FE03 		and	r3, r3, #8323072
+ 193:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL0_2V5_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+ 305              		.loc 1 193 0
+ 306 0092 1B0C     		lsrs	r3, r3, #16
+ 192:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL0 & _DEVINFO_ADC0CAL0_2V5_OFFSET_MASK) >>
+ 307              		.loc 1 192 0
+ 308 0094 039A     		ldr	r2, [sp, #12]
+ 309 0096 1343     		orrs	r3, r3, r2
+ 310 0098 0393     		str	r3, [sp, #12]
+ARM GAS  /tmp/ccAbY0bm.s 			page 10
+
+
+ 194:../emlib/src/em_adc.c ****     adc->CAL = cal;
+ 311              		.loc 1 194 0
+ 312 009a 019B     		ldr	r3, [sp, #4]
+ 313 009c 039A     		ldr	r2, [sp, #12]
+ 314 009e 5A63     		str	r2, [r3, #52]
+ 195:../emlib/src/em_adc.c ****     break;
+ 315              		.loc 1 195 0
+ 316 00a0 45E0     		b	.L13
+ 317              	.L18:
+ 196:../emlib/src/em_adc.c **** 
+ 197:../emlib/src/em_adc.c ****   case adcRefVDD:
+ 198:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
+ 318              		.loc 1 198 0
+ 319 00a2 019B     		ldr	r3, [sp, #4]
+ 320 00a4 5B6B     		ldr	r3, [r3, #52]
+ 321 00a6 23F4FE43 		bic	r3, r3, #32512
+ 322 00aa 23F07F03 		bic	r3, r3, #127
+ 323 00ae 0393     		str	r3, [sp, #12]
+ 199:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_GAIN_MASK) >>
+ 324              		.loc 1 199 0
+ 325 00b0 204B     		ldr	r3, .L23
+ 326 00b2 9B68     		ldr	r3, [r3, #8]
+ 200:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL1_VDD_GAIN_SHIFT) << _ADC_CAL_SINGLEGAIN_SHIFT;
+ 327              		.loc 1 200 0
+ 328 00b4 03F4FE43 		and	r3, r3, #32512
+ 199:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_GAIN_MASK) >>
+ 329              		.loc 1 199 0
+ 330 00b8 039A     		ldr	r2, [sp, #12]
+ 331 00ba 1343     		orrs	r3, r3, r2
+ 332 00bc 0393     		str	r3, [sp, #12]
+ 201:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_OFFSET_MASK) >>
+ 333              		.loc 1 201 0
+ 334 00be 1D4B     		ldr	r3, .L23
+ 335 00c0 9B68     		ldr	r3, [r3, #8]
+ 202:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL1_VDD_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+ 336              		.loc 1 202 0
+ 337 00c2 03F07F03 		and	r3, r3, #127
+ 201:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_VDD_OFFSET_MASK) >>
+ 338              		.loc 1 201 0
+ 339 00c6 039A     		ldr	r2, [sp, #12]
+ 340 00c8 1343     		orrs	r3, r3, r2
+ 341 00ca 0393     		str	r3, [sp, #12]
+ 203:../emlib/src/em_adc.c ****     adc->CAL = cal;
+ 342              		.loc 1 203 0
+ 343 00cc 019B     		ldr	r3, [sp, #4]
+ 344 00ce 039A     		ldr	r2, [sp, #12]
+ 345 00d0 5A63     		str	r2, [r3, #52]
+ 204:../emlib/src/em_adc.c ****     break;
+ 346              		.loc 1 204 0
+ 347 00d2 2CE0     		b	.L13
+ 348              	.L19:
+ 205:../emlib/src/em_adc.c **** 
+ 206:../emlib/src/em_adc.c ****   case adcRef5VDIFF:
+ 207:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~(_ADC_CAL_SINGLEOFFSET_MASK | _ADC_CAL_SINGLEGAIN_MASK);
+ 349              		.loc 1 207 0
+ 350 00d4 019B     		ldr	r3, [sp, #4]
+ 351 00d6 5B6B     		ldr	r3, [r3, #52]
+ARM GAS  /tmp/ccAbY0bm.s 			page 11
+
+
+ 352 00d8 23F4FE43 		bic	r3, r3, #32512
+ 353 00dc 23F07F03 		bic	r3, r3, #127
+ 354 00e0 0393     		str	r3, [sp, #12]
+ 208:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_GAIN_MASK) >>
+ 355              		.loc 1 208 0
+ 356 00e2 144B     		ldr	r3, .L23
+ 357 00e4 9B68     		ldr	r3, [r3, #8]
+ 358 00e6 03F0FE43 		and	r3, r3, #2130706432
+ 359 00ea 1B0E     		lsrs	r3, r3, #24
+ 209:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL1_5VDIFF_GAIN_SHIFT) << _ADC_CAL_SINGLEGAIN_SHIFT;
+ 360              		.loc 1 209 0
+ 361 00ec 1B02     		lsls	r3, r3, #8
+ 208:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_GAIN_MASK) >>
+ 362              		.loc 1 208 0
+ 363 00ee 039A     		ldr	r2, [sp, #12]
+ 364 00f0 1343     		orrs	r3, r3, r2
+ 365 00f2 0393     		str	r3, [sp, #12]
+ 210:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_MASK) >>
+ 366              		.loc 1 210 0
+ 367 00f4 0F4B     		ldr	r3, .L23
+ 368 00f6 9B68     		ldr	r3, [r3, #8]
+ 369 00f8 03F4FE03 		and	r3, r3, #8323072
+ 211:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+ 370              		.loc 1 211 0
+ 371 00fc 1B0C     		lsrs	r3, r3, #16
+ 210:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL1 & _DEVINFO_ADC0CAL1_5VDIFF_OFFSET_MASK) >>
+ 372              		.loc 1 210 0
+ 373 00fe 039A     		ldr	r2, [sp, #12]
+ 374 0100 1343     		orrs	r3, r3, r2
+ 375 0102 0393     		str	r3, [sp, #12]
+ 212:../emlib/src/em_adc.c ****     adc->CAL = cal;
+ 376              		.loc 1 212 0
+ 377 0104 019B     		ldr	r3, [sp, #4]
+ 378 0106 039A     		ldr	r2, [sp, #12]
+ 379 0108 5A63     		str	r2, [r3, #52]
+ 213:../emlib/src/em_adc.c ****     break;
+ 380              		.loc 1 213 0
+ 381 010a 10E0     		b	.L13
+ 382              	.L20:
+ 214:../emlib/src/em_adc.c **** 
+ 215:../emlib/src/em_adc.c ****   case adcRef2xVDD:
+ 216:../emlib/src/em_adc.c ****     /* Gain value not of relevance for this reference, leave as is */
+ 217:../emlib/src/em_adc.c ****     cal  = adc->CAL & ~_ADC_CAL_SINGLEOFFSET_MASK;
+ 383              		.loc 1 217 0
+ 384 010c 019B     		ldr	r3, [sp, #4]
+ 385 010e 5B6B     		ldr	r3, [r3, #52]
+ 386 0110 23F07F03 		bic	r3, r3, #127
+ 387 0114 0393     		str	r3, [sp, #12]
+ 218:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_MASK) >>
+ 388              		.loc 1 218 0
+ 389 0116 074B     		ldr	r3, .L23
+ 390 0118 DB68     		ldr	r3, [r3, #12]
+ 219:../emlib/src/em_adc.c ****             _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_SHIFT) << _ADC_CAL_SINGLEOFFSET_SHIFT;
+ 391              		.loc 1 219 0
+ 392 011a 03F07F03 		and	r3, r3, #127
+ 218:../emlib/src/em_adc.c ****     cal |= ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_2XVDDVSS_OFFSET_MASK) >>
+ 393              		.loc 1 218 0
+ARM GAS  /tmp/ccAbY0bm.s 			page 12
+
+
+ 394 011e 039A     		ldr	r2, [sp, #12]
+ 395 0120 1343     		orrs	r3, r3, r2
+ 396 0122 0393     		str	r3, [sp, #12]
+ 220:../emlib/src/em_adc.c ****     adc->CAL = cal;
+ 397              		.loc 1 220 0
+ 398 0124 019B     		ldr	r3, [sp, #4]
+ 399 0126 039A     		ldr	r2, [sp, #12]
+ 400 0128 5A63     		str	r2, [r3, #52]
+ 221:../emlib/src/em_adc.c ****     break;
+ 401              		.loc 1 221 0
+ 402 012a 00E0     		b	.L13
+ 403              	.L22:
+ 222:../emlib/src/em_adc.c **** 
+ 223:../emlib/src/em_adc.c ****   /* For external references, the calibration must be determined for the */
+ 224:../emlib/src/em_adc.c ****   /* specific application and set explicitly. */
+ 225:../emlib/src/em_adc.c ****   default:
+ 226:../emlib/src/em_adc.c ****     break;
+ 404              		.loc 1 226 0
+ 405 012c 00BF     		nop
+ 406              	.L13:
+ 227:../emlib/src/em_adc.c ****   }
+ 228:../emlib/src/em_adc.c **** }
+ 407              		.loc 1 228 0
+ 408 012e 04B0     		add	sp, sp, #16
+ 409              		@ sp needed
+ 410 0130 7047     		bx	lr
+ 411              	.L24:
+ 412 0132 00BF     		.align	2
+ 413              	.L23:
+ 414 0134 B081E00F 		.word	266371504
+ 415              		.cfi_endproc
+ 416              	.LFE80:
+ 418              		.section	.rodata
+ 419              		.align	2
+ 420              	.LC0:
+ 421 0000 2E2E2F65 		.ascii	"../emlib/src/em_adc.c\000"
+ 421      6D6C6962 
+ 421      2F737263 
+ 421      2F656D5F 
+ 421      6164632E 
+ 422 0016 0000     		.section	.text.ADC_Init,"ax",%progbits
+ 423              		.align	2
+ 424              		.global	ADC_Init
+ 425              		.thumb
+ 426              		.thumb_func
+ 428              	ADC_Init:
+ 429              	.LFB81:
+ 229:../emlib/src/em_adc.c **** 
+ 230:../emlib/src/em_adc.c **** /** @endcond */
+ 231:../emlib/src/em_adc.c **** 
+ 232:../emlib/src/em_adc.c **** /*******************************************************************************
+ 233:../emlib/src/em_adc.c ****  **************************   GLOBAL FUNCTIONS   *******************************
+ 234:../emlib/src/em_adc.c ****  ******************************************************************************/
+ 235:../emlib/src/em_adc.c **** 
+ 236:../emlib/src/em_adc.c **** /***************************************************************************//**
+ 237:../emlib/src/em_adc.c ****  * @brief
+ 238:../emlib/src/em_adc.c ****  *   Initialize ADC.
+ARM GAS  /tmp/ccAbY0bm.s 			page 13
+
+
+ 239:../emlib/src/em_adc.c ****  *
+ 240:../emlib/src/em_adc.c ****  * @details
+ 241:../emlib/src/em_adc.c ****  *   Initializes common parts for both single conversion and scan sequence.
+ 242:../emlib/src/em_adc.c ****  *   In addition, single and/or scan control configuration must be done, please
+ 243:../emlib/src/em_adc.c ****  *   refer to ADC_InitSingle() and ADC_InitScan() respectively.
+ 244:../emlib/src/em_adc.c ****  *
+ 245:../emlib/src/em_adc.c ****  * @note
+ 246:../emlib/src/em_adc.c ****  *   This function will stop any ongoing conversion.
+ 247:../emlib/src/em_adc.c ****  *
+ 248:../emlib/src/em_adc.c ****  * @param[in] adc
+ 249:../emlib/src/em_adc.c ****  *   Pointer to ADC peripheral register block.
+ 250:../emlib/src/em_adc.c ****  *
+ 251:../emlib/src/em_adc.c ****  * @param[in] init
+ 252:../emlib/src/em_adc.c ****  *   Pointer to ADC initialization structure.
+ 253:../emlib/src/em_adc.c ****  ******************************************************************************/
+ 254:../emlib/src/em_adc.c **** void ADC_Init(ADC_TypeDef *adc, const ADC_Init_TypeDef *init)
+ 255:../emlib/src/em_adc.c **** {
+ 430              		.loc 1 255 0
+ 431              		.cfi_startproc
+ 432              		@ args = 0, pretend = 0, frame = 16
+ 433              		@ frame_needed = 0, uses_anonymous_args = 0
+ 434 0000 00B5     		push	{lr}
+ 435              		.cfi_def_cfa_offset 4
+ 436              		.cfi_offset 14, -4
+ 437 0002 85B0     		sub	sp, sp, #20
+ 438              		.cfi_def_cfa_offset 24
+ 439 0004 0190     		str	r0, [sp, #4]
+ 440 0006 0091     		str	r1, [sp]
+ 256:../emlib/src/em_adc.c ****   uint32_t tmp;
+ 257:../emlib/src/em_adc.c **** 
+ 258:../emlib/src/em_adc.c ****   EFM_ASSERT(ADC_REF_VALID(adc));
+ 441              		.loc 1 258 0
+ 442 0008 019A     		ldr	r2, [sp, #4]
+ 443 000a 184B     		ldr	r3, .L28
+ 444 000c 9A42     		cmp	r2, r3
+ 445 000e 04D0     		beq	.L26
+ 446              		.loc 1 258 0 is_stmt 0 discriminator 1
+ 447 0010 1748     		ldr	r0, .L28+4
+ 448 0012 4FF48171 		mov	r1, #258
+ 449 0016 FFF7FEFF 		bl	assertEFM
+ 450              	.L26:
+ 259:../emlib/src/em_adc.c **** 
+ 260:../emlib/src/em_adc.c ****   /* Make sure conversion is not in progress */
+ 261:../emlib/src/em_adc.c ****   adc->CMD = ADC_CMD_SINGLESTOP | ADC_CMD_SCANSTOP;
+ 451              		.loc 1 261 0 is_stmt 1
+ 452 001a 019B     		ldr	r3, [sp, #4]
+ 453 001c 0A22     		movs	r2, #10
+ 454 001e 5A60     		str	r2, [r3, #4]
+ 262:../emlib/src/em_adc.c **** 
+ 263:../emlib/src/em_adc.c ****   tmp = ((uint32_t)(init->ovsRateSel) << _ADC_CTRL_OVSRSEL_SHIFT) |
+ 455              		.loc 1 263 0
+ 456 0020 009B     		ldr	r3, [sp]
+ 457 0022 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 458 0024 1A06     		lsls	r2, r3, #24
+ 264:../emlib/src/em_adc.c ****         (((uint32_t)(init->timebase) << _ADC_CTRL_TIMEBASE_SHIFT) & _ADC_CTRL_TIMEBASE_MASK) |
+ 459              		.loc 1 264 0
+ 460 0026 009B     		ldr	r3, [sp]
+ARM GAS  /tmp/ccAbY0bm.s 			page 14
+
+
+ 461 0028 DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 462 002a 1B04     		lsls	r3, r3, #16
+ 463 002c 03F4F813 		and	r3, r3, #2031616
+ 263:../emlib/src/em_adc.c ****   tmp = ((uint32_t)(init->ovsRateSel) << _ADC_CTRL_OVSRSEL_SHIFT) |
+ 464              		.loc 1 263 0
+ 465 0030 1A43     		orrs	r2, r2, r3
+ 265:../emlib/src/em_adc.c ****         (((uint32_t)(init->prescale) << _ADC_CTRL_PRESC_SHIFT) & _ADC_CTRL_PRESC_MASK) |
+ 466              		.loc 1 265 0
+ 467 0032 009B     		ldr	r3, [sp]
+ 468 0034 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 469 0036 1B02     		lsls	r3, r3, #8
+ 470 0038 03F4FE43 		and	r3, r3, #32512
+ 264:../emlib/src/em_adc.c ****         (((uint32_t)(init->timebase) << _ADC_CTRL_TIMEBASE_SHIFT) & _ADC_CTRL_TIMEBASE_MASK) |
+ 471              		.loc 1 264 0
+ 472 003c 1A43     		orrs	r2, r2, r3
+ 266:../emlib/src/em_adc.c ****         ((uint32_t)(init->lpfMode) << _ADC_CTRL_LPFMODE_SHIFT) |
+ 473              		.loc 1 266 0
+ 474 003e 009B     		ldr	r3, [sp]
+ 475 0040 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 476 0042 1B01     		lsls	r3, r3, #4
+ 265:../emlib/src/em_adc.c ****         (((uint32_t)(init->prescale) << _ADC_CTRL_PRESC_SHIFT) & _ADC_CTRL_PRESC_MASK) |
+ 477              		.loc 1 265 0
+ 478 0044 1A43     		orrs	r2, r2, r3
+ 267:../emlib/src/em_adc.c ****         ((uint32_t)(init->warmUpMode) << _ADC_CTRL_WARMUPMODE_SHIFT);
+ 479              		.loc 1 267 0
+ 480 0046 009B     		ldr	r3, [sp]
+ 481 0048 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 263:../emlib/src/em_adc.c ****   tmp = ((uint32_t)(init->ovsRateSel) << _ADC_CTRL_OVSRSEL_SHIFT) |
+ 482              		.loc 1 263 0
+ 483 004a 1343     		orrs	r3, r3, r2
+ 484 004c 0393     		str	r3, [sp, #12]
+ 268:../emlib/src/em_adc.c **** 
+ 269:../emlib/src/em_adc.c ****   if (init->tailgate)
+ 485              		.loc 1 269 0
+ 486 004e 009B     		ldr	r3, [sp]
+ 487 0050 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 488 0052 002B     		cmp	r3, #0
+ 489 0054 03D0     		beq	.L27
+ 270:../emlib/src/em_adc.c ****   {
+ 271:../emlib/src/em_adc.c ****     tmp |= ADC_CTRL_TAILGATE;
+ 490              		.loc 1 271 0
+ 491 0056 039B     		ldr	r3, [sp, #12]
+ 492 0058 43F00803 		orr	r3, r3, #8
+ 493 005c 0393     		str	r3, [sp, #12]
+ 494              	.L27:
+ 272:../emlib/src/em_adc.c ****   }
+ 273:../emlib/src/em_adc.c **** 
+ 274:../emlib/src/em_adc.c ****   adc->CTRL = tmp;
+ 495              		.loc 1 274 0
+ 496 005e 019B     		ldr	r3, [sp, #4]
+ 497 0060 039A     		ldr	r2, [sp, #12]
+ 498 0062 1A60     		str	r2, [r3]
+ 275:../emlib/src/em_adc.c **** }
+ 499              		.loc 1 275 0
+ 500 0064 05B0     		add	sp, sp, #20
+ 501              		@ sp needed
+ 502 0066 5DF804FB 		ldr	pc, [sp], #4
+ARM GAS  /tmp/ccAbY0bm.s 			page 15
+
+
+ 503              	.L29:
+ 504 006a 00BF     		.align	2
+ 505              	.L28:
+ 506 006c 00200040 		.word	1073750016
+ 507 0070 00000000 		.word	.LC0
+ 508              		.cfi_endproc
+ 509              	.LFE81:
+ 511              		.section	.text.ADC_InitScan,"ax",%progbits
+ 512              		.align	2
+ 513              		.global	ADC_InitScan
+ 514              		.thumb
+ 515              		.thumb_func
+ 517              	ADC_InitScan:
+ 518              	.LFB82:
+ 276:../emlib/src/em_adc.c **** 
+ 277:../emlib/src/em_adc.c **** 
+ 278:../emlib/src/em_adc.c **** /***************************************************************************//**
+ 279:../emlib/src/em_adc.c ****  * @brief
+ 280:../emlib/src/em_adc.c ****  *   Initialize ADC scan sequence.
+ 281:../emlib/src/em_adc.c ****  *
+ 282:../emlib/src/em_adc.c ****  * @details
+ 283:../emlib/src/em_adc.c ****  *   Please refer to ADC_Start() for starting scan sequence.
+ 284:../emlib/src/em_adc.c ****  *
+ 285:../emlib/src/em_adc.c ****  *   When selecting an external reference, the gain and offset calibration
+ 286:../emlib/src/em_adc.c ****  *   must be set explicitly (CAL register). For other references, the
+ 287:../emlib/src/em_adc.c ****  *   calibration is updated with values defined during manufacturing.
+ 288:../emlib/src/em_adc.c ****  *
+ 289:../emlib/src/em_adc.c ****  * @note
+ 290:../emlib/src/em_adc.c ****  *   This function will stop any ongoing scan sequence.
+ 291:../emlib/src/em_adc.c ****  *
+ 292:../emlib/src/em_adc.c ****  * @param[in] adc
+ 293:../emlib/src/em_adc.c ****  *   Pointer to ADC peripheral register block.
+ 294:../emlib/src/em_adc.c ****  *
+ 295:../emlib/src/em_adc.c ****  * @param[in] init
+ 296:../emlib/src/em_adc.c ****  *   Pointer to ADC initialization structure.
+ 297:../emlib/src/em_adc.c ****  ******************************************************************************/
+ 298:../emlib/src/em_adc.c **** void ADC_InitScan(ADC_TypeDef *adc, const ADC_InitScan_TypeDef *init)
+ 299:../emlib/src/em_adc.c **** {
+ 519              		.loc 1 299 0
+ 520              		.cfi_startproc
+ 521              		@ args = 0, pretend = 0, frame = 16
+ 522              		@ frame_needed = 0, uses_anonymous_args = 0
+ 523 0000 00B5     		push	{lr}
+ 524              		.cfi_def_cfa_offset 4
+ 525              		.cfi_offset 14, -4
+ 526 0002 85B0     		sub	sp, sp, #20
+ 527              		.cfi_def_cfa_offset 24
+ 528 0004 0190     		str	r0, [sp, #4]
+ 529 0006 0091     		str	r1, [sp]
+ 300:../emlib/src/em_adc.c ****   uint32_t tmp;
+ 301:../emlib/src/em_adc.c **** 
+ 302:../emlib/src/em_adc.c ****   EFM_ASSERT(ADC_REF_VALID(adc));
+ 530              		.loc 1 302 0
+ 531 0008 019A     		ldr	r2, [sp, #4]
+ 532 000a 254B     		ldr	r3, .L36
+ 533 000c 9A42     		cmp	r2, r3
+ 534 000e 04D0     		beq	.L31
+ARM GAS  /tmp/ccAbY0bm.s 			page 16
+
+
+ 535              		.loc 1 302 0 is_stmt 0 discriminator 1
+ 536 0010 2448     		ldr	r0, .L36+4
+ 537 0012 4FF49771 		mov	r1, #302
+ 538 0016 FFF7FEFF 		bl	assertEFM
+ 539              	.L31:
+ 303:../emlib/src/em_adc.c **** 
+ 304:../emlib/src/em_adc.c ****   /* Make sure scan sequence is not in progress */
+ 305:../emlib/src/em_adc.c ****   adc->CMD = ADC_CMD_SCANSTOP;
+ 540              		.loc 1 305 0 is_stmt 1
+ 541 001a 019B     		ldr	r3, [sp, #4]
+ 542 001c 0822     		movs	r2, #8
+ 543 001e 5A60     		str	r2, [r3, #4]
+ 306:../emlib/src/em_adc.c **** 
+ 307:../emlib/src/em_adc.c ****   /* Load proper calibration data depending on selected reference */
+ 308:../emlib/src/em_adc.c ****   ADC_CalibrateLoadScan(adc, init->reference);
+ 544              		.loc 1 308 0
+ 545 0020 009B     		ldr	r3, [sp]
+ 546 0022 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 547 0024 0198     		ldr	r0, [sp, #4]
+ 548 0026 1946     		mov	r1, r3
+ 549 0028 FFF7FEFF 		bl	ADC_CalibrateLoadScan
+ 309:../emlib/src/em_adc.c **** 
+ 310:../emlib/src/em_adc.c ****   tmp = ((uint32_t)(init->prsSel) << _ADC_SCANCTRL_PRSSEL_SHIFT) |
+ 550              		.loc 1 310 0
+ 551 002c 009B     		ldr	r3, [sp]
+ 552 002e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 553 0030 1A07     		lsls	r2, r3, #28
+ 311:../emlib/src/em_adc.c ****         ((uint32_t)(init->acqTime) << _ADC_SCANCTRL_AT_SHIFT) |
+ 554              		.loc 1 311 0
+ 555 0032 009B     		ldr	r3, [sp]
+ 556 0034 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 557 0036 1B05     		lsls	r3, r3, #20
+ 310:../emlib/src/em_adc.c ****   tmp = ((uint32_t)(init->prsSel) << _ADC_SCANCTRL_PRSSEL_SHIFT) |
+ 558              		.loc 1 310 0
+ 559 0038 1A43     		orrs	r2, r2, r3
+ 312:../emlib/src/em_adc.c ****         ((uint32_t)(init->reference) << _ADC_SCANCTRL_REF_SHIFT) |
+ 560              		.loc 1 312 0
+ 561 003a 009B     		ldr	r3, [sp]
+ 562 003c 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 563 003e 1B04     		lsls	r3, r3, #16
+ 311:../emlib/src/em_adc.c ****         ((uint32_t)(init->acqTime) << _ADC_SCANCTRL_AT_SHIFT) |
+ 564              		.loc 1 311 0
+ 565 0040 1A43     		orrs	r2, r2, r3
+ 313:../emlib/src/em_adc.c ****         init->input |
+ 566              		.loc 1 313 0
+ 567 0042 009B     		ldr	r3, [sp]
+ 568 0044 5B68     		ldr	r3, [r3, #4]
+ 312:../emlib/src/em_adc.c ****         ((uint32_t)(init->reference) << _ADC_SCANCTRL_REF_SHIFT) |
+ 569              		.loc 1 312 0
+ 570 0046 1A43     		orrs	r2, r2, r3
+ 314:../emlib/src/em_adc.c ****         ((uint32_t)(init->resolution) << _ADC_SCANCTRL_RES_SHIFT);
+ 571              		.loc 1 314 0
+ 572 0048 009B     		ldr	r3, [sp]
+ 573 004a DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 574 004c 1B01     		lsls	r3, r3, #4
+ 310:../emlib/src/em_adc.c ****   tmp = ((uint32_t)(init->prsSel) << _ADC_SCANCTRL_PRSSEL_SHIFT) |
+ 575              		.loc 1 310 0
+ARM GAS  /tmp/ccAbY0bm.s 			page 17
+
+
+ 576 004e 1343     		orrs	r3, r3, r2
+ 577 0050 0393     		str	r3, [sp, #12]
+ 315:../emlib/src/em_adc.c **** 
+ 316:../emlib/src/em_adc.c ****   if (init->prsEnable)
+ 578              		.loc 1 316 0
+ 579 0052 009B     		ldr	r3, [sp]
+ 580 0054 5B7A     		ldrb	r3, [r3, #9]	@ zero_extendqisi2
+ 581 0056 002B     		cmp	r3, #0
+ 582 0058 03D0     		beq	.L32
+ 317:../emlib/src/em_adc.c ****   {
+ 318:../emlib/src/em_adc.c ****     tmp |= ADC_SCANCTRL_PRSEN;
+ 583              		.loc 1 318 0
+ 584 005a 039B     		ldr	r3, [sp, #12]
+ 585 005c 43F08073 		orr	r3, r3, #16777216
+ 586 0060 0393     		str	r3, [sp, #12]
+ 587              	.L32:
+ 319:../emlib/src/em_adc.c ****   }
+ 320:../emlib/src/em_adc.c **** 
+ 321:../emlib/src/em_adc.c ****   if (init->leftAdjust)
+ 588              		.loc 1 321 0
+ 589 0062 009B     		ldr	r3, [sp]
+ 590 0064 9B7A     		ldrb	r3, [r3, #10]	@ zero_extendqisi2
+ 591 0066 002B     		cmp	r3, #0
+ 592 0068 03D0     		beq	.L33
+ 322:../emlib/src/em_adc.c ****   {
+ 323:../emlib/src/em_adc.c ****     tmp |= ADC_SCANCTRL_ADJ_LEFT;
+ 593              		.loc 1 323 0
+ 594 006a 039B     		ldr	r3, [sp, #12]
+ 595 006c 43F00403 		orr	r3, r3, #4
+ 596 0070 0393     		str	r3, [sp, #12]
+ 597              	.L33:
+ 324:../emlib/src/em_adc.c ****   }
+ 325:../emlib/src/em_adc.c **** 
+ 326:../emlib/src/em_adc.c ****   if (init->diff)
+ 598              		.loc 1 326 0
+ 599 0072 009B     		ldr	r3, [sp]
+ 600 0074 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 601 0076 002B     		cmp	r3, #0
+ 602 0078 03D0     		beq	.L34
+ 327:../emlib/src/em_adc.c ****   {
+ 328:../emlib/src/em_adc.c ****     tmp |= ADC_SCANCTRL_DIFF;
+ 603              		.loc 1 328 0
+ 604 007a 039B     		ldr	r3, [sp, #12]
+ 605 007c 43F00203 		orr	r3, r3, #2
+ 606 0080 0393     		str	r3, [sp, #12]
+ 607              	.L34:
+ 329:../emlib/src/em_adc.c ****   }
+ 330:../emlib/src/em_adc.c **** 
+ 331:../emlib/src/em_adc.c ****   if (init->rep)
+ 608              		.loc 1 331 0
+ 609 0082 009B     		ldr	r3, [sp]
+ 610 0084 DB7A     		ldrb	r3, [r3, #11]	@ zero_extendqisi2
+ 611 0086 002B     		cmp	r3, #0
+ 612 0088 03D0     		beq	.L35
+ 332:../emlib/src/em_adc.c ****   {
+ 333:../emlib/src/em_adc.c ****     tmp |= ADC_SCANCTRL_REP;
+ 613              		.loc 1 333 0
+ARM GAS  /tmp/ccAbY0bm.s 			page 18
+
+
+ 614 008a 039B     		ldr	r3, [sp, #12]
+ 615 008c 43F00103 		orr	r3, r3, #1
+ 616 0090 0393     		str	r3, [sp, #12]
+ 617              	.L35:
+ 334:../emlib/src/em_adc.c ****   }
+ 335:../emlib/src/em_adc.c **** 
+ 336:../emlib/src/em_adc.c ****   adc->SCANCTRL = tmp;
+ 618              		.loc 1 336 0
+ 619 0092 019B     		ldr	r3, [sp, #4]
+ 620 0094 039A     		ldr	r2, [sp, #12]
+ 621 0096 1A61     		str	r2, [r3, #16]
+ 337:../emlib/src/em_adc.c **** }
+ 622              		.loc 1 337 0
+ 623 0098 05B0     		add	sp, sp, #20
+ 624              		@ sp needed
+ 625 009a 5DF804FB 		ldr	pc, [sp], #4
+ 626              	.L37:
+ 627 009e 00BF     		.align	2
+ 628              	.L36:
+ 629 00a0 00200040 		.word	1073750016
+ 630 00a4 00000000 		.word	.LC0
+ 631              		.cfi_endproc
+ 632              	.LFE82:
+ 634              		.section	.text.ADC_InitSingle,"ax",%progbits
+ 635              		.align	2
+ 636              		.global	ADC_InitSingle
+ 637              		.thumb
+ 638              		.thumb_func
+ 640              	ADC_InitSingle:
+ 641              	.LFB83:
+ 338:../emlib/src/em_adc.c **** 
+ 339:../emlib/src/em_adc.c **** 
+ 340:../emlib/src/em_adc.c **** /***************************************************************************//**
+ 341:../emlib/src/em_adc.c ****  * @brief
+ 342:../emlib/src/em_adc.c ****  *   Initialize single ADC sample conversion.
+ 343:../emlib/src/em_adc.c ****  *
+ 344:../emlib/src/em_adc.c ****  * @details
+ 345:../emlib/src/em_adc.c ****  *   Please refer to ADC_Start() for starting single conversion.
+ 346:../emlib/src/em_adc.c ****  *
+ 347:../emlib/src/em_adc.c ****  *   When selecting an external reference, the gain and offset calibration
+ 348:../emlib/src/em_adc.c ****  *   must be set explicitly (CAL register). For other references, the
+ 349:../emlib/src/em_adc.c ****  *   calibration is updated with values defined during manufacturing.
+ 350:../emlib/src/em_adc.c ****  *
+ 351:../emlib/src/em_adc.c ****  * @note
+ 352:../emlib/src/em_adc.c ****  *   This function will stop any ongoing single conversion.
+ 353:../emlib/src/em_adc.c ****  *
+ 354:../emlib/src/em_adc.c ****  * @param[in] adc
+ 355:../emlib/src/em_adc.c ****  *   Pointer to ADC peripheral register block.
+ 356:../emlib/src/em_adc.c ****  *
+ 357:../emlib/src/em_adc.c ****  * @param[in] init
+ 358:../emlib/src/em_adc.c ****  *   Pointer to ADC initialization structure.
+ 359:../emlib/src/em_adc.c ****  ******************************************************************************/
+ 360:../emlib/src/em_adc.c **** void ADC_InitSingle(ADC_TypeDef *adc, const ADC_InitSingle_TypeDef *init)
+ 361:../emlib/src/em_adc.c **** {
+ 642              		.loc 1 361 0
+ 643              		.cfi_startproc
+ 644              		@ args = 0, pretend = 0, frame = 16
+ARM GAS  /tmp/ccAbY0bm.s 			page 19
+
+
+ 645              		@ frame_needed = 0, uses_anonymous_args = 0
+ 646 0000 00B5     		push	{lr}
+ 647              		.cfi_def_cfa_offset 4
+ 648              		.cfi_offset 14, -4
+ 649 0002 85B0     		sub	sp, sp, #20
+ 650              		.cfi_def_cfa_offset 24
+ 651 0004 0190     		str	r0, [sp, #4]
+ 652 0006 0091     		str	r1, [sp]
+ 362:../emlib/src/em_adc.c ****   uint32_t tmp;
+ 363:../emlib/src/em_adc.c **** 
+ 364:../emlib/src/em_adc.c ****   EFM_ASSERT(ADC_REF_VALID(adc));
+ 653              		.loc 1 364 0
+ 654 0008 019A     		ldr	r2, [sp, #4]
+ 655 000a 254B     		ldr	r3, .L44
+ 656 000c 9A42     		cmp	r2, r3
+ 657 000e 04D0     		beq	.L39
+ 658              		.loc 1 364 0 is_stmt 0 discriminator 1
+ 659 0010 2448     		ldr	r0, .L44+4
+ 660 0012 4FF4B671 		mov	r1, #364
+ 661 0016 FFF7FEFF 		bl	assertEFM
+ 662              	.L39:
+ 365:../emlib/src/em_adc.c **** 
+ 366:../emlib/src/em_adc.c ****   /* Make sure single conversion is not in progress */
+ 367:../emlib/src/em_adc.c ****   adc->CMD = ADC_CMD_SINGLESTOP;
+ 663              		.loc 1 367 0 is_stmt 1
+ 664 001a 019B     		ldr	r3, [sp, #4]
+ 665 001c 0222     		movs	r2, #2
+ 666 001e 5A60     		str	r2, [r3, #4]
+ 368:../emlib/src/em_adc.c **** 
+ 369:../emlib/src/em_adc.c ****   /* Load proper calibration data depending on selected reference */
+ 370:../emlib/src/em_adc.c ****   ADC_CalibrateLoadSingle(adc, init->reference);
+ 667              		.loc 1 370 0
+ 668 0020 009B     		ldr	r3, [sp]
+ 669 0022 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 670 0024 0198     		ldr	r0, [sp, #4]
+ 671 0026 1946     		mov	r1, r3
+ 672 0028 FFF7FEFF 		bl	ADC_CalibrateLoadSingle
+ 371:../emlib/src/em_adc.c **** 
+ 372:../emlib/src/em_adc.c ****   tmp = ((uint32_t)(init->prsSel) << _ADC_SINGLECTRL_PRSSEL_SHIFT) |
+ 673              		.loc 1 372 0
+ 674 002c 009B     		ldr	r3, [sp]
+ 675 002e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 676 0030 1A07     		lsls	r2, r3, #28
+ 373:../emlib/src/em_adc.c ****         ((uint32_t)(init->acqTime) << _ADC_SINGLECTRL_AT_SHIFT) |
+ 677              		.loc 1 373 0
+ 678 0032 009B     		ldr	r3, [sp]
+ 679 0034 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 680 0036 1B05     		lsls	r3, r3, #20
+ 372:../emlib/src/em_adc.c ****   tmp = ((uint32_t)(init->prsSel) << _ADC_SINGLECTRL_PRSSEL_SHIFT) |
+ 681              		.loc 1 372 0
+ 682 0038 1A43     		orrs	r2, r2, r3
+ 374:../emlib/src/em_adc.c ****         ((uint32_t)(init->reference) << _ADC_SINGLECTRL_REF_SHIFT) |
+ 683              		.loc 1 374 0
+ 684 003a 009B     		ldr	r3, [sp]
+ 685 003c 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 686 003e 1B04     		lsls	r3, r3, #16
+ 373:../emlib/src/em_adc.c ****         ((uint32_t)(init->acqTime) << _ADC_SINGLECTRL_AT_SHIFT) |
+ARM GAS  /tmp/ccAbY0bm.s 			page 20
+
+
+ 687              		.loc 1 373 0
+ 688 0040 1A43     		orrs	r2, r2, r3
+ 375:../emlib/src/em_adc.c ****         ((uint32_t)(init->input) << _ADC_SINGLECTRL_INPUTSEL_SHIFT) |
+ 689              		.loc 1 375 0
+ 690 0042 009B     		ldr	r3, [sp]
+ 691 0044 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 692 0046 1B02     		lsls	r3, r3, #8
+ 374:../emlib/src/em_adc.c ****         ((uint32_t)(init->reference) << _ADC_SINGLECTRL_REF_SHIFT) |
+ 693              		.loc 1 374 0
+ 694 0048 1A43     		orrs	r2, r2, r3
+ 376:../emlib/src/em_adc.c ****         ((uint32_t)(init->resolution) << _ADC_SINGLECTRL_RES_SHIFT);
+ 695              		.loc 1 376 0
+ 696 004a 009B     		ldr	r3, [sp]
+ 697 004c DB78     		ldrb	r3, [r3, #3]	@ zero_extendqisi2
+ 698 004e 1B01     		lsls	r3, r3, #4
+ 372:../emlib/src/em_adc.c ****   tmp = ((uint32_t)(init->prsSel) << _ADC_SINGLECTRL_PRSSEL_SHIFT) |
+ 699              		.loc 1 372 0
+ 700 0050 1343     		orrs	r3, r3, r2
+ 701 0052 0393     		str	r3, [sp, #12]
+ 377:../emlib/src/em_adc.c **** 
+ 378:../emlib/src/em_adc.c ****   if (init->prsEnable)
+ 702              		.loc 1 378 0
+ 703 0054 009B     		ldr	r3, [sp]
+ 704 0056 9B79     		ldrb	r3, [r3, #6]	@ zero_extendqisi2
+ 705 0058 002B     		cmp	r3, #0
+ 706 005a 03D0     		beq	.L40
+ 379:../emlib/src/em_adc.c ****   {
+ 380:../emlib/src/em_adc.c ****     tmp |= ADC_SINGLECTRL_PRSEN;
+ 707              		.loc 1 380 0
+ 708 005c 039B     		ldr	r3, [sp, #12]
+ 709 005e 43F08073 		orr	r3, r3, #16777216
+ 710 0062 0393     		str	r3, [sp, #12]
+ 711              	.L40:
+ 381:../emlib/src/em_adc.c ****   }
+ 382:../emlib/src/em_adc.c **** 
+ 383:../emlib/src/em_adc.c ****   if (init->leftAdjust)
+ 712              		.loc 1 383 0
+ 713 0064 009B     		ldr	r3, [sp]
+ 714 0066 DB79     		ldrb	r3, [r3, #7]	@ zero_extendqisi2
+ 715 0068 002B     		cmp	r3, #0
+ 716 006a 03D0     		beq	.L41
+ 384:../emlib/src/em_adc.c ****   {
+ 385:../emlib/src/em_adc.c ****     tmp |= ADC_SINGLECTRL_ADJ_LEFT;
+ 717              		.loc 1 385 0
+ 718 006c 039B     		ldr	r3, [sp, #12]
+ 719 006e 43F00403 		orr	r3, r3, #4
+ 720 0072 0393     		str	r3, [sp, #12]
+ 721              	.L41:
+ 386:../emlib/src/em_adc.c ****   }
+ 387:../emlib/src/em_adc.c **** 
+ 388:../emlib/src/em_adc.c ****   if (init->diff)
+ 722              		.loc 1 388 0
+ 723 0074 009B     		ldr	r3, [sp]
+ 724 0076 5B79     		ldrb	r3, [r3, #5]	@ zero_extendqisi2
+ 725 0078 002B     		cmp	r3, #0
+ 726 007a 03D0     		beq	.L42
+ 389:../emlib/src/em_adc.c ****   {
+ARM GAS  /tmp/ccAbY0bm.s 			page 21
+
+
+ 390:../emlib/src/em_adc.c ****     tmp |= ADC_SINGLECTRL_DIFF;
+ 727              		.loc 1 390 0
+ 728 007c 039B     		ldr	r3, [sp, #12]
+ 729 007e 43F00203 		orr	r3, r3, #2
+ 730 0082 0393     		str	r3, [sp, #12]
+ 731              	.L42:
+ 391:../emlib/src/em_adc.c ****   }
+ 392:../emlib/src/em_adc.c **** 
+ 393:../emlib/src/em_adc.c ****   if (init->rep)
+ 732              		.loc 1 393 0
+ 733 0084 009B     		ldr	r3, [sp]
+ 734 0086 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 735 0088 002B     		cmp	r3, #0
+ 736 008a 03D0     		beq	.L43
+ 394:../emlib/src/em_adc.c ****   {
+ 395:../emlib/src/em_adc.c ****     tmp |= ADC_SINGLECTRL_REP;
+ 737              		.loc 1 395 0
+ 738 008c 039B     		ldr	r3, [sp, #12]
+ 739 008e 43F00103 		orr	r3, r3, #1
+ 740 0092 0393     		str	r3, [sp, #12]
+ 741              	.L43:
+ 396:../emlib/src/em_adc.c ****   }
+ 397:../emlib/src/em_adc.c **** 
+ 398:../emlib/src/em_adc.c ****   adc->SINGLECTRL = tmp;
+ 742              		.loc 1 398 0
+ 743 0094 019B     		ldr	r3, [sp, #4]
+ 744 0096 039A     		ldr	r2, [sp, #12]
+ 745 0098 DA60     		str	r2, [r3, #12]
+ 399:../emlib/src/em_adc.c **** }
+ 746              		.loc 1 399 0
+ 747 009a 05B0     		add	sp, sp, #20
+ 748              		@ sp needed
+ 749 009c 5DF804FB 		ldr	pc, [sp], #4
+ 750              	.L45:
+ 751              		.align	2
+ 752              	.L44:
+ 753 00a0 00200040 		.word	1073750016
+ 754 00a4 00000000 		.word	.LC0
+ 755              		.cfi_endproc
+ 756              	.LFE83:
+ 758              		.section	.text.ADC_PrescaleCalc,"ax",%progbits
+ 759              		.align	2
+ 760              		.global	ADC_PrescaleCalc
+ 761              		.thumb
+ 762              		.thumb_func
+ 764              	ADC_PrescaleCalc:
+ 765              	.LFB84:
+ 400:../emlib/src/em_adc.c **** 
+ 401:../emlib/src/em_adc.c **** 
+ 402:../emlib/src/em_adc.c **** /***************************************************************************//**
+ 403:../emlib/src/em_adc.c ****  * @brief
+ 404:../emlib/src/em_adc.c ****  *   Calculate prescaler value used to determine ADC clock.
+ 405:../emlib/src/em_adc.c ****  *
+ 406:../emlib/src/em_adc.c ****  * @details
+ 407:../emlib/src/em_adc.c ****  *   The ADC clock is given by: HFPERCLK / (prescale + 1).
+ 408:../emlib/src/em_adc.c ****  *
+ 409:../emlib/src/em_adc.c ****  * @param[in] adcFreq ADC frequency wanted. The frequency will automatically
+ARM GAS  /tmp/ccAbY0bm.s 			page 22
+
+
+ 410:../emlib/src/em_adc.c ****  *   be adjusted to be within valid range according to reference manual.
+ 411:../emlib/src/em_adc.c ****  *
+ 412:../emlib/src/em_adc.c ****  * @param[in] hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
+ 413:../emlib/src/em_adc.c ****  *   use currently defined HFPER clock setting.
+ 414:../emlib/src/em_adc.c ****  *
+ 415:../emlib/src/em_adc.c ****  * @return
+ 416:../emlib/src/em_adc.c ****  *   Prescaler value to use for ADC in order to achieve a clock value
+ 417:../emlib/src/em_adc.c ****  *   <= @p adcFreq.
+ 418:../emlib/src/em_adc.c ****  ******************************************************************************/
+ 419:../emlib/src/em_adc.c **** uint8_t ADC_PrescaleCalc(uint32_t adcFreq, uint32_t hfperFreq)
+ 420:../emlib/src/em_adc.c **** {
+ 766              		.loc 1 420 0
+ 767              		.cfi_startproc
+ 768              		@ args = 0, pretend = 0, frame = 16
+ 769              		@ frame_needed = 0, uses_anonymous_args = 0
+ 770 0000 00B5     		push	{lr}
+ 771              		.cfi_def_cfa_offset 4
+ 772              		.cfi_offset 14, -4
+ 773 0002 85B0     		sub	sp, sp, #20
+ 774              		.cfi_def_cfa_offset 24
+ 775 0004 0190     		str	r0, [sp, #4]
+ 776 0006 0091     		str	r1, [sp]
+ 421:../emlib/src/em_adc.c ****   uint32_t ret;
+ 422:../emlib/src/em_adc.c **** 
+ 423:../emlib/src/em_adc.c ****   /* Make sure selected ADC clock is within valid range */
+ 424:../emlib/src/em_adc.c ****   if (adcFreq > ADC_MAX_CLOCK)
+ 777              		.loc 1 424 0
+ 778 0008 019A     		ldr	r2, [sp, #4]
+ 779 000a 144B     		ldr	r3, .L52
+ 780 000c 9A42     		cmp	r2, r3
+ 781 000e 02D9     		bls	.L47
+ 425:../emlib/src/em_adc.c ****   {
+ 426:../emlib/src/em_adc.c ****     adcFreq = ADC_MAX_CLOCK;
+ 782              		.loc 1 426 0
+ 783 0010 124B     		ldr	r3, .L52
+ 784 0012 0193     		str	r3, [sp, #4]
+ 785 0014 06E0     		b	.L48
+ 786              	.L47:
+ 427:../emlib/src/em_adc.c ****   }
+ 428:../emlib/src/em_adc.c ****   else if (adcFreq < ADC_MIN_CLOCK)
+ 787              		.loc 1 428 0
+ 788 0016 019B     		ldr	r3, [sp, #4]
+ 789 0018 B3F5FA4F 		cmp	r3, #32000
+ 790 001c 02D2     		bcs	.L48
+ 429:../emlib/src/em_adc.c ****   {
+ 430:../emlib/src/em_adc.c ****     adcFreq = ADC_MIN_CLOCK;
+ 791              		.loc 1 430 0
+ 792 001e 4FF4FA43 		mov	r3, #32000
+ 793 0022 0193     		str	r3, [sp, #4]
+ 794              	.L48:
+ 431:../emlib/src/em_adc.c ****   }
+ 432:../emlib/src/em_adc.c **** 
+ 433:../emlib/src/em_adc.c ****   /* Use current HFPER frequency? */
+ 434:../emlib/src/em_adc.c ****   if (!hfperFreq)
+ 795              		.loc 1 434 0
+ 796 0024 009B     		ldr	r3, [sp]
+ 797 0026 002B     		cmp	r3, #0
+ARM GAS  /tmp/ccAbY0bm.s 			page 23
+
+
+ 798 0028 03D1     		bne	.L49
+ 435:../emlib/src/em_adc.c ****   {
+ 436:../emlib/src/em_adc.c ****     hfperFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+ 799              		.loc 1 436 0
+ 800 002a 0D48     		ldr	r0, .L52+4
+ 801 002c FFF7FEFF 		bl	CMU_ClockFreqGet
+ 802 0030 0090     		str	r0, [sp]
+ 803              	.L49:
+ 437:../emlib/src/em_adc.c ****   }
+ 438:../emlib/src/em_adc.c **** 
+ 439:../emlib/src/em_adc.c ****   ret = (hfperFreq + adcFreq - 1) / adcFreq;
+ 804              		.loc 1 439 0
+ 805 0032 009A     		ldr	r2, [sp]
+ 806 0034 019B     		ldr	r3, [sp, #4]
+ 807 0036 1344     		add	r3, r3, r2
+ 808 0038 5A1E     		subs	r2, r3, #1
+ 809 003a 019B     		ldr	r3, [sp, #4]
+ 810 003c B2FBF3F3 		udiv	r3, r2, r3
+ 811 0040 0393     		str	r3, [sp, #12]
+ 440:../emlib/src/em_adc.c ****   if (ret)
+ 812              		.loc 1 440 0
+ 813 0042 039B     		ldr	r3, [sp, #12]
+ 814 0044 002B     		cmp	r3, #0
+ 815 0046 02D0     		beq	.L50
+ 441:../emlib/src/em_adc.c ****   {
+ 442:../emlib/src/em_adc.c ****     ret--;
+ 816              		.loc 1 442 0
+ 817 0048 039B     		ldr	r3, [sp, #12]
+ 818 004a 013B     		subs	r3, r3, #1
+ 819 004c 0393     		str	r3, [sp, #12]
+ 820              	.L50:
+ 443:../emlib/src/em_adc.c ****   }
+ 444:../emlib/src/em_adc.c **** 
+ 445:../emlib/src/em_adc.c ****   return (uint8_t)ret;
+ 821              		.loc 1 445 0
+ 822 004e 039B     		ldr	r3, [sp, #12]
+ 823 0050 DBB2     		uxtb	r3, r3
+ 446:../emlib/src/em_adc.c **** }
+ 824              		.loc 1 446 0
+ 825 0052 1846     		mov	r0, r3
+ 826 0054 05B0     		add	sp, sp, #20
+ 827              		@ sp needed
+ 828 0056 5DF804FB 		ldr	pc, [sp], #4
+ 829              	.L53:
+ 830 005a 00BF     		.align	2
+ 831              	.L52:
+ 832 005c 405DC600 		.word	13000000
+ 833 0060 10810200 		.word	164112
+ 834              		.cfi_endproc
+ 835              	.LFE84:
+ 837              		.section	.text.ADC_Reset,"ax",%progbits
+ 838              		.align	2
+ 839              		.global	ADC_Reset
+ 840              		.thumb
+ 841              		.thumb_func
+ 843              	ADC_Reset:
+ 844              	.LFB85:
+ARM GAS  /tmp/ccAbY0bm.s 			page 24
+
+
+ 447:../emlib/src/em_adc.c **** 
+ 448:../emlib/src/em_adc.c **** 
+ 449:../emlib/src/em_adc.c **** /***************************************************************************//**
+ 450:../emlib/src/em_adc.c ****  * @brief
+ 451:../emlib/src/em_adc.c ****  *   Reset ADC to same state as after a HW reset.
+ 452:../emlib/src/em_adc.c ****  *
+ 453:../emlib/src/em_adc.c ****  * @note
+ 454:../emlib/src/em_adc.c ****  *   The ROUTE register is NOT reset by this function, in order to allow for
+ 455:../emlib/src/em_adc.c ****  *   centralized setup of this feature.
+ 456:../emlib/src/em_adc.c ****  *
+ 457:../emlib/src/em_adc.c ****  * @param[in] adc
+ 458:../emlib/src/em_adc.c ****  *   Pointer to ADC peripheral register block.
+ 459:../emlib/src/em_adc.c ****  ******************************************************************************/
+ 460:../emlib/src/em_adc.c **** void ADC_Reset(ADC_TypeDef *adc)
+ 461:../emlib/src/em_adc.c **** {
+ 845              		.loc 1 461 0
+ 846              		.cfi_startproc
+ 847              		@ args = 0, pretend = 0, frame = 8
+ 848              		@ frame_needed = 0, uses_anonymous_args = 0
+ 849 0000 00B5     		push	{lr}
+ 850              		.cfi_def_cfa_offset 4
+ 851              		.cfi_offset 14, -4
+ 852 0002 83B0     		sub	sp, sp, #12
+ 853              		.cfi_def_cfa_offset 16
+ 854 0004 0190     		str	r0, [sp, #4]
+ 462:../emlib/src/em_adc.c ****   /* Stop conversions, before resetting other registers. */
+ 463:../emlib/src/em_adc.c ****   adc->CMD        = ADC_CMD_SINGLESTOP | ADC_CMD_SCANSTOP;
+ 855              		.loc 1 463 0
+ 856 0006 019B     		ldr	r3, [sp, #4]
+ 857 0008 0A22     		movs	r2, #10
+ 858 000a 5A60     		str	r2, [r3, #4]
+ 464:../emlib/src/em_adc.c ****   adc->SINGLECTRL = _ADC_SINGLECTRL_RESETVALUE;
+ 859              		.loc 1 464 0
+ 860 000c 019B     		ldr	r3, [sp, #4]
+ 861 000e 0022     		movs	r2, #0
+ 862 0010 DA60     		str	r2, [r3, #12]
+ 465:../emlib/src/em_adc.c ****   adc->SCANCTRL   = _ADC_SCANCTRL_RESETVALUE;
+ 863              		.loc 1 465 0
+ 864 0012 019B     		ldr	r3, [sp, #4]
+ 865 0014 0022     		movs	r2, #0
+ 866 0016 1A61     		str	r2, [r3, #16]
+ 466:../emlib/src/em_adc.c ****   adc->CTRL       = _ADC_CTRL_RESETVALUE;
+ 867              		.loc 1 466 0
+ 868 0018 019B     		ldr	r3, [sp, #4]
+ 869 001a 4FF4F812 		mov	r2, #2031616
+ 870 001e 1A60     		str	r2, [r3]
+ 467:../emlib/src/em_adc.c ****   adc->IEN        = _ADC_IEN_RESETVALUE;
+ 871              		.loc 1 467 0
+ 872 0020 019B     		ldr	r3, [sp, #4]
+ 873 0022 0022     		movs	r2, #0
+ 874 0024 5A61     		str	r2, [r3, #20]
+ 468:../emlib/src/em_adc.c ****   adc->IFC        = _ADC_IFC_MASK;
+ 875              		.loc 1 468 0
+ 876 0026 019B     		ldr	r3, [sp, #4]
+ 877 0028 40F20332 		movw	r2, #771
+ 878 002c 1A62     		str	r2, [r3, #32]
+ 469:../emlib/src/em_adc.c ****   adc->BIASPROG   = _ADC_BIASPROG_RESETVALUE;
+ARM GAS  /tmp/ccAbY0bm.s 			page 25
+
+
+ 879              		.loc 1 469 0
+ 880 002e 019B     		ldr	r3, [sp, #4]
+ 881 0030 40F24772 		movw	r2, #1863
+ 882 0034 DA63     		str	r2, [r3, #60]
+ 470:../emlib/src/em_adc.c **** 
+ 471:../emlib/src/em_adc.c ****   /* Load calibration values for the 1V25 internal reference. */
+ 472:../emlib/src/em_adc.c ****   ADC_CalibrateLoadSingle(adc, adcRef1V25);
+ 883              		.loc 1 472 0
+ 884 0036 0198     		ldr	r0, [sp, #4]
+ 885 0038 0021     		movs	r1, #0
+ 886 003a FFF7FEFF 		bl	ADC_CalibrateLoadSingle
+ 473:../emlib/src/em_adc.c ****   ADC_CalibrateLoadScan(adc, adcRef1V25);
+ 887              		.loc 1 473 0
+ 888 003e 0198     		ldr	r0, [sp, #4]
+ 889 0040 0021     		movs	r1, #0
+ 890 0042 FFF7FEFF 		bl	ADC_CalibrateLoadScan
+ 474:../emlib/src/em_adc.c **** 
+ 475:../emlib/src/em_adc.c ****   /* Do not reset route register, setting should be done independently */
+ 476:../emlib/src/em_adc.c **** }
+ 891              		.loc 1 476 0
+ 892 0046 03B0     		add	sp, sp, #12
+ 893              		@ sp needed
+ 894 0048 5DF804FB 		ldr	pc, [sp], #4
+ 895              		.cfi_endproc
+ 896              	.LFE85:
+ 898              		.section	.text.ADC_TimebaseCalc,"ax",%progbits
+ 899              		.align	2
+ 900              		.global	ADC_TimebaseCalc
+ 901              		.thumb
+ 902              		.thumb_func
+ 904              	ADC_TimebaseCalc:
+ 905              	.LFB86:
+ 477:../emlib/src/em_adc.c **** 
+ 478:../emlib/src/em_adc.c **** 
+ 479:../emlib/src/em_adc.c **** /***************************************************************************//**
+ 480:../emlib/src/em_adc.c ****  * @brief
+ 481:../emlib/src/em_adc.c ****  *   Calculate timebase value in order to get a timebase providing at least 1us.
+ 482:../emlib/src/em_adc.c ****  *
+ 483:../emlib/src/em_adc.c ****  * @param[in] hfperFreq Frequency in Hz of reference HFPER clock. Set to 0 to
+ 484:../emlib/src/em_adc.c ****  *   use currently defined HFPER clock setting.
+ 485:../emlib/src/em_adc.c ****  *
+ 486:../emlib/src/em_adc.c ****  * @return
+ 487:../emlib/src/em_adc.c ****  *   Timebase value to use for ADC in order to achieve at least 1 us.
+ 488:../emlib/src/em_adc.c ****  ******************************************************************************/
+ 489:../emlib/src/em_adc.c **** uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
+ 490:../emlib/src/em_adc.c **** {
+ 906              		.loc 1 490 0
+ 907              		.cfi_startproc
+ 908              		@ args = 0, pretend = 0, frame = 8
+ 909              		@ frame_needed = 0, uses_anonymous_args = 0
+ 910 0000 00B5     		push	{lr}
+ 911              		.cfi_def_cfa_offset 4
+ 912              		.cfi_offset 14, -4
+ 913 0002 83B0     		sub	sp, sp, #12
+ 914              		.cfi_def_cfa_offset 16
+ 915 0004 0190     		str	r0, [sp, #4]
+ 491:../emlib/src/em_adc.c ****   if (!hfperFreq)
+ARM GAS  /tmp/ccAbY0bm.s 			page 26
+
+
+ 916              		.loc 1 491 0
+ 917 0006 019B     		ldr	r3, [sp, #4]
+ 918 0008 002B     		cmp	r3, #0
+ 919 000a 08D1     		bne	.L56
+ 492:../emlib/src/em_adc.c ****   {
+ 493:../emlib/src/em_adc.c ****     hfperFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+ 920              		.loc 1 493 0
+ 921 000c 0E48     		ldr	r0, .L58
+ 922 000e FFF7FEFF 		bl	CMU_ClockFreqGet
+ 923 0012 0190     		str	r0, [sp, #4]
+ 494:../emlib/src/em_adc.c **** 
+ 495:../emlib/src/em_adc.c ****     /* Just in case, make sure we get non-zero freq for below calculation */
+ 496:../emlib/src/em_adc.c ****     if (!hfperFreq)
+ 924              		.loc 1 496 0
+ 925 0014 019B     		ldr	r3, [sp, #4]
+ 926 0016 002B     		cmp	r3, #0
+ 927 0018 01D1     		bne	.L56
+ 497:../emlib/src/em_adc.c ****     {
+ 498:../emlib/src/em_adc.c ****       hfperFreq = 1;
+ 928              		.loc 1 498 0
+ 929 001a 0123     		movs	r3, #1
+ 930 001c 0193     		str	r3, [sp, #4]
+ 931              	.L56:
+ 499:../emlib/src/em_adc.c ****     }
+ 500:../emlib/src/em_adc.c ****   }
+ 501:../emlib/src/em_adc.c **** #if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+ 502:../emlib/src/em_adc.c ****   /* Handle errata on Giant Gecko, max TIMEBASE is 5 bits wide or max 0x1F */
+ 503:../emlib/src/em_adc.c ****   /* cycles. This will give a warmp up time of e.g. 0.645us, not the       */
+ 504:../emlib/src/em_adc.c ****   /* required 1us when operating at 48MHz. One must also increase acqTime  */
+ 505:../emlib/src/em_adc.c ****   /* to compensate for the missing clock cycles, adding up to 1us in total.*/
+ 506:../emlib/src/em_adc.c ****   /* See reference manual for details. */
+ 507:../emlib/src/em_adc.c ****   if( hfperFreq > 32000000 )
+ 508:../emlib/src/em_adc.c ****   {
+ 509:../emlib/src/em_adc.c ****     hfperFreq = 32000000;
+ 510:../emlib/src/em_adc.c ****   }
+ 511:../emlib/src/em_adc.c **** #endif
+ 512:../emlib/src/em_adc.c ****   /* Determine number of HFPERCLK cycle >= 1us */
+ 513:../emlib/src/em_adc.c ****   hfperFreq += 999999;
+ 932              		.loc 1 513 0
+ 933 001e 019B     		ldr	r3, [sp, #4]
+ 934 0020 03F57423 		add	r3, r3, #999424
+ 935 0024 03F23F23 		addw	r3, r3, #575
+ 936 0028 0193     		str	r3, [sp, #4]
+ 514:../emlib/src/em_adc.c ****   hfperFreq /= 1000000;
+ 937              		.loc 1 514 0
+ 938 002a 019A     		ldr	r2, [sp, #4]
+ 939 002c 074B     		ldr	r3, .L58+4
+ 940 002e A3FB0213 		umull	r1, r3, r3, r2
+ 941 0032 9B0C     		lsrs	r3, r3, #18
+ 942 0034 0193     		str	r3, [sp, #4]
+ 515:../emlib/src/em_adc.c **** 
+ 516:../emlib/src/em_adc.c ****   /* Return timebase value (N+1 format) */
+ 517:../emlib/src/em_adc.c ****   return (uint8_t)(hfperFreq - 1);
+ 943              		.loc 1 517 0
+ 944 0036 019B     		ldr	r3, [sp, #4]
+ 945 0038 DBB2     		uxtb	r3, r3
+ 946 003a 013B     		subs	r3, r3, #1
+ARM GAS  /tmp/ccAbY0bm.s 			page 27
+
+
+ 947 003c DBB2     		uxtb	r3, r3
+ 518:../emlib/src/em_adc.c **** }
+ 948              		.loc 1 518 0
+ 949 003e 1846     		mov	r0, r3
+ 950 0040 03B0     		add	sp, sp, #12
+ 951              		@ sp needed
+ 952 0042 5DF804FB 		ldr	pc, [sp], #4
+ 953              	.L59:
+ 954 0046 00BF     		.align	2
+ 955              	.L58:
+ 956 0048 10810200 		.word	164112
+ 957 004c 83DE1B43 		.word	1125899907
+ 958              		.cfi_endproc
+ 959              	.LFE86:
+ 961              		.text
+ 962              	.Letext0:
+ 963              		.file 2 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 964              		.file 3 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 965              		.file 4 "../Device/EnergyMicro/EFM32G/Include/efm32g_adc.h"
+ 966              		.file 5 "../Device/EnergyMicro/EFM32G/Include/efm32g_devinfo.h"
+ 967              		.file 6 "../emlib/inc/em_adc.h"
+ 968              		.file 7 "../emlib/inc/em_cmu.h"
+ 969              		.file 8 "../CMSIS/Include/core_cm3.h"

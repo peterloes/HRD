@@ -1,0 +1,1589 @@
+ARM GAS  /tmp/ccYZYc0K.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"LCD_DOGM162.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.bss.l_pField,"aw",%nobits
+  19              		.align	2
+  22              	l_pField:
+  23 0000 00000000 		.space	4
+  24              		.section	.data.l_Contrast,"aw",%progbits
+  25              		.align	2
+  28              	l_Contrast:
+  29 0000 23000000 		.word	35
+  30              		.section	.bss.l_flgLCD_IsOn,"aw",%nobits
+  33              	l_flgLCD_IsOn:
+  34 0000 00       		.space	1
+  35              		.section	.rodata
+  36              		.align	2
+  37              	.LC0:
+  38 0000 2E2E2F64 		.ascii	"../drivers/LCD_DOGM162.c\000"
+  38      72697665 
+  38      72732F4C 
+  38      43445F44 
+  38      4F474D31 
+  39              		.section	.text.LCD_Init,"ax",%progbits
+  40              		.align	2
+  41              		.global	LCD_Init
+  42              		.thumb
+  43              		.thumb_func
+  45              	LCD_Init:
+  46              	.LFB90:
+  47              		.file 1 "../drivers/LCD_DOGM162.c"
+   1:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+   2:../drivers/LCD_DOGM162.c ****  * @file
+   3:../drivers/LCD_DOGM162.c ****  * @brief	Routines for LCD Module EA DOGM162
+   4:../drivers/LCD_DOGM162.c ****  * @author	Ralf Gerhauser
+   5:../drivers/LCD_DOGM162.c ****  * @version	2016-11-22
+   6:../drivers/LCD_DOGM162.c ****  *
+   7:../drivers/LCD_DOGM162.c ****  * This module contains the low-level, i.e. the DOGM162 specific part of the
+   8:../drivers/LCD_DOGM162.c ****  * display routine.  They are used by module Display.c, but should never be
+   9:../drivers/LCD_DOGM162.c ****  * called directly by user code.
+  10:../drivers/LCD_DOGM162.c ****  *
+  11:../drivers/LCD_DOGM162.c ****  ****************************************************************************//*
+  12:../drivers/LCD_DOGM162.c **** Revision History:
+  13:../drivers/LCD_DOGM162.c **** 2016-11-22,rage	Implemented additional output to LEUART.
+ARM GAS  /tmp/ccYZYc0K.s 			page 2
+
+
+  14:../drivers/LCD_DOGM162.c **** 2016-04-05,rage	Made local variable <l_flgLCD_IsOn> of type "volatile".
+  15:../drivers/LCD_DOGM162.c **** 2015-07-09,rage	IAR Compiler: Use vsprintf() instead vsiprintf().
+  16:../drivers/LCD_DOGM162.c **** 2015-05-22,rage	Changed numeric defines to hexadecimal because the IAR compiler
+  17:../drivers/LCD_DOGM162.c **** 		does not support binary constants.
+  18:../drivers/LCD_DOGM162.c **** 2014-11-19,rage	Initial version.
+  19:../drivers/LCD_DOGM162.c **** */
+  20:../drivers/LCD_DOGM162.c **** 
+  21:../drivers/LCD_DOGM162.c **** /*=============================== Header Files ===============================*/
+  22:../drivers/LCD_DOGM162.c **** 
+  23:../drivers/LCD_DOGM162.c **** #include <stdio.h>
+  24:../drivers/LCD_DOGM162.c **** #include <stdarg.h>
+  25:../drivers/LCD_DOGM162.c **** #include <string.h>
+  26:../drivers/LCD_DOGM162.c **** #include "em_device.h"
+  27:../drivers/LCD_DOGM162.c **** #include "em_assert.h"
+  28:../drivers/LCD_DOGM162.c **** #include "em_gpio.h"
+  29:../drivers/LCD_DOGM162.c **** #include "AlarmClock.h"
+  30:../drivers/LCD_DOGM162.c **** #include "LCD_DOGM162.h"
+  31:../drivers/LCD_DOGM162.c **** 
+  32:../drivers/LCD_DOGM162.c **** /*=============================== Definitions ================================*/
+  33:../drivers/LCD_DOGM162.c **** 
+  34:../drivers/LCD_DOGM162.c ****     /*!@name Hardware Configuration: Power Enable for the LCD Module. */
+  35:../drivers/LCD_DOGM162.c **** //@{
+  36:../drivers/LCD_DOGM162.c **** #define LCD_POWER_PORT		gpioPortA	//!< Port for power control
+  37:../drivers/LCD_DOGM162.c **** #define LCD_POWER_PIN		8		//!< Power Pin: 0=OFF, 1=ON
+  38:../drivers/LCD_DOGM162.c **** //@}
+  39:../drivers/LCD_DOGM162.c **** 
+  40:../drivers/LCD_DOGM162.c ****     /*!@name Hardware Configuration: Control lines to the LCD Module. */
+  41:../drivers/LCD_DOGM162.c **** //@{
+  42:../drivers/LCD_DOGM162.c **** #define LCD_CTRL_PORT		gpioPortF	//!< Port for control lines
+  43:../drivers/LCD_DOGM162.c **** #define LCD_CTRL_PIN_E		3		//!< Data Enable signal
+  44:../drivers/LCD_DOGM162.c **** #define LCD_CTRL_PIN_RW		4		//!< Read/Write signal
+  45:../drivers/LCD_DOGM162.c **** #define LCD_CTRL_PIN_RS		5		//!< Register Select signal
+  46:../drivers/LCD_DOGM162.c **** //@}
+  47:../drivers/LCD_DOGM162.c **** 
+  48:../drivers/LCD_DOGM162.c ****     /*!@name Hardware Configuration: Data bus to the LCD Module. */
+  49:../drivers/LCD_DOGM162.c **** //@{
+  50:../drivers/LCD_DOGM162.c **** #define LCD_DATA_PORT		gpioPortE	//!< Port for the data bus
+  51:../drivers/LCD_DOGM162.c **** #define LCD_DATA_MODE_OUT	0x44444444	//!< 8x @ref gpioModePushPull
+  52:../drivers/LCD_DOGM162.c **** #define LCD_DATA_MODE_IN	0x11111111	//!< 8x @ref gpioModeInput
+  53:../drivers/LCD_DOGM162.c **** #define LCD_DATA_MASK		(0xFF << 8)	//!< Data bus uses bit 15:8
+  54:../drivers/LCD_DOGM162.c **** //@}
+  55:../drivers/LCD_DOGM162.c **** 
+  56:../drivers/LCD_DOGM162.c ****     /*!@brief Timeout for WaitCtrlReady() is 1ms */
+  57:../drivers/LCD_DOGM162.c **** #define LCD_WAIT_READY_TIMEOUT	(RTC_COUNTS_PER_SEC / 1000)
+  58:../drivers/LCD_DOGM162.c **** 
+  59:../drivers/LCD_DOGM162.c ****     /*!@name I/O Macros providing access to the LCD Module. */
+  60:../drivers/LCD_DOGM162.c **** //@{
+  61:../drivers/LCD_DOGM162.c ****     //! Set level of the LCD power enable pin.
+  62:../drivers/LCD_DOGM162.c **** #define SET_LCD_POWER_PIN(level)  IO_Bit(GPIO->P[LCD_POWER_PORT].DOUT,	\
+  63:../drivers/LCD_DOGM162.c **** 					 LCD_POWER_PIN) = (level)
+  64:../drivers/LCD_DOGM162.c ****     //! Configure the data bus to the LCD module for input, i.e. reading data.
+  65:../drivers/LCD_DOGM162.c **** #define SET_LCD_DATA_MODE_IN  GPIO->P[LCD_DATA_PORT].MODEH = LCD_DATA_MODE_IN
+  66:../drivers/LCD_DOGM162.c ****     //! Configure the data bus to the LCD module for output, i.e. writing data.
+  67:../drivers/LCD_DOGM162.c **** #define SET_LCD_DATA_MODE_OUT GPIO->P[LCD_DATA_PORT].MODEH = LCD_DATA_MODE_OUT
+  68:../drivers/LCD_DOGM162.c ****     //! Read data from the data bus of the LCD module.
+  69:../drivers/LCD_DOGM162.c **** #define READ_LCD_DATA()       (GPIO->P[LCD_DATA_PORT].DIN >> 8)
+  70:../drivers/LCD_DOGM162.c ****     /*!@brief Write data to the LCD module.  Writing directly to the GPIO data
+ARM GAS  /tmp/ccYZYc0K.s 			page 3
+
+
+  71:../drivers/LCD_DOGM162.c ****      * out register is possible since port <b>E</b> is exclusively used for the
+  72:../drivers/LCD_DOGM162.c ****      * data bus (bit 7 to 0 are not routed to any pin for QFP64).
+  73:../drivers/LCD_DOGM162.c ****      */
+  74:../drivers/LCD_DOGM162.c **** #define WRITE_LCD_DATA(data)  (GPIO->P[LCD_DATA_PORT].DOUT = (data) << 8)
+  75:../drivers/LCD_DOGM162.c ****     //! Set level of control line "E"
+  76:../drivers/LCD_DOGM162.c **** #define SET_LCD_CTRL_PIN_E(level)  IO_Bit(GPIO->P[LCD_CTRL_PORT].DOUT,	\
+  77:../drivers/LCD_DOGM162.c **** 					  LCD_CTRL_PIN_E) = (level)
+  78:../drivers/LCD_DOGM162.c ****     //! Set level of control line "RW"
+  79:../drivers/LCD_DOGM162.c **** #define SET_LCD_CTRL_PIN_RW(level) IO_Bit(GPIO->P[LCD_CTRL_PORT].DOUT,	\
+  80:../drivers/LCD_DOGM162.c **** 					  LCD_CTRL_PIN_RW) = (level)
+  81:../drivers/LCD_DOGM162.c ****     //! Set level of control line "RS"
+  82:../drivers/LCD_DOGM162.c **** #define SET_LCD_CTRL_PIN_RS(level) IO_Bit(GPIO->P[LCD_CTRL_PORT].DOUT,	\
+  83:../drivers/LCD_DOGM162.c **** 					  LCD_CTRL_PIN_RS) = (level)
+  84:../drivers/LCD_DOGM162.c **** //@}
+  85:../drivers/LCD_DOGM162.c **** 
+  86:../drivers/LCD_DOGM162.c ****     /*!@anchor commands @name Commands for the LCD Controller. */
+  87:../drivers/LCD_DOGM162.c **** //@{
+  88:../drivers/LCD_DOGM162.c **** #define LCD_CMD_CLEAR_DISPLAY	0x01	//!< Clear display, addr=0
+  89:../drivers/LCD_DOGM162.c **** #define LCD_CMD_RETURN_HOME	0x02	//!< Set addr=0, cursor home
+  90:../drivers/LCD_DOGM162.c **** #define LCD_CMD_ENTRY_MODE	0x04	//!< Cursor move direction right
+  91:../drivers/LCD_DOGM162.c **** #define LCD_CMD_ENTRY_MODE_ID	0x06	//!< Cursor move direction left
+  92:../drivers/LCD_DOGM162.c **** #define LCD_CMD_ENTRY_MODE_S	0x05	//!< Shift display left
+  93:../drivers/LCD_DOGM162.c **** #define LCD_CMD_DISPLAY_OFF	0x08	//!< Switch display OFF
+  94:../drivers/LCD_DOGM162.c **** #define LCD_CMD_DISPLAY_ON_D	0x0C	//!< Entire display ON
+  95:../drivers/LCD_DOGM162.c **** #define LCD_CMD_DISPLAY_ON_C	0x0A	//!< Cursor ON
+  96:../drivers/LCD_DOGM162.c **** #define LCD_CMD_DISPLAY_ON_B	0X09	//!< Cursor blinking ON
+  97:../drivers/LCD_DOGM162.c **** #define LCD_CMD_FCT_SET		0x20	//!< 4bit, 1 line, Instr-Tab 00
+  98:../drivers/LCD_DOGM162.c **** #define LCD_CMD_FCT_SET_DL	0X30	//!< Interface data is 8 bit
+  99:../drivers/LCD_DOGM162.c **** #define LCD_CMD_FCT_SET_N	0x28	//!< Select 2 lines
+ 100:../drivers/LCD_DOGM162.c **** #define LCD_CMD_FCT_SET_DH	0x24	//!< Double Height
+ 101:../drivers/LCD_DOGM162.c **** #define LCD_CMD_FCT_SET_IS2	0x22	//!< Instruction-Table 10
+ 102:../drivers/LCD_DOGM162.c **** #define LCD_CMD_FCT_SET_IS1	0x21	//!< Instruction-Table 01
+ 103:../drivers/LCD_DOGM162.c **** #define LCD_CMD_FCT_SET_IS0	0x20	//!< Instruction-Table 00
+ 104:../drivers/LCD_DOGM162.c **** #define LCD_CMD_SET_DDRAM_ADDR	0x80	//!< Set DDRAM address
+ 105:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS0_CD_SHIFT	0x10	//!< Set Cursor Shift (left)
+ 106:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS0_CD_SHIFT_SC	0x18	//!< Set Display Shift (left)
+ 107:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS0_CD_SHIFT_RL	0x14	//!< Cursor/Display Shift right
+ 108:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS0_SET_CGRAM	0x40	//!< Set CGRAM address AC5:0
+ 109:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_BIAS_SET	0x14	//!< BS=0: 1/5 bias
+ 110:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_BIAS_SET_BL	0x1C	//!< BS=1: 1/4 bias
+ 111:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_ICON_ADDR	0x40	//!< Set ICON address AC3:0
+ 112:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_IBC		0x50	//!< ICON+Boost OFF, Contrast 0
+ 113:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_IBC_ION	0x58	//!< ICON display ON
+ 114:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_IBC_BON	0x54	//!< Set booster curcuit ON
+ 115:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_IBC_C5	0x52	//!< Contrast bit 5
+ 116:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_IBC_C4	0x51	//!< Contrast bit 4
+ 117:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_CONTR	0x70	//!< Contrast
+ 118:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_CONTR_C3	0x78	//!< Contrast bit 3
+ 119:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_CONTR_C2	0x74	//!< Contrast bit 2
+ 120:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_CONTR_C1	0x72	//!< Contrast bit 1
+ 121:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_CONTR_C0	0x71	//!< Contrast bit 0
+ 122:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_FOLLOW	0x60	//!< Follower Control (all 0)
+ 123:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_FOLLOW_FON	0x68	//!< Follower Ctrl: FON=1
+ 124:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_FOLLOW_RAB2	0x64	//!< Follower Ampl. Ratio: RAB2
+ 125:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_FOLLOW_RAB1	0x62	//!< Follower Ampl. Ratio: RAB1
+ 126:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS1_FOLLOW_RAB0	0x61	//!< Follower Ampl. Ratio: RAB0
+ 127:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS2_DBL_HP	0x10	//!< Double Height Position UD=0
+ARM GAS  /tmp/ccYZYc0K.s 			page 4
+
+
+ 128:../drivers/LCD_DOGM162.c **** #define LCD_CMD_IS2_DBL_HP_UD	0x18	//!< Double Height Position UD=1
+ 129:../drivers/LCD_DOGM162.c **** //@}
+ 130:../drivers/LCD_DOGM162.c **** 
+ 131:../drivers/LCD_DOGM162.c **** /*================================ Local Data ================================*/
+ 132:../drivers/LCD_DOGM162.c **** 
+ 133:../drivers/LCD_DOGM162.c ****     /*!@brief Pointer to module configuration. */
+ 134:../drivers/LCD_DOGM162.c **** static const LCD_FIELD *l_pField;
+ 135:../drivers/LCD_DOGM162.c **** 
+ 136:../drivers/LCD_DOGM162.c ****     /*!@brief LCD Contrast value (0 to 63). */
+ 137:../drivers/LCD_DOGM162.c **** static volatile int l_Contrast = 35;
+ 138:../drivers/LCD_DOGM162.c **** 
+ 139:../drivers/LCD_DOGM162.c ****     /*!@brief Flag if LCD is on. */
+ 140:../drivers/LCD_DOGM162.c **** static volatile bool l_flgLCD_IsOn;
+ 141:../drivers/LCD_DOGM162.c **** 
+ 142:../drivers/LCD_DOGM162.c **** /*=========================== Forward Declarations ===========================*/
+ 143:../drivers/LCD_DOGM162.c **** 
+ 144:../drivers/LCD_DOGM162.c **** static uint8_t BusyRead (void);
+ 145:../drivers/LCD_DOGM162.c **** static bool WaitCtrlReady (void);
+ 146:../drivers/LCD_DOGM162.c **** static void CmdWrite (uint8_t cmd);
+ 147:../drivers/LCD_DOGM162.c **** // static uint8_t DataRead (void);
+ 148:../drivers/LCD_DOGM162.c **** static void DataWrite (uint8_t data);
+ 149:../drivers/LCD_DOGM162.c **** 
+ 150:../drivers/LCD_DOGM162.c **** 
+ 151:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 152:../drivers/LCD_DOGM162.c ****  *
+ 153:../drivers/LCD_DOGM162.c ****  * @brief	Initialize LCD
+ 154:../drivers/LCD_DOGM162.c ****  *
+ 155:../drivers/LCD_DOGM162.c ****  * This routine initializes the board-specific hardware (GPIOs) and the LCD
+ 156:../drivers/LCD_DOGM162.c ****  * controller itself.
+ 157:../drivers/LCD_DOGM162.c ****  *
+ 158:../drivers/LCD_DOGM162.c ****  * @param[in] pField
+ 159:../drivers/LCD_DOGM162.c ****  *	Address of an initialization structure of type @ref LCD_FIELD that
+ 160:../drivers/LCD_DOGM162.c ****  *	points to a list of fields, referenced by an @ref LCD_FIELD_ID index.
+ 161:../drivers/LCD_DOGM162.c ****  *
+ 162:../drivers/LCD_DOGM162.c ****  * @note
+ 163:../drivers/LCD_DOGM162.c ****  *	Parameter <b>pField</b> must point to a persistent data structure,
+ 164:../drivers/LCD_DOGM162.c ****  *	i.e. this must be valid over the whole life time of the program.
+ 165:../drivers/LCD_DOGM162.c ****  *
+ 166:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 167:../drivers/LCD_DOGM162.c **** void LCD_Init (const LCD_FIELD *pField)
+ 168:../drivers/LCD_DOGM162.c **** {
+  48              		.loc 1 168 0
+  49              		.cfi_startproc
+  50              		@ args = 0, pretend = 0, frame = 8
+  51              		@ frame_needed = 0, uses_anonymous_args = 0
+  52 0000 00B5     		push	{lr}
+  53              		.cfi_def_cfa_offset 4
+  54              		.cfi_offset 14, -4
+  55 0002 83B0     		sub	sp, sp, #12
+  56              		.cfi_def_cfa_offset 16
+  57 0004 0190     		str	r0, [sp, #4]
+ 169:../drivers/LCD_DOGM162.c ****     /* Parameter check */
+ 170:../drivers/LCD_DOGM162.c ****     EFM_ASSERT(pField != NULL);
+  58              		.loc 1 170 0
+  59 0006 019B     		ldr	r3, [sp, #4]
+  60 0008 002B     		cmp	r3, #0
+  61 000a 03D1     		bne	.L2
+ARM GAS  /tmp/ccYZYc0K.s 			page 5
+
+
+  62              		.loc 1 170 0 is_stmt 0 discriminator 1
+  63 000c 0548     		ldr	r0, .L3
+  64 000e AA21     		movs	r1, #170
+  65 0010 FFF7FEFF 		bl	assertEFM
+  66              	.L2:
+ 171:../drivers/LCD_DOGM162.c **** 
+ 172:../drivers/LCD_DOGM162.c ****     /* Save configuration */
+ 173:../drivers/LCD_DOGM162.c ****     l_pField = pField;
+  67              		.loc 1 173 0 is_stmt 1
+  68 0014 044B     		ldr	r3, .L3+4
+  69 0016 019A     		ldr	r2, [sp, #4]
+  70 0018 1A60     		str	r2, [r3]
+ 174:../drivers/LCD_DOGM162.c **** 
+ 175:../drivers/LCD_DOGM162.c ****     /* Power the LCD Module On and initialize it */
+ 176:../drivers/LCD_DOGM162.c ****     LCD_PowerOn();
+  71              		.loc 1 176 0
+  72 001a FFF7FEFF 		bl	LCD_PowerOn
+ 177:../drivers/LCD_DOGM162.c **** }
+  73              		.loc 1 177 0
+  74 001e 03B0     		add	sp, sp, #12
+  75              		@ sp needed
+  76 0020 5DF804FB 		ldr	pc, [sp], #4
+  77              	.L4:
+  78              		.align	2
+  79              	.L3:
+  80 0024 00000000 		.word	.LC0
+  81 0028 00000000 		.word	l_pField
+  82              		.cfi_endproc
+  83              	.LFE90:
+  85              		.section	.text.LCD_PowerOn,"ax",%progbits
+  86              		.align	2
+  87              		.global	LCD_PowerOn
+  88              		.thumb
+  89              		.thumb_func
+  91              	LCD_PowerOn:
+  92              	.LFB91:
+ 178:../drivers/LCD_DOGM162.c **** 
+ 179:../drivers/LCD_DOGM162.c **** 
+ 180:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 181:../drivers/LCD_DOGM162.c ****  *
+ 182:../drivers/LCD_DOGM162.c ****  * @brief	Power LCD On
+ 183:../drivers/LCD_DOGM162.c ****  *
+ 184:../drivers/LCD_DOGM162.c ****  * This routine powers the LCD on and initializes the related hardware.
+ 185:../drivers/LCD_DOGM162.c ****  *
+ 186:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 187:../drivers/LCD_DOGM162.c **** void LCD_PowerOn (void)
+ 188:../drivers/LCD_DOGM162.c **** {
+  93              		.loc 1 188 0
+  94              		.cfi_startproc
+  95              		@ args = 0, pretend = 0, frame = 0
+  96              		@ frame_needed = 0, uses_anonymous_args = 0
+  97 0000 08B5     		push	{r3, lr}
+  98              		.cfi_def_cfa_offset 8
+  99              		.cfi_offset 3, -8
+ 100              		.cfi_offset 14, -4
+ 189:../drivers/LCD_DOGM162.c ****     /* Configure control lines E, RW, and RS as output */
+ 190:../drivers/LCD_DOGM162.c ****     GPIO_PinModeSet (LCD_CTRL_PORT, LCD_CTRL_PIN_E, gpioModePushPull, 0);
+ARM GAS  /tmp/ccYZYc0K.s 			page 6
+
+
+ 101              		.loc 1 190 0
+ 102 0002 0520     		movs	r0, #5
+ 103 0004 0321     		movs	r1, #3
+ 104 0006 0422     		movs	r2, #4
+ 105 0008 0023     		movs	r3, #0
+ 106 000a FFF7FEFF 		bl	GPIO_PinModeSet
+ 191:../drivers/LCD_DOGM162.c ****     GPIO_PinModeSet (LCD_CTRL_PORT, LCD_CTRL_PIN_RW, gpioModePushPull, 0);
+ 107              		.loc 1 191 0
+ 108 000e 0520     		movs	r0, #5
+ 109 0010 0421     		movs	r1, #4
+ 110 0012 0422     		movs	r2, #4
+ 111 0014 0023     		movs	r3, #0
+ 112 0016 FFF7FEFF 		bl	GPIO_PinModeSet
+ 192:../drivers/LCD_DOGM162.c ****     GPIO_PinModeSet (LCD_CTRL_PORT, LCD_CTRL_PIN_RS, gpioModePushPull, 0);
+ 113              		.loc 1 192 0
+ 114 001a 0520     		movs	r0, #5
+ 115 001c 0521     		movs	r1, #5
+ 116 001e 0422     		movs	r2, #4
+ 117 0020 0023     		movs	r3, #0
+ 118 0022 FFF7FEFF 		bl	GPIO_PinModeSet
+ 193:../drivers/LCD_DOGM162.c **** 
+ 194:../drivers/LCD_DOGM162.c ****     /* Set data bus to 0 for default */
+ 195:../drivers/LCD_DOGM162.c ****     GPIO->P[LCD_DATA_PORT].DOUTCLR = LCD_DATA_MASK;
+ 119              		.loc 1 195 0
+ 120 0026 1F4B     		ldr	r3, .L6
+ 121 0028 4FF47F42 		mov	r2, #65280
+ 122 002c C3F8A420 		str	r2, [r3, #164]
+ 196:../drivers/LCD_DOGM162.c **** 
+ 197:../drivers/LCD_DOGM162.c ****     /* Configure Power Enable Pin for LCD Module, switch it ON */
+ 198:../drivers/LCD_DOGM162.c ****     GPIO_PinModeSet (LCD_POWER_PORT, LCD_POWER_PIN, gpioModePushPull, 1);
+ 123              		.loc 1 198 0
+ 124 0030 0020     		movs	r0, #0
+ 125 0032 0821     		movs	r1, #8
+ 126 0034 0422     		movs	r2, #4
+ 127 0036 0123     		movs	r3, #1
+ 128 0038 FFF7FEFF 		bl	GPIO_PinModeSet
+ 199:../drivers/LCD_DOGM162.c **** 
+ 200:../drivers/LCD_DOGM162.c ****     /* Wait until LCD is powered up and ready */
+ 201:../drivers/LCD_DOGM162.c ****     msDelay (100);
+ 129              		.loc 1 201 0
+ 130 003c 6420     		movs	r0, #100
+ 131 003e FFF7FEFF 		bl	msDelay
+ 202:../drivers/LCD_DOGM162.c **** 
+ 203:../drivers/LCD_DOGM162.c ****     /* Set 8bit data width, 2 lines, and instruction table 1 */
+ 204:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_FCT_SET_DL|LCD_CMD_FCT_SET_N|LCD_CMD_FCT_SET_IS1);
+ 132              		.loc 1 204 0
+ 133 0042 3920     		movs	r0, #57
+ 134 0044 FFF7FEFF 		bl	CmdWrite
+ 205:../drivers/LCD_DOGM162.c **** 
+ 206:../drivers/LCD_DOGM162.c ****     /* Instruction table 1: BIAS Set BS=0: 1/5 bias for a 2 line LCD */
+ 207:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_IS1_BIAS_SET);
+ 135              		.loc 1 207 0
+ 136 0048 1420     		movs	r0, #20
+ 137 004a FFF7FEFF 		bl	CmdWrite
+ 208:../drivers/LCD_DOGM162.c **** 
+ 209:../drivers/LCD_DOGM162.c ****     /* Instruction table 1: booster ON, contrast bit C5:4 */
+ 210:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_IS1_IBC_BON |(l_Contrast >> 4));
+ARM GAS  /tmp/ccYZYc0K.s 			page 7
+
+
+ 138              		.loc 1 210 0
+ 139 004e 164B     		ldr	r3, .L6+4
+ 140 0050 1B68     		ldr	r3, [r3]
+ 141 0052 1B11     		asrs	r3, r3, #4
+ 142 0054 DBB2     		uxtb	r3, r3
+ 143 0056 43F05403 		orr	r3, r3, #84
+ 144 005a DBB2     		uxtb	r3, r3
+ 145 005c DBB2     		uxtb	r3, r3
+ 146 005e 1846     		mov	r0, r3
+ 147 0060 FFF7FEFF 		bl	CmdWrite
+ 211:../drivers/LCD_DOGM162.c **** 
+ 212:../drivers/LCD_DOGM162.c ****     /* Instruction table 1: Follower Ctrl FON=1, Amplifier Ratio = 5 */
+ 213:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_IS1_FOLLOW_FON|LCD_CMD_IS1_FOLLOW_RAB2
+ 148              		.loc 1 213 0
+ 149 0064 6D20     		movs	r0, #109
+ 150 0066 FFF7FEFF 		bl	CmdWrite
+ 214:../drivers/LCD_DOGM162.c **** 				    |LCD_CMD_IS1_FOLLOW_RAB0);
+ 215:../drivers/LCD_DOGM162.c **** 
+ 216:../drivers/LCD_DOGM162.c ****     /* Set LCD Contrast bit C3:0 */
+ 217:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_IS1_CONTR |(l_Contrast & 0x0F));
+ 151              		.loc 1 217 0
+ 152 006a 0F4B     		ldr	r3, .L6+4
+ 153 006c 1B68     		ldr	r3, [r3]
+ 154 006e DBB2     		uxtb	r3, r3
+ 155 0070 03F00F03 		and	r3, r3, #15
+ 156 0074 DBB2     		uxtb	r3, r3
+ 157 0076 43F07003 		orr	r3, r3, #112
+ 158 007a DBB2     		uxtb	r3, r3
+ 159 007c DBB2     		uxtb	r3, r3
+ 160 007e 1846     		mov	r0, r3
+ 161 0080 FFF7FEFF 		bl	CmdWrite
+ 218:../drivers/LCD_DOGM162.c **** 
+ 219:../drivers/LCD_DOGM162.c ****     /* Select instruction table 0 */
+ 220:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_FCT_SET_DL|LCD_CMD_FCT_SET_N|LCD_CMD_FCT_SET_IS0);
+ 162              		.loc 1 220 0
+ 163 0084 3820     		movs	r0, #56
+ 164 0086 FFF7FEFF 		bl	CmdWrite
+ 221:../drivers/LCD_DOGM162.c **** 
+ 222:../drivers/LCD_DOGM162.c ****     /* Switch display ON, cursor OFF and no blinking */
+ 223:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_DISPLAY_ON_D);
+ 165              		.loc 1 223 0
+ 166 008a 0C20     		movs	r0, #12
+ 167 008c FFF7FEFF 		bl	CmdWrite
+ 224:../drivers/LCD_DOGM162.c **** 
+ 225:../drivers/LCD_DOGM162.c ****     /* Clear display, set cursor home */
+ 226:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_CLEAR_DISPLAY);
+ 168              		.loc 1 226 0
+ 169 0090 0120     		movs	r0, #1
+ 170 0092 FFF7FEFF 		bl	CmdWrite
+ 227:../drivers/LCD_DOGM162.c **** 
+ 228:../drivers/LCD_DOGM162.c ****     /* Set cursor to autoincrement mode */
+ 229:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_ENTRY_MODE_ID);
+ 171              		.loc 1 229 0
+ 172 0096 0620     		movs	r0, #6
+ 173 0098 FFF7FEFF 		bl	CmdWrite
+ 230:../drivers/LCD_DOGM162.c **** 
+ 231:../drivers/LCD_DOGM162.c ****     /* LCD is now ON */
+ARM GAS  /tmp/ccYZYc0K.s 			page 8
+
+
+ 232:../drivers/LCD_DOGM162.c ****     l_flgLCD_IsOn = true;
+ 174              		.loc 1 232 0
+ 175 009c 034B     		ldr	r3, .L6+8
+ 176 009e 0122     		movs	r2, #1
+ 177 00a0 1A70     		strb	r2, [r3]
+ 233:../drivers/LCD_DOGM162.c **** }
+ 178              		.loc 1 233 0
+ 179 00a2 08BD     		pop	{r3, pc}
+ 180              	.L7:
+ 181              		.align	2
+ 182              	.L6:
+ 183 00a4 00600040 		.word	1073766400
+ 184 00a8 00000000 		.word	l_Contrast
+ 185 00ac 00000000 		.word	l_flgLCD_IsOn
+ 186              		.cfi_endproc
+ 187              	.LFE91:
+ 189              		.section	.text.LCD_PowerOff,"ax",%progbits
+ 190              		.align	2
+ 191              		.global	LCD_PowerOff
+ 192              		.thumb
+ 193              		.thumb_func
+ 195              	LCD_PowerOff:
+ 196              	.LFB92:
+ 234:../drivers/LCD_DOGM162.c **** 
+ 235:../drivers/LCD_DOGM162.c **** 
+ 236:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 237:../drivers/LCD_DOGM162.c ****  *
+ 238:../drivers/LCD_DOGM162.c ****  * @brief	Power LCD Off
+ 239:../drivers/LCD_DOGM162.c ****  *
+ 240:../drivers/LCD_DOGM162.c ****  * This routine powers the LCD off.
+ 241:../drivers/LCD_DOGM162.c ****  *
+ 242:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 243:../drivers/LCD_DOGM162.c **** void LCD_PowerOff (void)
+ 244:../drivers/LCD_DOGM162.c **** {
+ 197              		.loc 1 244 0
+ 198              		.cfi_startproc
+ 199              		@ args = 0, pretend = 0, frame = 0
+ 200              		@ frame_needed = 0, uses_anonymous_args = 0
+ 201              		@ link register save eliminated.
+ 245:../drivers/LCD_DOGM162.c ****     /* LCD will be switched OFF */
+ 246:../drivers/LCD_DOGM162.c ****     l_flgLCD_IsOn = false;
+ 202              		.loc 1 246 0
+ 203 0000 0C4B     		ldr	r3, .L9
+ 204 0002 0022     		movs	r2, #0
+ 205 0004 1A70     		strb	r2, [r3]
+ 247:../drivers/LCD_DOGM162.c **** 
+ 248:../drivers/LCD_DOGM162.c ****     /* Set LCD Power Enable Pin to OFF */
+ 249:../drivers/LCD_DOGM162.c ****     SET_LCD_POWER_PIN(0);
+ 206              		.loc 1 249 0
+ 207 0006 0C4B     		ldr	r3, .L9+4
+ 208 0008 0022     		movs	r2, #0
+ 209 000a 1A60     		str	r2, [r3]
+ 250:../drivers/LCD_DOGM162.c **** 
+ 251:../drivers/LCD_DOGM162.c ****     /*
+ 252:../drivers/LCD_DOGM162.c ****      * Set all other signals also to GND, otherwise these will provide enough
+ 253:../drivers/LCD_DOGM162.c ****      * power for the LCD to be still active!
+ 254:../drivers/LCD_DOGM162.c ****      */
+ARM GAS  /tmp/ccYZYc0K.s 			page 9
+
+
+ 255:../drivers/LCD_DOGM162.c ****     SET_LCD_DATA_MODE_OUT;	// data bus output mode
+ 210              		.loc 1 255 0
+ 211 000c 0B4B     		ldr	r3, .L9+8
+ 212 000e 4FF04432 		mov	r2, #1145324612
+ 213 0012 C3F89820 		str	r2, [r3, #152]
+ 256:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RW(0);	// set RW pin to 0
+ 214              		.loc 1 256 0
+ 215 0016 0A4B     		ldr	r3, .L9+12
+ 216 0018 0022     		movs	r2, #0
+ 217 001a 1A60     		str	r2, [r3]
+ 257:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RS(0);	// set RS pin to 0
+ 218              		.loc 1 257 0
+ 219 001c 094B     		ldr	r3, .L9+16
+ 220 001e 0022     		movs	r2, #0
+ 221 0020 1A60     		str	r2, [r3]
+ 258:../drivers/LCD_DOGM162.c ****     WRITE_LCD_DATA (0x00);	// set data bus to 0x00
+ 222              		.loc 1 258 0
+ 223 0022 064B     		ldr	r3, .L9+8
+ 224 0024 0022     		movs	r2, #0
+ 225 0026 C3F89C20 		str	r2, [r3, #156]
+ 259:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_E (0);	// set E pin to 0
+ 226              		.loc 1 259 0
+ 227 002a 074B     		ldr	r3, .L9+20
+ 228 002c 0022     		movs	r2, #0
+ 229 002e 1A60     		str	r2, [r3]
+ 260:../drivers/LCD_DOGM162.c **** }
+ 230              		.loc 1 260 0
+ 231 0030 7047     		bx	lr
+ 232              	.L10:
+ 233 0032 00BF     		.align	2
+ 234              	.L9:
+ 235 0034 00000000 		.word	l_flgLCD_IsOn
+ 236 0038 A0010C42 		.word	1108083104
+ 237 003c 00600040 		.word	1073766400
+ 238 0040 10180C42 		.word	1108088848
+ 239 0044 14180C42 		.word	1108088852
+ 240 0048 0C180C42 		.word	1108088844
+ 241              		.cfi_endproc
+ 242              	.LFE92:
+ 244              		.section	.text.LCD_Printf,"ax",%progbits
+ 245              		.align	2
+ 246              		.global	LCD_Printf
+ 247              		.thumb
+ 248              		.thumb_func
+ 250              	LCD_Printf:
+ 251              	.LFB93:
+ 261:../drivers/LCD_DOGM162.c **** 
+ 262:../drivers/LCD_DOGM162.c **** 
+ 263:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 264:../drivers/LCD_DOGM162.c ****  *
+ 265:../drivers/LCD_DOGM162.c ****  * @brief	Print string to LCD and LEUART
+ 266:../drivers/LCD_DOGM162.c ****  *
+ 267:../drivers/LCD_DOGM162.c ****  * This routine is used to print text to the specified field on the LC-Display
+ 268:../drivers/LCD_DOGM162.c ****  * and the LEUART.
+ 269:../drivers/LCD_DOGM162.c ****  *
+ 270:../drivers/LCD_DOGM162.c ****  * @note
+ 271:../drivers/LCD_DOGM162.c ****  * LEUART support is realized in the following way: Since the LCD consists
+ARM GAS  /tmp/ccYZYc0K.s 			page 10
+
+
+ 272:../drivers/LCD_DOGM162.c ****  * of several independent fields on its two lines, which may be updated
+ 273:../drivers/LCD_DOGM162.c ****  * separately at different times, it is not useful to write this information
+ 274:../drivers/LCD_DOGM162.c ****  * directly to the LEUART.  Instead a copy of the complete LCD contents is held
+ 275:../drivers/LCD_DOGM162.c ****  * in a memory buffer and updated synchronously to the LCD.  This buffer will
+ 276:../drivers/LCD_DOGM162.c ****  * be written to the LEUART after dedicated fields have been updated (i.e.
+ 277:../drivers/LCD_DOGM162.c ****  * LCD_ITEM_DATA and LCD_LINE2_TEXT), and, the content of the buffer has
+ 278:../drivers/LCD_DOGM162.c ****  * changed.
+ 279:../drivers/LCD_DOGM162.c ****  *
+ 280:../drivers/LCD_DOGM162.c ****  * @param[in] id
+ 281:../drivers/LCD_DOGM162.c ****  *	Identifier of type @ref LCD_FIELD_ID to select a field on the LCD.
+ 282:../drivers/LCD_DOGM162.c ****  *	The cursor is placed to the beginning of this field before text is
+ 283:../drivers/LCD_DOGM162.c ****  *	written.
+ 284:../drivers/LCD_DOGM162.c ****  *
+ 285:../drivers/LCD_DOGM162.c ****  * @param[in] frmt
+ 286:../drivers/LCD_DOGM162.c ****  *	Format string of the text to print - same as for printf().
+ 287:../drivers/LCD_DOGM162.c ****  *
+ 288:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 289:../drivers/LCD_DOGM162.c **** void LCD_Printf (LCD_FIELD_ID id, const char *frmt, ...)
+ 290:../drivers/LCD_DOGM162.c **** {
+ 252              		.loc 1 290 0
+ 253              		.cfi_startproc
+ 254              		@ args = 4, pretend = 12, frame = 16
+ 255              		@ frame_needed = 0, uses_anonymous_args = 1
+ 256 0000 0EB4     		push	{r1, r2, r3}
+ 257              		.cfi_def_cfa_offset 12
+ 258              		.cfi_offset 1, -12
+ 259              		.cfi_offset 2, -8
+ 260              		.cfi_offset 3, -4
+ 261 0002 00B5     		push	{lr}
+ 262              		.cfi_def_cfa_offset 16
+ 263              		.cfi_offset 14, -16
+ 264 0004 84B0     		sub	sp, sp, #16
+ 265              		.cfi_def_cfa_offset 32
+ 266 0006 0346     		mov	r3, r0
+ 267 0008 8DF80730 		strb	r3, [sp, #7]
+ 291:../drivers/LCD_DOGM162.c **** va_list	 args;
+ 292:../drivers/LCD_DOGM162.c **** 
+ 293:../drivers/LCD_DOGM162.c **** 
+ 294:../drivers/LCD_DOGM162.c ****     va_start (args, frmt);
+ 268              		.loc 1 294 0
+ 269 000c 06AB     		add	r3, sp, #24
+ 270 000e 0393     		str	r3, [sp, #12]
+ 295:../drivers/LCD_DOGM162.c ****     LCD_vPrintf (id, frmt, args);
+ 271              		.loc 1 295 0
+ 272 0010 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 273 0014 1846     		mov	r0, r3
+ 274 0016 0599     		ldr	r1, [sp, #20]
+ 275 0018 039A     		ldr	r2, [sp, #12]
+ 276 001a FFF7FEFF 		bl	LCD_vPrintf
+ 296:../drivers/LCD_DOGM162.c ****     va_end (args);
+ 297:../drivers/LCD_DOGM162.c **** }
+ 277              		.loc 1 297 0
+ 278 001e 04B0     		add	sp, sp, #16
+ 279              		@ sp needed
+ 280 0020 5DF804EB 		ldr	lr, [sp], #4
+ 281 0024 03B0     		add	sp, sp, #12
+ 282 0026 7047     		bx	lr
+ARM GAS  /tmp/ccYZYc0K.s 			page 11
+
+
+ 283              		.cfi_endproc
+ 284              	.LFE93:
+ 286              		.section	.rodata
+ 287 0019 000000   		.align	2
+ 288              	.LC1:
+ 289 001c 0A00     		.ascii	"\012\000"
+ 290 001e 0000     		.section	.text.LCD_vPrintf,"ax",%progbits
+ 291              		.align	2
+ 292              		.global	LCD_vPrintf
+ 293              		.thumb
+ 294              		.thumb_func
+ 296              	LCD_vPrintf:
+ 297              	.LFB94:
+ 298:../drivers/LCD_DOGM162.c **** 
+ 299:../drivers/LCD_DOGM162.c **** 
+ 300:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 301:../drivers/LCD_DOGM162.c ****  *
+ 302:../drivers/LCD_DOGM162.c ****  * @brief	Print string with va_list to LCD and LEUART
+ 303:../drivers/LCD_DOGM162.c ****  *
+ 304:../drivers/LCD_DOGM162.c ****  * This routine is identical to LCD_Printf(), except parameter @p args is a
+ 305:../drivers/LCD_DOGM162.c ****  * variable argument list.
+ 306:../drivers/LCD_DOGM162.c ****  *
+ 307:../drivers/LCD_DOGM162.c ****  * @param[in] id
+ 308:../drivers/LCD_DOGM162.c ****  *	Identifier of type @ref LCD_FIELD_ID to select a field on the LCD.
+ 309:../drivers/LCD_DOGM162.c ****  *	The cursor is placed to the beginning of this field before text is
+ 310:../drivers/LCD_DOGM162.c ****  *	written.
+ 311:../drivers/LCD_DOGM162.c ****  *
+ 312:../drivers/LCD_DOGM162.c ****  * @param[in] frmt
+ 313:../drivers/LCD_DOGM162.c ****  *	Format string of the text to print - same as for printf().
+ 314:../drivers/LCD_DOGM162.c ****  *
+ 315:../drivers/LCD_DOGM162.c ****  * @param[in] args
+ 316:../drivers/LCD_DOGM162.c ****  *	Variable argument list.
+ 317:../drivers/LCD_DOGM162.c ****  *
+ 318:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 319:../drivers/LCD_DOGM162.c **** void LCD_vPrintf (LCD_FIELD_ID id, const char *frmt, va_list args)
+ 320:../drivers/LCD_DOGM162.c **** {
+ 298              		.loc 1 320 0
+ 299              		.cfi_startproc
+ 300              		@ args = 0, pretend = 0, frame = 64
+ 301              		@ frame_needed = 0, uses_anonymous_args = 0
+ 302 0000 00B5     		push	{lr}
+ 303              		.cfi_def_cfa_offset 4
+ 304              		.cfi_offset 14, -4
+ 305 0002 91B0     		sub	sp, sp, #68
+ 306              		.cfi_def_cfa_offset 72
+ 307 0004 0346     		mov	r3, r0
+ 308 0006 0291     		str	r1, [sp, #8]
+ 309 0008 0192     		str	r2, [sp, #4]
+ 310 000a 8DF80F30 		strb	r3, [sp, #15]
+ 321:../drivers/LCD_DOGM162.c **** static char currSerBuf[40] = "                                     ";
+ 322:../drivers/LCD_DOGM162.c **** static char prevSerBuf[40];
+ 323:../drivers/LCD_DOGM162.c **** char	 buffer[40];
+ 324:../drivers/LCD_DOGM162.c **** int	 len, fieldWidth;
+ 325:../drivers/LCD_DOGM162.c **** 
+ 326:../drivers/LCD_DOGM162.c **** 
+ 327:../drivers/LCD_DOGM162.c ****     /* Immediately return if LCD is OFF */
+ 328:../drivers/LCD_DOGM162.c ****     if (! l_flgLCD_IsOn)
+ARM GAS  /tmp/ccYZYc0K.s 			page 12
+
+
+ 311              		.loc 1 328 0
+ 312 000e 544B     		ldr	r3, .L23
+ 313 0010 1B78     		ldrb	r3, [r3]
+ 314 0012 DBB2     		uxtb	r3, r3
+ 315 0014 83F00103 		eor	r3, r3, #1
+ 316 0018 DBB2     		uxtb	r3, r3
+ 317 001a 002B     		cmp	r3, #0
+ 318 001c 00D0     		beq	.L13
+ 329:../drivers/LCD_DOGM162.c **** 	return;
+ 319              		.loc 1 329 0
+ 320 001e 9BE0     		b	.L12
+ 321              	.L13:
+ 330:../drivers/LCD_DOGM162.c **** 
+ 331:../drivers/LCD_DOGM162.c ****     /* Parameter check */
+ 332:../drivers/LCD_DOGM162.c ****     if (id >= LCD_FIELD_ID_CNT)
+ 322              		.loc 1 332 0
+ 323 0020 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 324 0024 072B     		cmp	r3, #7
+ 325 0026 05D9     		bls	.L15
+ 333:../drivers/LCD_DOGM162.c ****     {
+ 334:../drivers/LCD_DOGM162.c **** 	EFM_ASSERT(0);
+ 326              		.loc 1 334 0
+ 327 0028 4E48     		ldr	r0, .L23+4
+ 328 002a 4FF4A771 		mov	r1, #334
+ 329 002e FFF7FEFF 		bl	assertEFM
+ 335:../drivers/LCD_DOGM162.c **** 	return;
+ 330              		.loc 1 335 0
+ 331 0032 91E0     		b	.L12
+ 332              	.L15:
+ 336:../drivers/LCD_DOGM162.c ****     }
+ 337:../drivers/LCD_DOGM162.c ****     if (strlen(frmt) > (sizeof(buffer) - 10))
+ 333              		.loc 1 337 0
+ 334 0034 0298     		ldr	r0, [sp, #8]
+ 335 0036 FFF7FEFF 		bl	strlen
+ 336 003a 0346     		mov	r3, r0
+ 337 003c 1E2B     		cmp	r3, #30
+ 338 003e 05D9     		bls	.L16
+ 338:../drivers/LCD_DOGM162.c ****     {
+ 339:../drivers/LCD_DOGM162.c **** 	EFM_ASSERT(0);
+ 339              		.loc 1 339 0
+ 340 0040 4848     		ldr	r0, .L23+4
+ 341 0042 40F25311 		movw	r1, #339
+ 342 0046 FFF7FEFF 		bl	assertEFM
+ 340:../drivers/LCD_DOGM162.c **** 	return;
+ 343              		.loc 1 340 0
+ 344 004a 85E0     		b	.L12
+ 345              	.L16:
+ 341:../drivers/LCD_DOGM162.c ****     }
+ 342:../drivers/LCD_DOGM162.c **** 
+ 343:../drivers/LCD_DOGM162.c ****     vsprintf (buffer, frmt, args);
+ 346              		.loc 1 343 0
+ 347 004c 04AB     		add	r3, sp, #16
+ 348 004e 1846     		mov	r0, r3
+ 349 0050 0299     		ldr	r1, [sp, #8]
+ 350 0052 019A     		ldr	r2, [sp, #4]
+ 351 0054 FFF7FEFF 		bl	vsprintf
+ 344:../drivers/LCD_DOGM162.c **** 
+ARM GAS  /tmp/ccYZYc0K.s 			page 13
+
+
+ 345:../drivers/LCD_DOGM162.c ****     /* Set LCD cursor to the beginning of the field */
+ 346:../drivers/LCD_DOGM162.c ****     LCD_GotoXY (l_pField[id].X, l_pField[id].Y);
+ 352              		.loc 1 346 0
+ 353 0058 434B     		ldr	r3, .L23+8
+ 354 005a 1968     		ldr	r1, [r3]
+ 355 005c 9DF80F20 		ldrb	r2, [sp, #15]	@ zero_extendqisi2
+ 356 0060 1346     		mov	r3, r2
+ 357 0062 5B00     		lsls	r3, r3, #1
+ 358 0064 1344     		add	r3, r3, r2
+ 359 0066 0B44     		add	r3, r3, r1
+ 360 0068 1978     		ldrb	r1, [r3]	@ zero_extendqisi2
+ 361 006a 3F4B     		ldr	r3, .L23+8
+ 362 006c 1868     		ldr	r0, [r3]
+ 363 006e 9DF80F20 		ldrb	r2, [sp, #15]	@ zero_extendqisi2
+ 364 0072 1346     		mov	r3, r2
+ 365 0074 5B00     		lsls	r3, r3, #1
+ 366 0076 1344     		add	r3, r3, r2
+ 367 0078 0344     		add	r3, r3, r0
+ 368 007a 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 369 007c 0846     		mov	r0, r1
+ 370 007e 1946     		mov	r1, r3
+ 371 0080 FFF7FEFF 		bl	LCD_GotoXY
+ 347:../drivers/LCD_DOGM162.c **** 
+ 348:../drivers/LCD_DOGM162.c ****     /* Get field width and string length */
+ 349:../drivers/LCD_DOGM162.c ****     fieldWidth = l_pField[id].Width;
+ 372              		.loc 1 349 0
+ 373 0084 384B     		ldr	r3, .L23+8
+ 374 0086 1968     		ldr	r1, [r3]
+ 375 0088 9DF80F20 		ldrb	r2, [sp, #15]	@ zero_extendqisi2
+ 376 008c 1346     		mov	r3, r2
+ 377 008e 5B00     		lsls	r3, r3, #1
+ 378 0090 1344     		add	r3, r3, r2
+ 379 0092 0B44     		add	r3, r3, r1
+ 380 0094 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
+ 381 0096 0E93     		str	r3, [sp, #56]
+ 350:../drivers/LCD_DOGM162.c ****     len = strlen (buffer);
+ 382              		.loc 1 350 0
+ 383 0098 04AB     		add	r3, sp, #16
+ 384 009a 1846     		mov	r0, r3
+ 385 009c FFF7FEFF 		bl	strlen
+ 386 00a0 0346     		mov	r3, r0
+ 387 00a2 0F93     		str	r3, [sp, #60]
+ 351:../drivers/LCD_DOGM162.c **** 
+ 352:../drivers/LCD_DOGM162.c ****     /* If string is too long, truncate it */
+ 353:../drivers/LCD_DOGM162.c ****     if (len > fieldWidth)
+ 388              		.loc 1 353 0
+ 389 00a4 0F9A     		ldr	r2, [sp, #60]
+ 390 00a6 0E9B     		ldr	r3, [sp, #56]
+ 391 00a8 9A42     		cmp	r2, r3
+ 392 00aa 05DD     		ble	.L17
+ 354:../drivers/LCD_DOGM162.c **** 	buffer[fieldWidth] = EOS;
+ 393              		.loc 1 354 0
+ 394 00ac 04AA     		add	r2, sp, #16
+ 395 00ae 0E9B     		ldr	r3, [sp, #56]
+ 396 00b0 1344     		add	r3, r3, r2
+ 397 00b2 0022     		movs	r2, #0
+ 398 00b4 1A70     		strb	r2, [r3]
+ARM GAS  /tmp/ccYZYc0K.s 			page 14
+
+
+ 355:../drivers/LCD_DOGM162.c **** 
+ 356:../drivers/LCD_DOGM162.c ****     /* If string is shorter than field width, add spaces */
+ 357:../drivers/LCD_DOGM162.c ****     while (len < fieldWidth)
+ 399              		.loc 1 357 0
+ 400 00b6 08E0     		b	.L18
+ 401              	.L17:
+ 402 00b8 07E0     		b	.L18
+ 403              	.L19:
+ 358:../drivers/LCD_DOGM162.c **** 	buffer[len++] = ' ';
+ 404              		.loc 1 358 0
+ 405 00ba 0F9B     		ldr	r3, [sp, #60]
+ 406 00bc 5A1C     		adds	r2, r3, #1
+ 407 00be 0F92     		str	r2, [sp, #60]
+ 408 00c0 10AA     		add	r2, sp, #64
+ 409 00c2 1344     		add	r3, r3, r2
+ 410 00c4 2022     		movs	r2, #32
+ 411 00c6 03F8302C 		strb	r2, [r3, #-48]
+ 412              	.L18:
+ 357:../drivers/LCD_DOGM162.c ****     while (len < fieldWidth)
+ 413              		.loc 1 357 0 discriminator 1
+ 414 00ca 0F9A     		ldr	r2, [sp, #60]
+ 415 00cc 0E9B     		ldr	r3, [sp, #56]
+ 416 00ce 9A42     		cmp	r2, r3
+ 417 00d0 F3DB     		blt	.L19
+ 359:../drivers/LCD_DOGM162.c **** 
+ 360:../drivers/LCD_DOGM162.c ****     buffer[fieldWidth] = EOS;
+ 418              		.loc 1 360 0
+ 419 00d2 04AA     		add	r2, sp, #16
+ 420 00d4 0E9B     		ldr	r3, [sp, #56]
+ 421 00d6 1344     		add	r3, r3, r2
+ 422 00d8 0022     		movs	r2, #0
+ 423 00da 1A70     		strb	r2, [r3]
+ 361:../drivers/LCD_DOGM162.c **** 
+ 362:../drivers/LCD_DOGM162.c ****     /* Update the respective part of the serial output string */
+ 363:../drivers/LCD_DOGM162.c ****     strncpy(currSerBuf+(l_pField[id].Y * (LCD_DIMENSION_X+1) + l_pField[id].X),
+ 424              		.loc 1 363 0
+ 425 00dc 224B     		ldr	r3, .L23+8
+ 426 00de 1968     		ldr	r1, [r3]
+ 427 00e0 9DF80F20 		ldrb	r2, [sp, #15]	@ zero_extendqisi2
+ 428 00e4 1346     		mov	r3, r2
+ 429 00e6 5B00     		lsls	r3, r3, #1
+ 430 00e8 1344     		add	r3, r3, r2
+ 431 00ea 0B44     		add	r3, r3, r1
+ 432 00ec 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 433 00ee 1A46     		mov	r2, r3
+ 434 00f0 1346     		mov	r3, r2
+ 435 00f2 1B01     		lsls	r3, r3, #4
+ 436 00f4 9918     		adds	r1, r3, r2
+ 437 00f6 1C4B     		ldr	r3, .L23+8
+ 438 00f8 1868     		ldr	r0, [r3]
+ 439 00fa 9DF80F20 		ldrb	r2, [sp, #15]	@ zero_extendqisi2
+ 440 00fe 1346     		mov	r3, r2
+ 441 0100 5B00     		lsls	r3, r3, #1
+ 442 0102 1344     		add	r3, r3, r2
+ 443 0104 0344     		add	r3, r3, r0
+ 444 0106 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 445 0108 0B44     		add	r3, r3, r1
+ARM GAS  /tmp/ccYZYc0K.s 			page 15
+
+
+ 446 010a 1A46     		mov	r2, r3
+ 447 010c 174B     		ldr	r3, .L23+12
+ 448 010e D118     		adds	r1, r2, r3
+ 449 0110 0F9B     		ldr	r3, [sp, #60]
+ 450 0112 04AA     		add	r2, sp, #16
+ 451 0114 0846     		mov	r0, r1
+ 452 0116 1146     		mov	r1, r2
+ 453 0118 1A46     		mov	r2, r3
+ 454 011a FFF7FEFF 		bl	strncpy
+ 364:../drivers/LCD_DOGM162.c **** 	    buffer, len);
+ 365:../drivers/LCD_DOGM162.c **** 
+ 366:../drivers/LCD_DOGM162.c ****     /* At the end of the update sequence write string to LEUART */
+ 367:../drivers/LCD_DOGM162.c ****     if ((id == LCD_ITEM_DATA  ||  id == LCD_LINE2_TEXT)
+ 455              		.loc 1 367 0
+ 456 011e 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 457 0122 062B     		cmp	r3, #6
+ 458 0124 03D0     		beq	.L20
+ 459              		.loc 1 367 0 is_stmt 0 discriminator 1
+ 460 0126 9DF80F30 		ldrb	r3, [sp, #15]	@ zero_extendqisi2
+ 461 012a 032B     		cmp	r3, #3
+ 462 012c 10D1     		bne	.L21
+ 463              	.L20:
+ 368:../drivers/LCD_DOGM162.c ****     &&  strcmp(currSerBuf, prevSerBuf) != 0)
+ 464              		.loc 1 368 0 is_stmt 1
+ 465 012e 0F48     		ldr	r0, .L23+12
+ 466 0130 0F49     		ldr	r1, .L23+16
+ 467 0132 FFF7FEFF 		bl	strcmp
+ 468 0136 0346     		mov	r3, r0
+ 469 0138 002B     		cmp	r3, #0
+ 470 013a 09D0     		beq	.L21
+ 369:../drivers/LCD_DOGM162.c ****     {
+ 370:../drivers/LCD_DOGM162.c **** 	strcpy(prevSerBuf, currSerBuf);
+ 471              		.loc 1 370 0
+ 472 013c 0C48     		ldr	r0, .L23+16
+ 473 013e 0B49     		ldr	r1, .L23+12
+ 474 0140 FFF7FEFF 		bl	strcpy
+ 371:../drivers/LCD_DOGM162.c **** 
+ 372:../drivers/LCD_DOGM162.c **** 	drvLEUART_puts(currSerBuf);
+ 475              		.loc 1 372 0
+ 476 0144 0948     		ldr	r0, .L23+12
+ 477 0146 FFF7FEFF 		bl	drvLEUART_puts
+ 373:../drivers/LCD_DOGM162.c **** 	drvLEUART_puts("\n");
+ 478              		.loc 1 373 0
+ 479 014a 0A48     		ldr	r0, .L23+20
+ 480 014c FFF7FEFF 		bl	drvLEUART_puts
+ 481              	.L21:
+ 374:../drivers/LCD_DOGM162.c ****     }
+ 375:../drivers/LCD_DOGM162.c **** 
+ 376:../drivers/LCD_DOGM162.c ****     /* Write string to LCD */
+ 377:../drivers/LCD_DOGM162.c ****     LCD_Puts (buffer);
+ 482              		.loc 1 377 0
+ 483 0150 04AB     		add	r3, sp, #16
+ 484 0152 1846     		mov	r0, r3
+ 485 0154 FFF7FEFF 		bl	LCD_Puts
+ 486              	.L12:
+ 378:../drivers/LCD_DOGM162.c **** }
+ 487              		.loc 1 378 0
+ARM GAS  /tmp/ccYZYc0K.s 			page 16
+
+
+ 488 0158 11B0     		add	sp, sp, #68
+ 489              		@ sp needed
+ 490 015a 5DF804FB 		ldr	pc, [sp], #4
+ 491              	.L24:
+ 492 015e 00BF     		.align	2
+ 493              	.L23:
+ 494 0160 00000000 		.word	l_flgLCD_IsOn
+ 495 0164 00000000 		.word	.LC0
+ 496 0168 00000000 		.word	l_pField
+ 497 016c 00000000 		.word	currSerBuf.6652
+ 498 0170 00000000 		.word	prevSerBuf.6653
+ 499 0174 1C000000 		.word	.LC1
+ 500              		.cfi_endproc
+ 501              	.LFE94:
+ 503              		.section	.text.LCD_Puts,"ax",%progbits
+ 504              		.align	2
+ 505              		.global	LCD_Puts
+ 506              		.thumb
+ 507              		.thumb_func
+ 509              	LCD_Puts:
+ 510              	.LFB95:
+ 379:../drivers/LCD_DOGM162.c **** 
+ 380:../drivers/LCD_DOGM162.c **** 
+ 381:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 382:../drivers/LCD_DOGM162.c ****  *
+ 383:../drivers/LCD_DOGM162.c ****  * @brief	Put string to LCD
+ 384:../drivers/LCD_DOGM162.c ****  *
+ 385:../drivers/LCD_DOGM162.c ****  * This routine puts the specified string to the LC-Display.
+ 386:../drivers/LCD_DOGM162.c ****  *
+ 387:../drivers/LCD_DOGM162.c ****  * @param[in] pStr
+ 388:../drivers/LCD_DOGM162.c ****  *	String to output on the LCD at the actual cursor position.
+ 389:../drivers/LCD_DOGM162.c ****  *
+ 390:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 391:../drivers/LCD_DOGM162.c **** void LCD_Puts (char *pStr)
+ 392:../drivers/LCD_DOGM162.c **** {
+ 511              		.loc 1 392 0
+ 512              		.cfi_startproc
+ 513              		@ args = 0, pretend = 0, frame = 8
+ 514              		@ frame_needed = 0, uses_anonymous_args = 0
+ 515 0000 00B5     		push	{lr}
+ 516              		.cfi_def_cfa_offset 4
+ 517              		.cfi_offset 14, -4
+ 518 0002 83B0     		sub	sp, sp, #12
+ 519              		.cfi_def_cfa_offset 16
+ 520 0004 0190     		str	r0, [sp, #4]
+ 393:../drivers/LCD_DOGM162.c ****     while (*pStr != EOS)
+ 521              		.loc 1 393 0
+ 522 0006 06E0     		b	.L26
+ 523              	.L27:
+ 394:../drivers/LCD_DOGM162.c **** 	LCD_Putc (*pStr++);
+ 524              		.loc 1 394 0
+ 525 0008 019B     		ldr	r3, [sp, #4]
+ 526 000a 5A1C     		adds	r2, r3, #1
+ 527 000c 0192     		str	r2, [sp, #4]
+ 528 000e 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 529 0010 1846     		mov	r0, r3
+ 530 0012 FFF7FEFF 		bl	LCD_Putc
+ARM GAS  /tmp/ccYZYc0K.s 			page 17
+
+
+ 531              	.L26:
+ 393:../drivers/LCD_DOGM162.c ****     while (*pStr != EOS)
+ 532              		.loc 1 393 0 discriminator 1
+ 533 0016 019B     		ldr	r3, [sp, #4]
+ 534 0018 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 535 001a 002B     		cmp	r3, #0
+ 536 001c F4D1     		bne	.L27
+ 395:../drivers/LCD_DOGM162.c **** }
+ 537              		.loc 1 395 0
+ 538 001e 03B0     		add	sp, sp, #12
+ 539              		@ sp needed
+ 540 0020 5DF804FB 		ldr	pc, [sp], #4
+ 541              		.cfi_endproc
+ 542              	.LFE95:
+ 544              		.section	.text.LCD_Putc,"ax",%progbits
+ 545              		.align	2
+ 546              		.global	LCD_Putc
+ 547              		.thumb
+ 548              		.thumb_func
+ 550              	LCD_Putc:
+ 551              	.LFB96:
+ 396:../drivers/LCD_DOGM162.c **** 
+ 397:../drivers/LCD_DOGM162.c **** 
+ 398:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 399:../drivers/LCD_DOGM162.c ****  *
+ 400:../drivers/LCD_DOGM162.c ****  * @brief	Put character to LCD
+ 401:../drivers/LCD_DOGM162.c ****  *
+ 402:../drivers/LCD_DOGM162.c ****  * This routine puts the specified character to the LC-Display.
+ 403:../drivers/LCD_DOGM162.c ****  *
+ 404:../drivers/LCD_DOGM162.c ****  * @param[in] c
+ 405:../drivers/LCD_DOGM162.c ****  *	Character to output on the LCD at the actual cursor position.
+ 406:../drivers/LCD_DOGM162.c ****  *
+ 407:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 408:../drivers/LCD_DOGM162.c **** void LCD_Putc (char c)
+ 409:../drivers/LCD_DOGM162.c **** {
+ 552              		.loc 1 409 0
+ 553              		.cfi_startproc
+ 554              		@ args = 0, pretend = 0, frame = 8
+ 555              		@ frame_needed = 0, uses_anonymous_args = 0
+ 556 0000 00B5     		push	{lr}
+ 557              		.cfi_def_cfa_offset 4
+ 558              		.cfi_offset 14, -4
+ 559 0002 83B0     		sub	sp, sp, #12
+ 560              		.cfi_def_cfa_offset 16
+ 561 0004 0346     		mov	r3, r0
+ 562 0006 8DF80730 		strb	r3, [sp, #7]
+ 410:../drivers/LCD_DOGM162.c ****     /* Write character to LCD data bus */
+ 411:../drivers/LCD_DOGM162.c ****     if (l_flgLCD_IsOn)
+ 563              		.loc 1 411 0
+ 564 000a 064B     		ldr	r3, .L30
+ 565 000c 1B78     		ldrb	r3, [r3]
+ 566 000e DBB2     		uxtb	r3, r3
+ 567 0010 002B     		cmp	r3, #0
+ 568 0012 04D0     		beq	.L28
+ 412:../drivers/LCD_DOGM162.c **** 	DataWrite (c);
+ 569              		.loc 1 412 0
+ 570 0014 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ARM GAS  /tmp/ccYZYc0K.s 			page 18
+
+
+ 571 0018 1846     		mov	r0, r3
+ 572 001a FFF7FEFF 		bl	DataWrite
+ 573              	.L28:
+ 413:../drivers/LCD_DOGM162.c **** }
+ 574              		.loc 1 413 0
+ 575 001e 03B0     		add	sp, sp, #12
+ 576              		@ sp needed
+ 577 0020 5DF804FB 		ldr	pc, [sp], #4
+ 578              	.L31:
+ 579              		.align	2
+ 580              	.L30:
+ 581 0024 00000000 		.word	l_flgLCD_IsOn
+ 582              		.cfi_endproc
+ 583              	.LFE96:
+ 585              		.section	.text.LCD_GotoXY,"ax",%progbits
+ 586              		.align	2
+ 587              		.global	LCD_GotoXY
+ 588              		.thumb
+ 589              		.thumb_func
+ 591              	LCD_GotoXY:
+ 592              	.LFB97:
+ 414:../drivers/LCD_DOGM162.c **** 
+ 415:../drivers/LCD_DOGM162.c **** 
+ 416:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 417:../drivers/LCD_DOGM162.c ****  *
+ 418:../drivers/LCD_DOGM162.c ****  * @brief	Move cursor on X-/Y-Position
+ 419:../drivers/LCD_DOGM162.c ****  *
+ 420:../drivers/LCD_DOGM162.c ****  * This routine moves the cursor the the specified position on the LC-Display.
+ 421:../drivers/LCD_DOGM162.c ****  * Coordinates 0,0 represent the upper left corner of the display.
+ 422:../drivers/LCD_DOGM162.c ****  *
+ 423:../drivers/LCD_DOGM162.c ****  * @param[in] x
+ 424:../drivers/LCD_DOGM162.c ****  *	X-Position to move cursor to.
+ 425:../drivers/LCD_DOGM162.c ****  *
+ 426:../drivers/LCD_DOGM162.c ****  * @param[in] y
+ 427:../drivers/LCD_DOGM162.c ****  *	Y-Position to move cursor to.
+ 428:../drivers/LCD_DOGM162.c ****  *
+ 429:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 430:../drivers/LCD_DOGM162.c **** void LCD_GotoXY (uint8_t x, uint8_t y)
+ 431:../drivers/LCD_DOGM162.c **** {
+ 593              		.loc 1 431 0
+ 594              		.cfi_startproc
+ 595              		@ args = 0, pretend = 0, frame = 16
+ 596              		@ frame_needed = 0, uses_anonymous_args = 0
+ 597 0000 00B5     		push	{lr}
+ 598              		.cfi_def_cfa_offset 4
+ 599              		.cfi_offset 14, -4
+ 600 0002 85B0     		sub	sp, sp, #20
+ 601              		.cfi_def_cfa_offset 24
+ 602 0004 0246     		mov	r2, r0
+ 603 0006 0B46     		mov	r3, r1
+ 604 0008 8DF80720 		strb	r2, [sp, #7]
+ 605 000c 8DF80630 		strb	r3, [sp, #6]
+ 432:../drivers/LCD_DOGM162.c **** uint8_t addr;
+ 433:../drivers/LCD_DOGM162.c **** 
+ 434:../drivers/LCD_DOGM162.c **** 
+ 435:../drivers/LCD_DOGM162.c ****     /* Immediately return if LCD is OFF */
+ 436:../drivers/LCD_DOGM162.c ****     if (! l_flgLCD_IsOn)
+ARM GAS  /tmp/ccYZYc0K.s 			page 19
+
+
+ 606              		.loc 1 436 0
+ 607 0010 144B     		ldr	r3, .L37
+ 608 0012 1B78     		ldrb	r3, [r3]
+ 609 0014 DBB2     		uxtb	r3, r3
+ 610 0016 83F00103 		eor	r3, r3, #1
+ 611 001a DBB2     		uxtb	r3, r3
+ 612 001c 002B     		cmp	r3, #0
+ 613 001e 00D0     		beq	.L33
+ 437:../drivers/LCD_DOGM162.c **** 	return;
+ 614              		.loc 1 437 0
+ 615 0020 1DE0     		b	.L32
+ 616              	.L33:
+ 438:../drivers/LCD_DOGM162.c **** 
+ 439:../drivers/LCD_DOGM162.c ****     EFM_ASSERT (x < LCD_DIMENSION_X  &&  y < LCD_DIMENSION_Y);
+ 617              		.loc 1 439 0
+ 618 0022 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 619 0026 0F2B     		cmp	r3, #15
+ 620 0028 03D8     		bhi	.L35
+ 621              		.loc 1 439 0 is_stmt 0 discriminator 2
+ 622 002a 9DF80630 		ldrb	r3, [sp, #6]	@ zero_extendqisi2
+ 623 002e 012B     		cmp	r3, #1
+ 624 0030 04D9     		bls	.L36
+ 625              	.L35:
+ 626              		.loc 1 439 0 discriminator 1
+ 627 0032 0D48     		ldr	r0, .L37+4
+ 628 0034 40F2B711 		movw	r1, #439
+ 629 0038 FFF7FEFF 		bl	assertEFM
+ 630              	.L36:
+ 440:../drivers/LCD_DOGM162.c **** 
+ 441:../drivers/LCD_DOGM162.c ****     addr = (y * 0x40) + x;
+ 631              		.loc 1 441 0 is_stmt 1
+ 632 003c 9DF80630 		ldrb	r3, [sp, #6]
+ 633 0040 9B01     		lsls	r3, r3, #6
+ 634 0042 DAB2     		uxtb	r2, r3
+ 635 0044 9DF80730 		ldrb	r3, [sp, #7]
+ 636 0048 1344     		add	r3, r3, r2
+ 637 004a 8DF80F30 		strb	r3, [sp, #15]
+ 442:../drivers/LCD_DOGM162.c **** 
+ 443:../drivers/LCD_DOGM162.c ****     CmdWrite (LCD_CMD_SET_DDRAM_ADDR | addr);
+ 638              		.loc 1 443 0
+ 639 004e 9DF80F30 		ldrb	r3, [sp, #15]
+ 640 0052 63F07F03 		orn	r3, r3, #127
+ 641 0056 DBB2     		uxtb	r3, r3
+ 642 0058 1846     		mov	r0, r3
+ 643 005a FFF7FEFF 		bl	CmdWrite
+ 644              	.L32:
+ 444:../drivers/LCD_DOGM162.c **** }
+ 645              		.loc 1 444 0
+ 646 005e 05B0     		add	sp, sp, #20
+ 647              		@ sp needed
+ 648 0060 5DF804FB 		ldr	pc, [sp], #4
+ 649              	.L38:
+ 650              		.align	2
+ 651              	.L37:
+ 652 0064 00000000 		.word	l_flgLCD_IsOn
+ 653 0068 00000000 		.word	.LC0
+ 654              		.cfi_endproc
+ARM GAS  /tmp/ccYZYc0K.s 			page 20
+
+
+ 655              	.LFE97:
+ 657              		.section	.text.BusyRead,"ax",%progbits
+ 658              		.align	2
+ 659              		.thumb
+ 660              		.thumb_func
+ 662              	BusyRead:
+ 663              	.LFB98:
+ 445:../drivers/LCD_DOGM162.c **** 
+ 446:../drivers/LCD_DOGM162.c **** 
+ 447:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 448:../drivers/LCD_DOGM162.c ****  *
+ 449:../drivers/LCD_DOGM162.c ****  * @brief	Read Busy Flag and Address
+ 450:../drivers/LCD_DOGM162.c ****  *
+ 451:../drivers/LCD_DOGM162.c ****  * This routine reads the busy flag and current value of the internal address
+ 452:../drivers/LCD_DOGM162.c ****  * counter of the LC-Display.
+ 453:../drivers/LCD_DOGM162.c ****  *
+ 454:../drivers/LCD_DOGM162.c ****  * @return
+ 455:../drivers/LCD_DOGM162.c ****  *	Current status: busy flag in bit [7] and address counter in bits [6:0].
+ 456:../drivers/LCD_DOGM162.c ****  *
+ 457:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 458:../drivers/LCD_DOGM162.c **** static uint8_t BusyRead (void)
+ 459:../drivers/LCD_DOGM162.c **** {
+ 664              		.loc 1 459 0
+ 665              		.cfi_startproc
+ 666              		@ args = 0, pretend = 0, frame = 8
+ 667              		@ frame_needed = 0, uses_anonymous_args = 0
+ 668 0000 00B5     		push	{lr}
+ 669              		.cfi_def_cfa_offset 4
+ 670              		.cfi_offset 14, -4
+ 671 0002 83B0     		sub	sp, sp, #12
+ 672              		.cfi_def_cfa_offset 16
+ 460:../drivers/LCD_DOGM162.c **** uint8_t status;
+ 461:../drivers/LCD_DOGM162.c **** 
+ 462:../drivers/LCD_DOGM162.c ****     SET_LCD_DATA_MODE_IN;	// input
+ 673              		.loc 1 462 0
+ 674 0004 0F4B     		ldr	r3, .L41
+ 675 0006 4FF01132 		mov	r2, #286331153
+ 676 000a C3F89820 		str	r2, [r3, #152]
+ 463:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RW(1);	// read
+ 677              		.loc 1 463 0
+ 678 000e 0E4B     		ldr	r3, .L41+4
+ 679 0010 0122     		movs	r2, #1
+ 680 0012 1A60     		str	r2, [r3]
+ 464:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RS(0);	// register
+ 681              		.loc 1 464 0
+ 682 0014 0D4B     		ldr	r3, .L41+8
+ 683 0016 0022     		movs	r2, #0
+ 684 0018 1A60     		str	r2, [r3]
+ 465:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_E (1);	// enable LCD output
+ 685              		.loc 1 465 0
+ 686 001a 0D4B     		ldr	r3, .L41+12
+ 687 001c 0122     		movs	r2, #1
+ 688 001e 1A60     		str	r2, [r3]
+ 466:../drivers/LCD_DOGM162.c **** 
+ 467:../drivers/LCD_DOGM162.c ****     DelayTick();
+ 689              		.loc 1 467 0
+ 690 0020 FFF7FEFF 		bl	DelayTick
+ARM GAS  /tmp/ccYZYc0K.s 			page 21
+
+
+ 468:../drivers/LCD_DOGM162.c ****     status = READ_LCD_DATA();	// read busy flag
+ 691              		.loc 1 468 0
+ 692 0024 074B     		ldr	r3, .L41
+ 693 0026 D3F8AC30 		ldr	r3, [r3, #172]
+ 694 002a 1B0A     		lsrs	r3, r3, #8
+ 695 002c 8DF80730 		strb	r3, [sp, #7]
+ 469:../drivers/LCD_DOGM162.c **** 
+ 470:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_E (0);	// disable LCD output
+ 696              		.loc 1 470 0
+ 697 0030 074B     		ldr	r3, .L41+12
+ 698 0032 0022     		movs	r2, #0
+ 699 0034 1A60     		str	r2, [r3]
+ 471:../drivers/LCD_DOGM162.c **** 
+ 472:../drivers/LCD_DOGM162.c ****     return status;
+ 700              		.loc 1 472 0
+ 701 0036 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 473:../drivers/LCD_DOGM162.c **** }
+ 702              		.loc 1 473 0
+ 703 003a 1846     		mov	r0, r3
+ 704 003c 03B0     		add	sp, sp, #12
+ 705              		@ sp needed
+ 706 003e 5DF804FB 		ldr	pc, [sp], #4
+ 707              	.L42:
+ 708 0042 00BF     		.align	2
+ 709              	.L41:
+ 710 0044 00600040 		.word	1073766400
+ 711 0048 10180C42 		.word	1108088848
+ 712 004c 14180C42 		.word	1108088852
+ 713 0050 0C180C42 		.word	1108088844
+ 714              		.cfi_endproc
+ 715              	.LFE98:
+ 717              		.section	.text.WaitCtrlReady,"ax",%progbits
+ 718              		.align	2
+ 719              		.thumb
+ 720              		.thumb_func
+ 722              	WaitCtrlReady:
+ 723              	.LFB99:
+ 474:../drivers/LCD_DOGM162.c **** 
+ 475:../drivers/LCD_DOGM162.c **** 
+ 476:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 477:../drivers/LCD_DOGM162.c ****  *
+ 478:../drivers/LCD_DOGM162.c ****  * @brief	Wait until the LCD Controller is ready
+ 479:../drivers/LCD_DOGM162.c ****  *
+ 480:../drivers/LCD_DOGM162.c ****  * This routine reads the current status of the LCD controller and checks its
+ 481:../drivers/LCD_DOGM162.c ****  * busy flag.  It waits as long as the busy flag is 1, i.e. the controller
+ 482:../drivers/LCD_DOGM162.c ****  * is not ready to receive new commands or data due to internal activity, or
+ 483:../drivers/LCD_DOGM162.c ****  * a timeout is reached.
+ 484:../drivers/LCD_DOGM162.c ****  *
+ 485:../drivers/LCD_DOGM162.c ****  * @return
+ 486:../drivers/LCD_DOGM162.c ****  *	Status: false if LCD is ready now, true in case of timeout
+ 487:../drivers/LCD_DOGM162.c ****  *
+ 488:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 489:../drivers/LCD_DOGM162.c **** static bool WaitCtrlReady (void)
+ 490:../drivers/LCD_DOGM162.c **** {
+ 724              		.loc 1 490 0
+ 725              		.cfi_startproc
+ 726              		@ args = 0, pretend = 0, frame = 8
+ARM GAS  /tmp/ccYZYc0K.s 			page 22
+
+
+ 727              		@ frame_needed = 0, uses_anonymous_args = 0
+ 728 0000 00B5     		push	{lr}
+ 729              		.cfi_def_cfa_offset 4
+ 730              		.cfi_offset 14, -4
+ 731 0002 83B0     		sub	sp, sp, #12
+ 732              		.cfi_def_cfa_offset 16
+ 491:../drivers/LCD_DOGM162.c **** int	i;
+ 492:../drivers/LCD_DOGM162.c **** 
+ 493:../drivers/LCD_DOGM162.c ****     for (i = 0;  i < LCD_WAIT_READY_TIMEOUT;  i++)
+ 733              		.loc 1 493 0
+ 734 0004 0023     		movs	r3, #0
+ 735 0006 0193     		str	r3, [sp, #4]
+ 736 0008 0DE0     		b	.L44
+ 737              	.L47:
+ 494:../drivers/LCD_DOGM162.c ****     {
+ 495:../drivers/LCD_DOGM162.c **** 	if ((BusyRead() & (1 << 7)) == false)
+ 738              		.loc 1 495 0
+ 739 000a FFF7FEFF 		bl	BusyRead
+ 740 000e 0346     		mov	r3, r0
+ 741 0010 DBB2     		uxtb	r3, r3
+ 742 0012 5BB2     		sxtb	r3, r3
+ 743 0014 002B     		cmp	r3, #0
+ 744 0016 01DB     		blt	.L45
+ 496:../drivers/LCD_DOGM162.c **** 	    return false;
+ 745              		.loc 1 496 0
+ 746 0018 0023     		movs	r3, #0
+ 747 001a 08E0     		b	.L46
+ 748              	.L45:
+ 497:../drivers/LCD_DOGM162.c **** 
+ 498:../drivers/LCD_DOGM162.c **** 	DelayTick();	// delay for 30us
+ 749              		.loc 1 498 0
+ 750 001c FFF7FEFF 		bl	DelayTick
+ 493:../drivers/LCD_DOGM162.c ****     for (i = 0;  i < LCD_WAIT_READY_TIMEOUT;  i++)
+ 751              		.loc 1 493 0
+ 752 0020 019B     		ldr	r3, [sp, #4]
+ 753 0022 0133     		adds	r3, r3, #1
+ 754 0024 0193     		str	r3, [sp, #4]
+ 755              	.L44:
+ 493:../drivers/LCD_DOGM162.c ****     for (i = 0;  i < LCD_WAIT_READY_TIMEOUT;  i++)
+ 756              		.loc 1 493 0 is_stmt 0 discriminator 1
+ 757 0026 019B     		ldr	r3, [sp, #4]
+ 758 0028 1F2B     		cmp	r3, #31
+ 759 002a EEDD     		ble	.L47
+ 499:../drivers/LCD_DOGM162.c ****     }
+ 500:../drivers/LCD_DOGM162.c **** 
+ 501:../drivers/LCD_DOGM162.c ****     return true;	// timeout
+ 760              		.loc 1 501 0 is_stmt 1
+ 761 002c 0123     		movs	r3, #1
+ 762              	.L46:
+ 502:../drivers/LCD_DOGM162.c **** }
+ 763              		.loc 1 502 0
+ 764 002e 1846     		mov	r0, r3
+ 765 0030 03B0     		add	sp, sp, #12
+ 766              		@ sp needed
+ 767 0032 5DF804FB 		ldr	pc, [sp], #4
+ 768              		.cfi_endproc
+ 769              	.LFE99:
+ARM GAS  /tmp/ccYZYc0K.s 			page 23
+
+
+ 771 0036 00BF     		.section	.text.CmdWrite,"ax",%progbits
+ 772              		.align	2
+ 773              		.thumb
+ 774              		.thumb_func
+ 776              	CmdWrite:
+ 777              	.LFB100:
+ 503:../drivers/LCD_DOGM162.c **** 
+ 504:../drivers/LCD_DOGM162.c **** 
+ 505:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 506:../drivers/LCD_DOGM162.c ****  *
+ 507:../drivers/LCD_DOGM162.c ****  * @brief	Write Command to LCD Controller
+ 508:../drivers/LCD_DOGM162.c ****  *
+ 509:../drivers/LCD_DOGM162.c ****  * This routine waits until the LCD controller is ready and then writes
+ 510:../drivers/LCD_DOGM162.c ****  * the specified command to it.  For a list of available commands, see
+ 511:../drivers/LCD_DOGM162.c ****  * @ref commands "Commands for the LCD Controller".
+ 512:../drivers/LCD_DOGM162.c ****  *
+ 513:../drivers/LCD_DOGM162.c ****  * @param[in] cmd
+ 514:../drivers/LCD_DOGM162.c ****  *	Command to write to the LCD controller.
+ 515:../drivers/LCD_DOGM162.c ****  *
+ 516:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 517:../drivers/LCD_DOGM162.c **** static void CmdWrite (uint8_t cmd)
+ 518:../drivers/LCD_DOGM162.c **** {
+ 778              		.loc 1 518 0
+ 779              		.cfi_startproc
+ 780              		@ args = 0, pretend = 0, frame = 8
+ 781              		@ frame_needed = 0, uses_anonymous_args = 0
+ 782 0000 00B5     		push	{lr}
+ 783              		.cfi_def_cfa_offset 4
+ 784              		.cfi_offset 14, -4
+ 785 0002 83B0     		sub	sp, sp, #12
+ 786              		.cfi_def_cfa_offset 16
+ 787 0004 0346     		mov	r3, r0
+ 788 0006 8DF80730 		strb	r3, [sp, #7]
+ 519:../drivers/LCD_DOGM162.c ****     /* Check if LCD controller is ready to receive a new command */
+ 520:../drivers/LCD_DOGM162.c ****     if (WaitCtrlReady())
+ 789              		.loc 1 520 0
+ 790 000a FFF7FEFF 		bl	WaitCtrlReady
+ 791 000e 0346     		mov	r3, r0
+ 792 0010 002B     		cmp	r3, #0
+ 793 0012 00D0     		beq	.L49
+ 521:../drivers/LCD_DOGM162.c **** 	return;			// timeout - abort
+ 794              		.loc 1 521 0
+ 795 0014 18E0     		b	.L48
+ 796              	.L49:
+ 522:../drivers/LCD_DOGM162.c **** 
+ 523:../drivers/LCD_DOGM162.c ****     SET_LCD_DATA_MODE_OUT;	// output
+ 797              		.loc 1 523 0
+ 798 0016 0E4B     		ldr	r3, .L51
+ 799 0018 4FF04432 		mov	r2, #1145324612
+ 800 001c C3F89820 		str	r2, [r3, #152]
+ 524:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RW(0);	// write
+ 801              		.loc 1 524 0
+ 802 0020 0C4B     		ldr	r3, .L51+4
+ 803 0022 0022     		movs	r2, #0
+ 804 0024 1A60     		str	r2, [r3]
+ 525:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RS(0);	// register
+ 805              		.loc 1 525 0
+ARM GAS  /tmp/ccYZYc0K.s 			page 24
+
+
+ 806 0026 0C4B     		ldr	r3, .L51+8
+ 807 0028 0022     		movs	r2, #0
+ 808 002a 1A60     		str	r2, [r3]
+ 526:../drivers/LCD_DOGM162.c **** 
+ 527:../drivers/LCD_DOGM162.c ****     WRITE_LCD_DATA (cmd);
+ 809              		.loc 1 527 0
+ 810 002c 084B     		ldr	r3, .L51
+ 811 002e 9DF80720 		ldrb	r2, [sp, #7]	@ zero_extendqisi2
+ 812 0032 1202     		lsls	r2, r2, #8
+ 813 0034 C3F89C20 		str	r2, [r3, #156]
+ 528:../drivers/LCD_DOGM162.c **** 
+ 529:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_E (1);	// enable data valid
+ 814              		.loc 1 529 0
+ 815 0038 084B     		ldr	r3, .L51+12
+ 816 003a 0122     		movs	r2, #1
+ 817 003c 1A60     		str	r2, [r3]
+ 530:../drivers/LCD_DOGM162.c ****     DelayTick();
+ 818              		.loc 1 530 0
+ 819 003e FFF7FEFF 		bl	DelayTick
+ 531:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_E (0);	// disable data valid
+ 820              		.loc 1 531 0
+ 821 0042 064B     		ldr	r3, .L51+12
+ 822 0044 0022     		movs	r2, #0
+ 823 0046 1A60     		str	r2, [r3]
+ 824              	.L48:
+ 532:../drivers/LCD_DOGM162.c **** }
+ 825              		.loc 1 532 0
+ 826 0048 03B0     		add	sp, sp, #12
+ 827              		@ sp needed
+ 828 004a 5DF804FB 		ldr	pc, [sp], #4
+ 829              	.L52:
+ 830 004e 00BF     		.align	2
+ 831              	.L51:
+ 832 0050 00600040 		.word	1073766400
+ 833 0054 10180C42 		.word	1108088848
+ 834 0058 14180C42 		.word	1108088852
+ 835 005c 0C180C42 		.word	1108088844
+ 836              		.cfi_endproc
+ 837              	.LFE100:
+ 839              		.section	.text.DataWrite,"ax",%progbits
+ 840              		.align	2
+ 841              		.thumb
+ 842              		.thumb_func
+ 844              	DataWrite:
+ 845              	.LFB101:
+ 533:../drivers/LCD_DOGM162.c **** 
+ 534:../drivers/LCD_DOGM162.c **** 
+ 535:../drivers/LCD_DOGM162.c **** #if 0
+ 536:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 537:../drivers/LCD_DOGM162.c ****  *
+ 538:../drivers/LCD_DOGM162.c ****  * @brief	Read Data from LCD Memory
+ 539:../drivers/LCD_DOGM162.c ****  *
+ 540:../drivers/LCD_DOGM162.c ****  * This routine reads the data byte, i.e. character code, from the current
+ 541:../drivers/LCD_DOGM162.c ****  * address of the internal memory of the LCD controller.  Use the
+ 542:../drivers/LCD_DOGM162.c ****  * command @ref LCD_CMD_SET_DDRAM_ADDR to change the value of the internal
+ 543:../drivers/LCD_DOGM162.c ****  * address pointer.
+ 544:../drivers/LCD_DOGM162.c ****  *
+ARM GAS  /tmp/ccYZYc0K.s 			page 25
+
+
+ 545:../drivers/LCD_DOGM162.c ****  * @return
+ 546:../drivers/LCD_DOGM162.c ****  *	The byte (character) as read from the internal memory.
+ 547:../drivers/LCD_DOGM162.c ****  *
+ 548:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 549:../drivers/LCD_DOGM162.c **** static uint8_t DataRead (void)
+ 550:../drivers/LCD_DOGM162.c **** {
+ 551:../drivers/LCD_DOGM162.c **** uint8_t data;
+ 552:../drivers/LCD_DOGM162.c **** 
+ 553:../drivers/LCD_DOGM162.c ****     SET_LCD_DATA_MODE_IN;	// input
+ 554:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RW(1);	// read
+ 555:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RS(1);	// data bus
+ 556:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_E (1);	// enable LCD output
+ 557:../drivers/LCD_DOGM162.c **** 
+ 558:../drivers/LCD_DOGM162.c ****     DelayTick();
+ 559:../drivers/LCD_DOGM162.c ****     data = READ_LCD_DATA();	// read data bus
+ 560:../drivers/LCD_DOGM162.c **** 
+ 561:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_E (0);	// disable LCD output
+ 562:../drivers/LCD_DOGM162.c **** 
+ 563:../drivers/LCD_DOGM162.c ****     return data;
+ 564:../drivers/LCD_DOGM162.c **** }
+ 565:../drivers/LCD_DOGM162.c **** #endif
+ 566:../drivers/LCD_DOGM162.c **** 
+ 567:../drivers/LCD_DOGM162.c **** 
+ 568:../drivers/LCD_DOGM162.c **** /***************************************************************************//**
+ 569:../drivers/LCD_DOGM162.c ****  *
+ 570:../drivers/LCD_DOGM162.c ****  * @brief	Write Data to LCD Memory
+ 571:../drivers/LCD_DOGM162.c ****  *
+ 572:../drivers/LCD_DOGM162.c ****  * This routine writes the specified data byte, i.e. character code, to the
+ 573:../drivers/LCD_DOGM162.c ****  * current address of the internal memory of the LCD controller.  Use the
+ 574:../drivers/LCD_DOGM162.c ****  * command @ref LCD_CMD_SET_DDRAM_ADDR to change the value of the internal
+ 575:../drivers/LCD_DOGM162.c ****  * address pointer.
+ 576:../drivers/LCD_DOGM162.c ****  *
+ 577:../drivers/LCD_DOGM162.c ****  * @param[in] data
+ 578:../drivers/LCD_DOGM162.c ****  *	Data to write to the internal memory of the LCD controller.
+ 579:../drivers/LCD_DOGM162.c ****  *
+ 580:../drivers/LCD_DOGM162.c ****  ******************************************************************************/
+ 581:../drivers/LCD_DOGM162.c **** static void DataWrite (uint8_t data)
+ 582:../drivers/LCD_DOGM162.c **** {
+ 846              		.loc 1 582 0
+ 847              		.cfi_startproc
+ 848              		@ args = 0, pretend = 0, frame = 8
+ 849              		@ frame_needed = 0, uses_anonymous_args = 0
+ 850 0000 00B5     		push	{lr}
+ 851              		.cfi_def_cfa_offset 4
+ 852              		.cfi_offset 14, -4
+ 853 0002 83B0     		sub	sp, sp, #12
+ 854              		.cfi_def_cfa_offset 16
+ 855 0004 0346     		mov	r3, r0
+ 856 0006 8DF80730 		strb	r3, [sp, #7]
+ 583:../drivers/LCD_DOGM162.c ****     /* Check if LCD controller is ready to receive new data */
+ 584:../drivers/LCD_DOGM162.c ****     if (WaitCtrlReady())
+ 857              		.loc 1 584 0
+ 858 000a FFF7FEFF 		bl	WaitCtrlReady
+ 859 000e 0346     		mov	r3, r0
+ 860 0010 002B     		cmp	r3, #0
+ 861 0012 00D0     		beq	.L54
+ 585:../drivers/LCD_DOGM162.c **** 	return;			// timeout - abort
+ARM GAS  /tmp/ccYZYc0K.s 			page 26
+
+
+ 862              		.loc 1 585 0
+ 863 0014 18E0     		b	.L53
+ 864              	.L54:
+ 586:../drivers/LCD_DOGM162.c **** 
+ 587:../drivers/LCD_DOGM162.c ****     SET_LCD_DATA_MODE_OUT;	// output
+ 865              		.loc 1 587 0
+ 866 0016 0E4B     		ldr	r3, .L56
+ 867 0018 4FF04432 		mov	r2, #1145324612
+ 868 001c C3F89820 		str	r2, [r3, #152]
+ 588:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RW(0);	// write
+ 869              		.loc 1 588 0
+ 870 0020 0C4B     		ldr	r3, .L56+4
+ 871 0022 0022     		movs	r2, #0
+ 872 0024 1A60     		str	r2, [r3]
+ 589:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_RS(1);	// data bus
+ 873              		.loc 1 589 0
+ 874 0026 0C4B     		ldr	r3, .L56+8
+ 875 0028 0122     		movs	r2, #1
+ 876 002a 1A60     		str	r2, [r3]
+ 590:../drivers/LCD_DOGM162.c **** 
+ 591:../drivers/LCD_DOGM162.c ****     WRITE_LCD_DATA (data);
+ 877              		.loc 1 591 0
+ 878 002c 084B     		ldr	r3, .L56
+ 879 002e 9DF80720 		ldrb	r2, [sp, #7]	@ zero_extendqisi2
+ 880 0032 1202     		lsls	r2, r2, #8
+ 881 0034 C3F89C20 		str	r2, [r3, #156]
+ 592:../drivers/LCD_DOGM162.c **** 
+ 593:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_E (1);	// enable data valid
+ 882              		.loc 1 593 0
+ 883 0038 084B     		ldr	r3, .L56+12
+ 884 003a 0122     		movs	r2, #1
+ 885 003c 1A60     		str	r2, [r3]
+ 594:../drivers/LCD_DOGM162.c ****     DelayTick();
+ 886              		.loc 1 594 0
+ 887 003e FFF7FEFF 		bl	DelayTick
+ 595:../drivers/LCD_DOGM162.c ****     SET_LCD_CTRL_PIN_E (0);	// disable data valid
+ 888              		.loc 1 595 0
+ 889 0042 064B     		ldr	r3, .L56+12
+ 890 0044 0022     		movs	r2, #0
+ 891 0046 1A60     		str	r2, [r3]
+ 892              	.L53:
+ 596:../drivers/LCD_DOGM162.c **** }
+ 893              		.loc 1 596 0
+ 894 0048 03B0     		add	sp, sp, #12
+ 895              		@ sp needed
+ 896 004a 5DF804FB 		ldr	pc, [sp], #4
+ 897              	.L57:
+ 898 004e 00BF     		.align	2
+ 899              	.L56:
+ 900 0050 00600040 		.word	1073766400
+ 901 0054 10180C42 		.word	1108088848
+ 902 0058 14180C42 		.word	1108088852
+ 903 005c 0C180C42 		.word	1108088844
+ 904              		.cfi_endproc
+ 905              	.LFE101:
+ 907              		.section	.data.currSerBuf.6652,"aw",%progbits
+ 908              		.align	2
+ARM GAS  /tmp/ccYZYc0K.s 			page 27
+
+
+ 911              	currSerBuf.6652:
+ 912 0000 20202020 		.ascii	"                                     \000"
+ 912      20202020 
+ 912      20202020 
+ 912      20202020 
+ 912      20202020 
+ 913 0026 0000     		.space	2
+ 914              		.section	.bss.prevSerBuf.6653,"aw",%nobits
+ 915              		.align	2
+ 918              	prevSerBuf.6653:
+ 919 0000 00000000 		.space	40
+ 919      00000000 
+ 919      00000000 
+ 919      00000000 
+ 919      00000000 
+ 920              		.text
+ 921              	.Letext0:
+ 922              		.file 2 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/lib/gcc/arm-none-eabi/4.8.4/include/stdarg.h"
+ 923              		.file 3 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 924              		.file 4 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 925              		.file 5 "../Device/EnergyMicro/EFM32G/Include/efm32g_gpio_p.h"
+ 926              		.file 6 "../Device/EnergyMicro/EFM32G/Include/efm32g_gpio.h"
+ 927              		.file 7 "../emlib/inc/em_gpio.h"
+ 928              		.file 8 "../drivers/Display.h"
+ 929              		.file 9 "<built-in>"
+ 930              		.file 10 "../CMSIS/Include/core_cm3.h"

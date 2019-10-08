@@ -1,0 +1,2322 @@
+ARM GAS  /tmp/ccmuhVuw.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"main.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.CHIP_Init,"ax",%progbits
+  19              		.align	2
+  20              		.thumb
+  21              		.thumb_func
+  23              	CHIP_Init:
+  24              	.LFB64:
+  25              		.file 1 "../emlib/inc/em_chip.h"
+   1:../emlib/inc/em_chip.h **** /***************************************************************************//**
+   2:../emlib/inc/em_chip.h ****  * @file
+   3:../emlib/inc/em_chip.h ****  * @brief Chip Initialization API
+   4:../emlib/inc/em_chip.h ****  * @author Energy Micro AS
+   5:../emlib/inc/em_chip.h ****  * @version 3.20.2
+   6:../emlib/inc/em_chip.h ****  *******************************************************************************
+   7:../emlib/inc/em_chip.h ****  * @section License
+   8:../emlib/inc/em_chip.h ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/inc/em_chip.h ****  *******************************************************************************
+  10:../emlib/inc/em_chip.h ****  *
+  11:../emlib/inc/em_chip.h ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/inc/em_chip.h ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/inc/em_chip.h ****  * freely, subject to the following restrictions:
+  14:../emlib/inc/em_chip.h ****  *
+  15:../emlib/inc/em_chip.h ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/inc/em_chip.h ****  *    claim that you wrote the original software.
+  17:../emlib/inc/em_chip.h ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/inc/em_chip.h ****  *    misrepresented as being the original software.
+  19:../emlib/inc/em_chip.h ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/inc/em_chip.h ****  *
+  21:../emlib/inc/em_chip.h ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/inc/em_chip.h ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/inc/em_chip.h ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/inc/em_chip.h ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/inc/em_chip.h ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/inc/em_chip.h ****  * of any proprietary rights of a third party.
+  27:../emlib/inc/em_chip.h ****  *
+  28:../emlib/inc/em_chip.h ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/inc/em_chip.h ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/inc/em_chip.h ****  * arising from your use of this Software.
+  31:../emlib/inc/em_chip.h ****  *
+  32:../emlib/inc/em_chip.h ****  ******************************************************************************/
+  33:../emlib/inc/em_chip.h **** #ifndef __EM_CHIP_H
+ARM GAS  /tmp/ccmuhVuw.s 			page 2
+
+
+  34:../emlib/inc/em_chip.h **** #define __EM_CHIP_H
+  35:../emlib/inc/em_chip.h **** 
+  36:../emlib/inc/em_chip.h **** #include "em_device.h"
+  37:../emlib/inc/em_chip.h **** #include "em_system.h"
+  38:../emlib/inc/em_chip.h **** 
+  39:../emlib/inc/em_chip.h **** #ifdef __cplusplus
+  40:../emlib/inc/em_chip.h **** extern "C" {
+  41:../emlib/inc/em_chip.h **** #endif
+  42:../emlib/inc/em_chip.h **** 
+  43:../emlib/inc/em_chip.h **** /***************************************************************************//**
+  44:../emlib/inc/em_chip.h ****  * @addtogroup EM_Library
+  45:../emlib/inc/em_chip.h ****  * @{
+  46:../emlib/inc/em_chip.h ****  ******************************************************************************/
+  47:../emlib/inc/em_chip.h **** 
+  48:../emlib/inc/em_chip.h **** /***************************************************************************//**
+  49:../emlib/inc/em_chip.h ****  * @addtogroup CHIP
+  50:../emlib/inc/em_chip.h ****  * @brief Chip Initialization API
+  51:../emlib/inc/em_chip.h ****  * @{
+  52:../emlib/inc/em_chip.h ****  ******************************************************************************/
+  53:../emlib/inc/em_chip.h **** 
+  54:../emlib/inc/em_chip.h **** /**************************************************************************//**
+  55:../emlib/inc/em_chip.h ****  * @brief
+  56:../emlib/inc/em_chip.h ****  *   Chip initialization routine for revision errata workarounds
+  57:../emlib/inc/em_chip.h ****  *
+  58:../emlib/inc/em_chip.h ****  * This init function will configure the EFM32 device to a state where it is
+  59:../emlib/inc/em_chip.h ****  * as similar as later revisions as possible, to improve software compatibility
+  60:../emlib/inc/em_chip.h ****  * with newer parts. See the device specific errata for details.
+  61:../emlib/inc/em_chip.h ****  *****************************************************************************/
+  62:../emlib/inc/em_chip.h **** __STATIC_INLINE void CHIP_Init(void)
+  63:../emlib/inc/em_chip.h **** {
+  26              		.loc 1 63 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 16
+  29              		@ frame_needed = 0, uses_anonymous_args = 0
+  30 0000 00B5     		push	{lr}
+  31              		.cfi_def_cfa_offset 4
+  32              		.cfi_offset 14, -4
+  33 0002 85B0     		sub	sp, sp, #20
+  34              		.cfi_def_cfa_offset 24
+  64:../emlib/inc/em_chip.h **** #if defined(_EFM32_GECKO_FAMILY)
+  65:../emlib/inc/em_chip.h ****   uint32_t                    rev;
+  66:../emlib/inc/em_chip.h ****   SYSTEM_ChipRevision_TypeDef chipRev;
+  67:../emlib/inc/em_chip.h ****   volatile uint32_t           *reg;
+  68:../emlib/inc/em_chip.h **** 
+  69:../emlib/inc/em_chip.h ****   rev = *(volatile uint32_t *)(0x0FE081FC);
+  35              		.loc 1 69 0
+  36 0004 524B     		ldr	r3, .L7
+  37 0006 1B68     		ldr	r3, [r3]
+  38 0008 0393     		str	r3, [sp, #12]
+  70:../emlib/inc/em_chip.h ****   /* Engineering Sample calibration setup */
+  71:../emlib/inc/em_chip.h ****   if ((rev >> 24) == 0)
+  39              		.loc 1 71 0
+  40 000a 039B     		ldr	r3, [sp, #12]
+  41 000c 1B0E     		lsrs	r3, r3, #24
+  42 000e 002B     		cmp	r3, #0
+  43 0010 15D1     		bne	.L2
+  72:../emlib/inc/em_chip.h ****   {
+ARM GAS  /tmp/ccmuhVuw.s 			page 3
+
+
+  73:../emlib/inc/em_chip.h ****     reg   = (volatile uint32_t *)0x400CA00C;
+  44              		.loc 1 73 0
+  45 0012 504B     		ldr	r3, .L7+4
+  46 0014 0293     		str	r3, [sp, #8]
+  74:../emlib/inc/em_chip.h ****     *reg &= ~(0x70UL);
+  47              		.loc 1 74 0
+  48 0016 029B     		ldr	r3, [sp, #8]
+  49 0018 1B68     		ldr	r3, [r3]
+  50 001a 23F07002 		bic	r2, r3, #112
+  51 001e 029B     		ldr	r3, [sp, #8]
+  52 0020 1A60     		str	r2, [r3]
+  75:../emlib/inc/em_chip.h ****     /* DREG */
+  76:../emlib/inc/em_chip.h ****     reg   = (volatile uint32_t *)0x400C6020;
+  53              		.loc 1 76 0
+  54 0022 4D4B     		ldr	r3, .L7+8
+  55 0024 0293     		str	r3, [sp, #8]
+  77:../emlib/inc/em_chip.h ****     *reg &= ~(0xE0000000UL);
+  56              		.loc 1 77 0
+  57 0026 029B     		ldr	r3, [sp, #8]
+  58 0028 1B68     		ldr	r3, [r3]
+  59 002a 23F06042 		bic	r2, r3, #-536870912
+  60 002e 029B     		ldr	r3, [sp, #8]
+  61 0030 1A60     		str	r2, [r3]
+  78:../emlib/inc/em_chip.h ****     *reg |= ~(7UL << 25);
+  62              		.loc 1 78 0
+  63 0032 029B     		ldr	r3, [sp, #8]
+  64 0034 1B68     		ldr	r3, [r3]
+  65 0036 63F06062 		orn	r2, r3, #234881024
+  66 003a 029B     		ldr	r3, [sp, #8]
+  67 003c 1A60     		str	r2, [r3]
+  68              	.L2:
+  79:../emlib/inc/em_chip.h ****   }
+  80:../emlib/inc/em_chip.h ****   if ((rev >> 24) <= 3)
+  69              		.loc 1 80 0
+  70 003e 039B     		ldr	r3, [sp, #12]
+  71 0040 1B0E     		lsrs	r3, r3, #24
+  72 0042 032B     		cmp	r3, #3
+  73 0044 20D8     		bhi	.L3
+  81:../emlib/inc/em_chip.h ****   {
+  82:../emlib/inc/em_chip.h ****     /* DREG */
+  83:../emlib/inc/em_chip.h ****     reg   = (volatile uint32_t *)0x400C6020;
+  74              		.loc 1 83 0
+  75 0046 444B     		ldr	r3, .L7+8
+  76 0048 0293     		str	r3, [sp, #8]
+  84:../emlib/inc/em_chip.h ****     *reg &= ~(0x00001F80UL);
+  77              		.loc 1 84 0
+  78 004a 029B     		ldr	r3, [sp, #8]
+  79 004c 1B68     		ldr	r3, [r3]
+  80 004e 23F4FC52 		bic	r2, r3, #8064
+  81 0052 029B     		ldr	r3, [sp, #8]
+  82 0054 1A60     		str	r2, [r3]
+  85:../emlib/inc/em_chip.h ****     /* Update CMU reset values */
+  86:../emlib/inc/em_chip.h ****     reg  = (volatile uint32_t *)0x400C8040;
+  83              		.loc 1 86 0
+  84 0056 414B     		ldr	r3, .L7+12
+  85 0058 0293     		str	r3, [sp, #8]
+  87:../emlib/inc/em_chip.h ****     *reg = 0;
+ARM GAS  /tmp/ccmuhVuw.s 			page 4
+
+
+  86              		.loc 1 87 0
+  87 005a 029B     		ldr	r3, [sp, #8]
+  88 005c 0022     		movs	r2, #0
+  89 005e 1A60     		str	r2, [r3]
+  88:../emlib/inc/em_chip.h ****     reg  = (volatile uint32_t *)0x400C8044;
+  90              		.loc 1 88 0
+  91 0060 3F4B     		ldr	r3, .L7+16
+  92 0062 0293     		str	r3, [sp, #8]
+  89:../emlib/inc/em_chip.h ****     *reg = 0;
+  93              		.loc 1 89 0
+  94 0064 029B     		ldr	r3, [sp, #8]
+  95 0066 0022     		movs	r2, #0
+  96 0068 1A60     		str	r2, [r3]
+  90:../emlib/inc/em_chip.h ****     reg  = (volatile uint32_t *)0x400C8058;
+  97              		.loc 1 90 0
+  98 006a 3E4B     		ldr	r3, .L7+20
+  99 006c 0293     		str	r3, [sp, #8]
+  91:../emlib/inc/em_chip.h ****     *reg = 0;
+ 100              		.loc 1 91 0
+ 101 006e 029B     		ldr	r3, [sp, #8]
+ 102 0070 0022     		movs	r2, #0
+ 103 0072 1A60     		str	r2, [r3]
+  92:../emlib/inc/em_chip.h ****     reg  = (volatile uint32_t *)0x400C8060;
+ 104              		.loc 1 92 0
+ 105 0074 3C4B     		ldr	r3, .L7+24
+ 106 0076 0293     		str	r3, [sp, #8]
+  93:../emlib/inc/em_chip.h ****     *reg = 0;
+ 107              		.loc 1 93 0
+ 108 0078 029B     		ldr	r3, [sp, #8]
+ 109 007a 0022     		movs	r2, #0
+ 110 007c 1A60     		str	r2, [r3]
+  94:../emlib/inc/em_chip.h ****     reg  = (volatile uint32_t *)0x400C8078;
+ 111              		.loc 1 94 0
+ 112 007e 3B4B     		ldr	r3, .L7+28
+ 113 0080 0293     		str	r3, [sp, #8]
+  95:../emlib/inc/em_chip.h ****     *reg = 0;
+ 114              		.loc 1 95 0
+ 115 0082 029B     		ldr	r3, [sp, #8]
+ 116 0084 0022     		movs	r2, #0
+ 117 0086 1A60     		str	r2, [r3]
+ 118              	.L3:
+  96:../emlib/inc/em_chip.h ****   }
+  97:../emlib/inc/em_chip.h **** 
+  98:../emlib/inc/em_chip.h ****   SYSTEM_ChipRevisionGet(&chipRev);
+ 119              		.loc 1 98 0
+ 120 0088 6B46     		mov	r3, sp
+ 121 008a 1846     		mov	r0, r3
+ 122 008c FFF7FEFF 		bl	SYSTEM_ChipRevisionGet
+  99:../emlib/inc/em_chip.h ****   if (chipRev.major == 0x01)
+ 123              		.loc 1 99 0
+ 124 0090 9DF80030 		ldrb	r3, [sp]	@ zero_extendqisi2
+ 125 0094 012B     		cmp	r3, #1
+ 126 0096 17D1     		bne	.L4
+ 100:../emlib/inc/em_chip.h ****   {
+ 101:../emlib/inc/em_chip.h ****     /* Rev A errata handling for EM2/3. Must enable DMA clock in order for EM2/3 */
+ 102:../emlib/inc/em_chip.h ****     /* to work. This will be fixed in later chip revisions, so only do for rev A. */
+ 103:../emlib/inc/em_chip.h ****     if (chipRev.minor == 00)
+ARM GAS  /tmp/ccmuhVuw.s 			page 5
+
+
+ 127              		.loc 1 103 0
+ 128 0098 9DF80130 		ldrb	r3, [sp, #1]	@ zero_extendqisi2
+ 129 009c 002B     		cmp	r3, #0
+ 130 009e 07D1     		bne	.L5
+ 104:../emlib/inc/em_chip.h ****     {
+ 105:../emlib/inc/em_chip.h ****       reg   = (volatile uint32_t *)0x400C8040;
+ 131              		.loc 1 105 0
+ 132 00a0 2E4B     		ldr	r3, .L7+12
+ 133 00a2 0293     		str	r3, [sp, #8]
+ 106:../emlib/inc/em_chip.h ****       *reg |= 0x2;
+ 134              		.loc 1 106 0
+ 135 00a4 029B     		ldr	r3, [sp, #8]
+ 136 00a6 1B68     		ldr	r3, [r3]
+ 137 00a8 43F00202 		orr	r2, r3, #2
+ 138 00ac 029B     		ldr	r3, [sp, #8]
+ 139 00ae 1A60     		str	r2, [r3]
+ 140              	.L5:
+ 107:../emlib/inc/em_chip.h ****     }
+ 108:../emlib/inc/em_chip.h **** 
+ 109:../emlib/inc/em_chip.h ****     /* Rev A+B errata handling for I2C when using EM2/3. USART0 clock must be enabled */
+ 110:../emlib/inc/em_chip.h ****     /* after waking up from EM2/EM3 in order for I2C to work. This will be fixed in */
+ 111:../emlib/inc/em_chip.h ****     /* later chip revisions, so only do for rev A+B. */
+ 112:../emlib/inc/em_chip.h ****     if (chipRev.minor <= 0x01)
+ 141              		.loc 1 112 0
+ 142 00b0 9DF80130 		ldrb	r3, [sp, #1]	@ zero_extendqisi2
+ 143 00b4 012B     		cmp	r3, #1
+ 144 00b6 07D8     		bhi	.L4
+ 113:../emlib/inc/em_chip.h ****     {
+ 114:../emlib/inc/em_chip.h ****       reg   = (volatile uint32_t *)0x400C8044;
+ 145              		.loc 1 114 0
+ 146 00b8 294B     		ldr	r3, .L7+16
+ 147 00ba 0293     		str	r3, [sp, #8]
+ 115:../emlib/inc/em_chip.h ****       *reg |= 0x1;
+ 148              		.loc 1 115 0
+ 149 00bc 029B     		ldr	r3, [sp, #8]
+ 150 00be 1B68     		ldr	r3, [r3]
+ 151 00c0 43F00102 		orr	r2, r3, #1
+ 152 00c4 029B     		ldr	r3, [sp, #8]
+ 153 00c6 1A60     		str	r2, [r3]
+ 154              	.L4:
+ 116:../emlib/inc/em_chip.h ****     }
+ 117:../emlib/inc/em_chip.h ****   }
+ 118:../emlib/inc/em_chip.h ****   /* Ensure correct ADC/DAC calibration value */
+ 119:../emlib/inc/em_chip.h ****   rev = *(volatile uint32_t *)0x0FE081F0;
+ 155              		.loc 1 119 0
+ 156 00c8 294B     		ldr	r3, .L7+32
+ 157 00ca 1B68     		ldr	r3, [r3]
+ 158 00cc 0393     		str	r3, [sp, #12]
+ 120:../emlib/inc/em_chip.h ****   if (rev < 0x4C8ABA00)
+ 159              		.loc 1 120 0
+ 160 00ce 039A     		ldr	r2, [sp, #12]
+ 161 00d0 284B     		ldr	r3, .L7+36
+ 162 00d2 9A42     		cmp	r2, r3
+ 163 00d4 39D8     		bhi	.L1
+ 164              	.LBB4:
+ 121:../emlib/inc/em_chip.h ****   {
+ 122:../emlib/inc/em_chip.h ****     uint32_t cal;
+ARM GAS  /tmp/ccmuhVuw.s 			page 6
+
+
+ 123:../emlib/inc/em_chip.h **** 
+ 124:../emlib/inc/em_chip.h ****     /* Enable ADC/DAC clocks */
+ 125:../emlib/inc/em_chip.h ****     reg   = (volatile uint32_t *)0x400C8044UL;
+ 165              		.loc 1 125 0
+ 166 00d6 224B     		ldr	r3, .L7+16
+ 167 00d8 0293     		str	r3, [sp, #8]
+ 126:../emlib/inc/em_chip.h ****     *reg |= (1 << 14 | 1 << 11);
+ 168              		.loc 1 126 0
+ 169 00da 029B     		ldr	r3, [sp, #8]
+ 170 00dc 1B68     		ldr	r3, [r3]
+ 171 00de 43F49042 		orr	r2, r3, #18432
+ 172 00e2 029B     		ldr	r3, [sp, #8]
+ 173 00e4 1A60     		str	r2, [r3]
+ 127:../emlib/inc/em_chip.h **** 
+ 128:../emlib/inc/em_chip.h ****     /* Retrive calibration values */
+ 129:../emlib/inc/em_chip.h ****     cal = ((*(volatile uint32_t *)(0x0FE081B4UL) & 0x00007F00UL) >>
+ 174              		.loc 1 129 0
+ 175 00e6 244B     		ldr	r3, .L7+40
+ 176 00e8 1B68     		ldr	r3, [r3]
+ 177 00ea 03F4FE43 		and	r3, r3, #32512
+ 178 00ee 1B0A     		lsrs	r3, r3, #8
+ 179 00f0 1B06     		lsls	r3, r3, #24
+ 180 00f2 0193     		str	r3, [sp, #4]
+ 130:../emlib/inc/em_chip.h ****            8) << 24;
+ 131:../emlib/inc/em_chip.h **** 
+ 132:../emlib/inc/em_chip.h ****     cal |= ((*(volatile uint32_t *)(0x0FE081B4UL) & 0x0000007FUL) >>
+ 181              		.loc 1 132 0
+ 182 00f4 204B     		ldr	r3, .L7+40
+ 183 00f6 1B68     		ldr	r3, [r3]
+ 184 00f8 03F07F03 		and	r3, r3, #127
+ 133:../emlib/inc/em_chip.h ****             0) << 16;
+ 185              		.loc 1 133 0
+ 186 00fc 1B04     		lsls	r3, r3, #16
+ 132:../emlib/inc/em_chip.h ****     cal |= ((*(volatile uint32_t *)(0x0FE081B4UL) & 0x0000007FUL) >>
+ 187              		.loc 1 132 0
+ 188 00fe 019A     		ldr	r2, [sp, #4]
+ 189 0100 1343     		orrs	r3, r3, r2
+ 190 0102 0193     		str	r3, [sp, #4]
+ 134:../emlib/inc/em_chip.h **** 
+ 135:../emlib/inc/em_chip.h ****     cal |= ((*(volatile uint32_t *)(0x0FE081B4UL) & 0x00007F00UL) >>
+ 191              		.loc 1 135 0
+ 192 0104 1C4B     		ldr	r3, .L7+40
+ 193 0106 1B68     		ldr	r3, [r3]
+ 136:../emlib/inc/em_chip.h ****             8) << 8;
+ 194              		.loc 1 136 0
+ 195 0108 03F4FE43 		and	r3, r3, #32512
+ 135:../emlib/inc/em_chip.h ****     cal |= ((*(volatile uint32_t *)(0x0FE081B4UL) & 0x00007F00UL) >>
+ 196              		.loc 1 135 0
+ 197 010c 019A     		ldr	r2, [sp, #4]
+ 198 010e 1343     		orrs	r3, r3, r2
+ 199 0110 0193     		str	r3, [sp, #4]
+ 137:../emlib/inc/em_chip.h **** 
+ 138:../emlib/inc/em_chip.h ****     cal |= ((*(volatile uint32_t *)(0x0FE081B4UL) & 0x0000007FUL) >>
+ 200              		.loc 1 138 0
+ 201 0112 194B     		ldr	r3, .L7+40
+ 202 0114 1B68     		ldr	r3, [r3]
+ 139:../emlib/inc/em_chip.h ****             0) << 0;
+ARM GAS  /tmp/ccmuhVuw.s 			page 7
+
+
+ 203              		.loc 1 139 0
+ 204 0116 03F07F03 		and	r3, r3, #127
+ 138:../emlib/inc/em_chip.h ****     cal |= ((*(volatile uint32_t *)(0x0FE081B4UL) & 0x0000007FUL) >>
+ 205              		.loc 1 138 0
+ 206 011a 019A     		ldr	r2, [sp, #4]
+ 207 011c 1343     		orrs	r3, r3, r2
+ 208 011e 0193     		str	r3, [sp, #4]
+ 140:../emlib/inc/em_chip.h **** 
+ 141:../emlib/inc/em_chip.h ****     /* ADC0->CAL = 1.25 reference */
+ 142:../emlib/inc/em_chip.h ****     reg  = (volatile uint32_t *)0x40002034UL;
+ 209              		.loc 1 142 0
+ 210 0120 164B     		ldr	r3, .L7+44
+ 211 0122 0293     		str	r3, [sp, #8]
+ 143:../emlib/inc/em_chip.h ****     *reg = cal;
+ 212              		.loc 1 143 0
+ 213 0124 029B     		ldr	r3, [sp, #8]
+ 214 0126 019A     		ldr	r2, [sp, #4]
+ 215 0128 1A60     		str	r2, [r3]
+ 144:../emlib/inc/em_chip.h **** 
+ 145:../emlib/inc/em_chip.h ****     /* DAC0->CAL = 1.25 reference */
+ 146:../emlib/inc/em_chip.h ****     reg  = (volatile uint32_t *)(0x4000402CUL);
+ 216              		.loc 1 146 0
+ 217 012a 154B     		ldr	r3, .L7+48
+ 218 012c 0293     		str	r3, [sp, #8]
+ 147:../emlib/inc/em_chip.h ****     cal  = *(volatile uint32_t *)0x0FE081C8UL;
+ 219              		.loc 1 147 0
+ 220 012e 154B     		ldr	r3, .L7+52
+ 221 0130 1B68     		ldr	r3, [r3]
+ 222 0132 0193     		str	r3, [sp, #4]
+ 148:../emlib/inc/em_chip.h ****     *reg = cal;
+ 223              		.loc 1 148 0
+ 224 0134 029B     		ldr	r3, [sp, #8]
+ 225 0136 019A     		ldr	r2, [sp, #4]
+ 226 0138 1A60     		str	r2, [r3]
+ 149:../emlib/inc/em_chip.h **** 
+ 150:../emlib/inc/em_chip.h ****     /* Turn off ADC/DAC clocks */
+ 151:../emlib/inc/em_chip.h ****     reg   = (volatile uint32_t *)0x400C8044UL;
+ 227              		.loc 1 151 0
+ 228 013a 094B     		ldr	r3, .L7+16
+ 229 013c 0293     		str	r3, [sp, #8]
+ 152:../emlib/inc/em_chip.h ****     *reg &= ~(1 << 14 | 1 << 11);
+ 230              		.loc 1 152 0
+ 231 013e 029B     		ldr	r3, [sp, #8]
+ 232 0140 1B68     		ldr	r3, [r3]
+ 233 0142 23F49042 		bic	r2, r3, #18432
+ 234 0146 029B     		ldr	r3, [sp, #8]
+ 235 0148 1A60     		str	r2, [r3]
+ 236              	.L1:
+ 237              	.LBE4:
+ 153:../emlib/inc/em_chip.h ****   }
+ 154:../emlib/inc/em_chip.h **** #endif
+ 155:../emlib/inc/em_chip.h **** 
+ 156:../emlib/inc/em_chip.h **** #if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+ 157:../emlib/inc/em_chip.h ****   uint32_t                    rev;
+ 158:../emlib/inc/em_chip.h ****   SYSTEM_ChipRevision_TypeDef chipRev;
+ 159:../emlib/inc/em_chip.h **** 
+ 160:../emlib/inc/em_chip.h ****   rev = *(volatile uint32_t *)(0x0FE081FC);
+ARM GAS  /tmp/ccmuhVuw.s 			page 8
+
+
+ 161:../emlib/inc/em_chip.h ****   SYSTEM_ChipRevisionGet(&chipRev);
+ 162:../emlib/inc/em_chip.h **** 
+ 163:../emlib/inc/em_chip.h ****   if (((rev >> 24) == 16) && (chipRev.minor == 3))
+ 164:../emlib/inc/em_chip.h ****   {
+ 165:../emlib/inc/em_chip.h ****     /* This fixes an issue with the LFXO on high temperatures. */
+ 166:../emlib/inc/em_chip.h ****     *(volatile uint32_t*)0x400C80C0 =
+ 167:../emlib/inc/em_chip.h ****                       ( *(volatile uint32_t*)0x400C80C0 & ~(1<<6) ) | (1<<4);
+ 168:../emlib/inc/em_chip.h ****   }
+ 169:../emlib/inc/em_chip.h **** #endif
+ 170:../emlib/inc/em_chip.h **** }
+ 238              		.loc 1 170 0
+ 239 014a 05B0     		add	sp, sp, #20
+ 240              		@ sp needed
+ 241 014c 5DF804FB 		ldr	pc, [sp], #4
+ 242              	.L8:
+ 243              		.align	2
+ 244              	.L7:
+ 245 0150 FC81E00F 		.word	266371580
+ 246 0154 0CA00C40 		.word	1074569228
+ 247 0158 20600C40 		.word	1074552864
+ 248 015c 40800C40 		.word	1074561088
+ 249 0160 44800C40 		.word	1074561092
+ 250 0164 58800C40 		.word	1074561112
+ 251 0168 60800C40 		.word	1074561120
+ 252 016c 78800C40 		.word	1074561144
+ 253 0170 F081E00F 		.word	266371568
+ 254 0174 FFB98A4C 		.word	1284159999
+ 255 0178 B481E00F 		.word	266371508
+ 256 017c 34200040 		.word	1073750068
+ 257 0180 2C400040 		.word	1073758252
+ 258 0184 C881E00F 		.word	266371528
+ 259              		.cfi_endproc
+ 260              	.LFE64:
+ 262              		.section	.text.EMU_EnterEM1,"ax",%progbits
+ 263              		.align	2
+ 264              		.thumb
+ 265              		.thumb_func
+ 267              	EMU_EnterEM1:
+ 268              	.LFB79:
+ 269              		.file 2 "../emlib/inc/em_emu.h"
+   1:../emlib/inc/em_emu.h **** /***************************************************************************//**
+   2:../emlib/inc/em_emu.h ****  * @file
+   3:../emlib/inc/em_emu.h ****  * @brief Energy management unit (EMU) peripheral API
+   4:../emlib/inc/em_emu.h ****  * @author Energy Micro AS
+   5:../emlib/inc/em_emu.h ****  * @version 3.20.2
+   6:../emlib/inc/em_emu.h ****  *******************************************************************************
+   7:../emlib/inc/em_emu.h ****  * @section License
+   8:../emlib/inc/em_emu.h ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/inc/em_emu.h ****  *******************************************************************************
+  10:../emlib/inc/em_emu.h ****  *
+  11:../emlib/inc/em_emu.h ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/inc/em_emu.h ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/inc/em_emu.h ****  * freely, subject to the following restrictions:
+  14:../emlib/inc/em_emu.h ****  *
+  15:../emlib/inc/em_emu.h ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/inc/em_emu.h ****  *    claim that you wrote the original software.
+  17:../emlib/inc/em_emu.h ****  * 2. Altered source versions must be plainly marked as such, and must not be
+ARM GAS  /tmp/ccmuhVuw.s 			page 9
+
+
+  18:../emlib/inc/em_emu.h ****  *    misrepresented as being the original software.
+  19:../emlib/inc/em_emu.h ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/inc/em_emu.h ****  *
+  21:../emlib/inc/em_emu.h ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/inc/em_emu.h ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/inc/em_emu.h ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/inc/em_emu.h ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/inc/em_emu.h ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/inc/em_emu.h ****  * of any proprietary rights of a third party.
+  27:../emlib/inc/em_emu.h ****  *
+  28:../emlib/inc/em_emu.h ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/inc/em_emu.h ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/inc/em_emu.h ****  * arising from your use of this Software.
+  31:../emlib/inc/em_emu.h ****  *
+  32:../emlib/inc/em_emu.h ****  ******************************************************************************/
+  33:../emlib/inc/em_emu.h **** #ifndef __EM_EMU_H
+  34:../emlib/inc/em_emu.h **** #define __EM_EMU_H
+  35:../emlib/inc/em_emu.h **** 
+  36:../emlib/inc/em_emu.h **** #include "em_device.h"
+  37:../emlib/inc/em_emu.h **** #if defined( EMU_PRESENT )
+  38:../emlib/inc/em_emu.h **** 
+  39:../emlib/inc/em_emu.h **** #include <stdbool.h>
+  40:../emlib/inc/em_emu.h **** #include "em_bitband.h"
+  41:../emlib/inc/em_emu.h **** 
+  42:../emlib/inc/em_emu.h **** #ifdef __cplusplus
+  43:../emlib/inc/em_emu.h **** extern "C" {
+  44:../emlib/inc/em_emu.h **** #endif
+  45:../emlib/inc/em_emu.h **** 
+  46:../emlib/inc/em_emu.h **** /***************************************************************************//**
+  47:../emlib/inc/em_emu.h ****  * @addtogroup EM_Library
+  48:../emlib/inc/em_emu.h ****  * @{
+  49:../emlib/inc/em_emu.h ****  ******************************************************************************/
+  50:../emlib/inc/em_emu.h **** 
+  51:../emlib/inc/em_emu.h **** /***************************************************************************//**
+  52:../emlib/inc/em_emu.h ****  * @addtogroup EMU
+  53:../emlib/inc/em_emu.h ****  * @{
+  54:../emlib/inc/em_emu.h ****  ******************************************************************************/
+  55:../emlib/inc/em_emu.h **** 
+  56:../emlib/inc/em_emu.h **** /*******************************************************************************
+  57:../emlib/inc/em_emu.h ****  ********************************   ENUMS   ************************************
+  58:../emlib/inc/em_emu.h ****  ******************************************************************************/
+  59:../emlib/inc/em_emu.h **** 
+  60:../emlib/inc/em_emu.h **** #if defined( _EMU_EM4CONF_MASK )
+  61:../emlib/inc/em_emu.h **** /** EM4 duty oscillator */
+  62:../emlib/inc/em_emu.h **** typedef enum
+  63:../emlib/inc/em_emu.h **** {
+  64:../emlib/inc/em_emu.h ****   /** Select ULFRCO as duty oscillator in EM4 */
+  65:../emlib/inc/em_emu.h ****   emuEM4Osc_ULFRCO = EMU_EM4CONF_OSC_ULFRCO,
+  66:../emlib/inc/em_emu.h ****   /** Select LFXO as duty oscillator in EM4 */
+  67:../emlib/inc/em_emu.h ****   emuEM4Osc_LFXO = EMU_EM4CONF_OSC_LFXO,
+  68:../emlib/inc/em_emu.h ****   /** Select LFRCO as duty oscillator in EM4 */
+  69:../emlib/inc/em_emu.h ****   emuEM4Osc_LFRCO = EMU_EM4CONF_OSC_LFRCO
+  70:../emlib/inc/em_emu.h **** } EMU_EM4Osc_TypeDef;
+  71:../emlib/inc/em_emu.h **** 
+  72:../emlib/inc/em_emu.h **** /** Backup Power Voltage Probe types */
+  73:../emlib/inc/em_emu.h **** typedef enum
+  74:../emlib/inc/em_emu.h **** {
+ARM GAS  /tmp/ccmuhVuw.s 			page 10
+
+
+  75:../emlib/inc/em_emu.h ****   /** Disable voltage probe */
+  76:../emlib/inc/em_emu.h ****   emuProbe_Disable = EMU_BUCTRL_PROBE_DISABLE,
+  77:../emlib/inc/em_emu.h ****   /** Connect probe to VDD_DREG */
+  78:../emlib/inc/em_emu.h ****   emuProbe_VDDDReg = EMU_BUCTRL_PROBE_VDDDREG,
+  79:../emlib/inc/em_emu.h ****   /** Connect probe to BU_IN */
+  80:../emlib/inc/em_emu.h ****   emuProbe_BUIN    = EMU_BUCTRL_PROBE_BUIN,
+  81:../emlib/inc/em_emu.h ****   /** Connect probe to BU_OUT */
+  82:../emlib/inc/em_emu.h ****   emuProbe_BUOUT   = EMU_BUCTRL_PROBE_BUOUT
+  83:../emlib/inc/em_emu.h **** } EMU_Probe_TypeDef;
+  84:../emlib/inc/em_emu.h **** 
+  85:../emlib/inc/em_emu.h **** /** Backup Power Domain resistor selection */
+  86:../emlib/inc/em_emu.h **** typedef enum
+  87:../emlib/inc/em_emu.h **** {
+  88:../emlib/inc/em_emu.h ****   /** Main power and backup power connected with RES0 series resistance */
+  89:../emlib/inc/em_emu.h ****   emuRes_Res0 = EMU_PWRCONF_PWRRES_RES0,
+  90:../emlib/inc/em_emu.h ****   /** Main power and backup power connected with RES1 series resistance */
+  91:../emlib/inc/em_emu.h ****   emuRes_Res1 = EMU_PWRCONF_PWRRES_RES1,
+  92:../emlib/inc/em_emu.h ****   /** Main power and backup power connected with RES2 series resistance */
+  93:../emlib/inc/em_emu.h ****   emuRes_Res2 = EMU_PWRCONF_PWRRES_RES2,
+  94:../emlib/inc/em_emu.h ****   /** Main power and backup power connected with RES3 series resistance */
+  95:../emlib/inc/em_emu.h ****   emuRes_Res3 = EMU_PWRCONF_PWRRES_RES3,
+  96:../emlib/inc/em_emu.h **** } EMU_Resistor_TypeDef;
+  97:../emlib/inc/em_emu.h **** 
+  98:../emlib/inc/em_emu.h **** /** Backup Power Domain power connection */
+  99:../emlib/inc/em_emu.h **** typedef enum
+ 100:../emlib/inc/em_emu.h **** {
+ 101:../emlib/inc/em_emu.h ****   /** No connection between main and backup power */
+ 102:../emlib/inc/em_emu.h ****   emuPower_None = EMU_BUINACT_PWRCON_NONE,
+ 103:../emlib/inc/em_emu.h ****   /** Main power and backup power connected through diode,
+ 104:../emlib/inc/em_emu.h ****       allowing current from backup to main only */
+ 105:../emlib/inc/em_emu.h ****   emuPower_BUMain = EMU_BUINACT_PWRCON_BUMAIN,
+ 106:../emlib/inc/em_emu.h ****   /** Main power and backup power connected through diode,
+ 107:../emlib/inc/em_emu.h ****       allowing current from main to backup only */
+ 108:../emlib/inc/em_emu.h ****   emuPower_MainBU = EMU_BUINACT_PWRCON_MAINBU,
+ 109:../emlib/inc/em_emu.h ****   /** Main power and backup power connected without diode */
+ 110:../emlib/inc/em_emu.h ****   emuPower_NoDiode = EMU_BUINACT_PWRCON_NODIODE,
+ 111:../emlib/inc/em_emu.h **** } EMU_Power_TypeDef;
+ 112:../emlib/inc/em_emu.h **** 
+ 113:../emlib/inc/em_emu.h **** /** BOD threshold setting selector, active or inactive mode */
+ 114:../emlib/inc/em_emu.h **** typedef enum
+ 115:../emlib/inc/em_emu.h **** {
+ 116:../emlib/inc/em_emu.h ****   /** Configure BOD threshold for active mode */
+ 117:../emlib/inc/em_emu.h ****   emuBODMode_Active,
+ 118:../emlib/inc/em_emu.h ****   /** Configure BOD threshold for inactive mode */
+ 119:../emlib/inc/em_emu.h ****   emuBODMode_Inactive,
+ 120:../emlib/inc/em_emu.h **** } EMU_BODMode_TypeDef;
+ 121:../emlib/inc/em_emu.h **** 
+ 122:../emlib/inc/em_emu.h **** /*******************************************************************************
+ 123:../emlib/inc/em_emu.h ****  *******************************   STRUCTS   ***********************************
+ 124:../emlib/inc/em_emu.h ****  ******************************************************************************/
+ 125:../emlib/inc/em_emu.h **** 
+ 126:../emlib/inc/em_emu.h **** /** Energy Mode 4 initialization structure  */
+ 127:../emlib/inc/em_emu.h **** typedef struct
+ 128:../emlib/inc/em_emu.h **** {
+ 129:../emlib/inc/em_emu.h ****   /** Lock configuration of regulator, BOD and oscillator */
+ 130:../emlib/inc/em_emu.h ****   bool               lockConfig;
+ 131:../emlib/inc/em_emu.h ****   /** EM4 duty oscillator */
+ARM GAS  /tmp/ccmuhVuw.s 			page 11
+
+
+ 132:../emlib/inc/em_emu.h ****   EMU_EM4Osc_TypeDef osc;
+ 133:../emlib/inc/em_emu.h ****   /** Wake up on EM4 BURTC interrupt */
+ 134:../emlib/inc/em_emu.h ****   bool               buRtcWakeup;
+ 135:../emlib/inc/em_emu.h ****   /** Enable EM4 voltage regulator */
+ 136:../emlib/inc/em_emu.h ****   bool               vreg;
+ 137:../emlib/inc/em_emu.h **** } EMU_EM4Init_TypeDef;
+ 138:../emlib/inc/em_emu.h **** 
+ 139:../emlib/inc/em_emu.h **** /** Default initialization of EM4 configuration */
+ 140:../emlib/inc/em_emu.h **** #define EMU_EM4INIT_DEFAULT    \
+ 141:../emlib/inc/em_emu.h ****   {   false,             /* Dont't lock configuration after it's been set */ \
+ 142:../emlib/inc/em_emu.h ****       emuEM4Osc_ULFRCO,  /* Use default ULFRCO oscillator  */ \
+ 143:../emlib/inc/em_emu.h ****       true,              /* Wake up on EM4 BURTC interrupt */ \
+ 144:../emlib/inc/em_emu.h ****       true,              /* Enable VREG */ \
+ 145:../emlib/inc/em_emu.h ****   }
+ 146:../emlib/inc/em_emu.h **** 
+ 147:../emlib/inc/em_emu.h **** /** Backup Power Domain Initialization structure */
+ 148:../emlib/inc/em_emu.h **** typedef struct
+ 149:../emlib/inc/em_emu.h **** {
+ 150:../emlib/inc/em_emu.h ****   /* Backup Power Domain power configuration */
+ 151:../emlib/inc/em_emu.h **** 
+ 152:../emlib/inc/em_emu.h ****   /** Voltage probe select, selects ADC voltage */
+ 153:../emlib/inc/em_emu.h ****   EMU_Probe_TypeDef probe;
+ 154:../emlib/inc/em_emu.h ****   /** Enable BOD calibration mode */
+ 155:../emlib/inc/em_emu.h ****   bool              bodCal;
+ 156:../emlib/inc/em_emu.h ****   /** Enable BU_STAT status pin for active BU mode */
+ 157:../emlib/inc/em_emu.h ****   bool              statusPinEnable;
+ 158:../emlib/inc/em_emu.h **** 
+ 159:../emlib/inc/em_emu.h ****   /* Backup Power Domain connection configuration */
+ 160:../emlib/inc/em_emu.h ****   /** Power domain resistor */
+ 161:../emlib/inc/em_emu.h ****   EMU_Resistor_TypeDef resistor;
+ 162:../emlib/inc/em_emu.h ****   /** BU_VOUT strong enable */
+ 163:../emlib/inc/em_emu.h ****   bool                 voutStrong;
+ 164:../emlib/inc/em_emu.h ****   /** BU_VOUT medium enable */
+ 165:../emlib/inc/em_emu.h ****   bool                 voutMed;
+ 166:../emlib/inc/em_emu.h ****   /** BU_VOUT weak enable */
+ 167:../emlib/inc/em_emu.h ****   bool                 voutWeak;
+ 168:../emlib/inc/em_emu.h ****   /** Power connection, when not in Backup Mode */
+ 169:../emlib/inc/em_emu.h ****   EMU_Power_TypeDef  inactivePower;
+ 170:../emlib/inc/em_emu.h ****   /** Power connection, when in Backup Mode */
+ 171:../emlib/inc/em_emu.h ****   EMU_Power_TypeDef  activePower;
+ 172:../emlib/inc/em_emu.h ****   /** Enable backup power domain, and release reset, enable BU_VIN pin  */
+ 173:../emlib/inc/em_emu.h ****   bool               enable;
+ 174:../emlib/inc/em_emu.h **** } EMU_BUPDInit_TypeDef;
+ 175:../emlib/inc/em_emu.h **** 
+ 176:../emlib/inc/em_emu.h **** /** Default */
+ 177:../emlib/inc/em_emu.h **** #define EMU_BUPDINIT_DEFAULT                                                \
+ 178:../emlib/inc/em_emu.h ****   { emuProbe_Disable, /* Do not enable voltage probe */                     \
+ 179:../emlib/inc/em_emu.h ****     false,            /* Disable BOD calibration mode */                    \
+ 180:../emlib/inc/em_emu.h ****     false,            /* Disable BU_STAT pin for backup mode indication */  \
+ 181:../emlib/inc/em_emu.h ****                                                                             \
+ 182:../emlib/inc/em_emu.h ****     emuRes_Res0,      /* RES0 series resistance between main and backup power */ \
+ 183:../emlib/inc/em_emu.h ****     false,            /* Don't enable strong switch */                           \
+ 184:../emlib/inc/em_emu.h ****     false,            /* Don't enable medium switch */                           \
+ 185:../emlib/inc/em_emu.h ****     false,            /* Don't enable weak switch */                             \
+ 186:../emlib/inc/em_emu.h ****                                                                                  \
+ 187:../emlib/inc/em_emu.h ****     emuPower_None,    /* No connection between main and backup power (inactive mode) */  \
+ 188:../emlib/inc/em_emu.h ****     emuPower_None,    /* No connection between main and backup power (active mode) */    \
+ARM GAS  /tmp/ccmuhVuw.s 			page 12
+
+
+ 189:../emlib/inc/em_emu.h ****     true              /* Enable BUPD enter on BOD, enable BU_VIN pin, release BU reset  */  \
+ 190:../emlib/inc/em_emu.h ****   }
+ 191:../emlib/inc/em_emu.h **** #endif
+ 192:../emlib/inc/em_emu.h **** 
+ 193:../emlib/inc/em_emu.h **** /*******************************************************************************
+ 194:../emlib/inc/em_emu.h ****  *****************************   PROTOTYPES   **********************************
+ 195:../emlib/inc/em_emu.h ****  ******************************************************************************/
+ 196:../emlib/inc/em_emu.h **** 
+ 197:../emlib/inc/em_emu.h **** /***************************************************************************//**
+ 198:../emlib/inc/em_emu.h ****  * @brief
+ 199:../emlib/inc/em_emu.h ****  *   Enter energy mode 1 (EM1).
+ 200:../emlib/inc/em_emu.h ****  ******************************************************************************/
+ 201:../emlib/inc/em_emu.h **** __STATIC_INLINE void EMU_EnterEM1(void)
+ 202:../emlib/inc/em_emu.h **** {
+ 270              		.loc 2 202 0
+ 271              		.cfi_startproc
+ 272              		@ args = 0, pretend = 0, frame = 0
+ 273              		@ frame_needed = 0, uses_anonymous_args = 0
+ 274              		@ link register save eliminated.
+ 203:../emlib/inc/em_emu.h ****   /* Just enter Cortex-M3 sleep mode */
+ 204:../emlib/inc/em_emu.h ****   SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
+ 275              		.loc 2 204 0
+ 276 0000 034B     		ldr	r3, .L10
+ 277 0002 034A     		ldr	r2, .L10
+ 278 0004 1269     		ldr	r2, [r2, #16]
+ 279 0006 22F00402 		bic	r2, r2, #4
+ 280 000a 1A61     		str	r2, [r3, #16]
+ 281              	.LBB5:
+ 282              	.LBB6:
+ 283              		.file 3 "../CMSIS/Include/core_cmInstr.h"
+   1:../CMSIS/Include/core_cmInstr.h **** /**************************************************************************//**
+   2:../CMSIS/Include/core_cmInstr.h ****  * @file     core_cmInstr.h
+   3:../CMSIS/Include/core_cmInstr.h ****  * @brief    CMSIS Cortex-M Core Instruction Access Header File
+   4:../CMSIS/Include/core_cmInstr.h ****  * @version  V3.20
+   5:../CMSIS/Include/core_cmInstr.h ****  * @date     05. March 2013
+   6:../CMSIS/Include/core_cmInstr.h ****  *
+   7:../CMSIS/Include/core_cmInstr.h ****  * @note
+   8:../CMSIS/Include/core_cmInstr.h ****  *
+   9:../CMSIS/Include/core_cmInstr.h ****  ******************************************************************************/
+  10:../CMSIS/Include/core_cmInstr.h **** /* Copyright (c) 2009 - 2013 ARM LIMITED
+  11:../CMSIS/Include/core_cmInstr.h **** 
+  12:../CMSIS/Include/core_cmInstr.h ****    All rights reserved.
+  13:../CMSIS/Include/core_cmInstr.h ****    Redistribution and use in source and binary forms, with or without
+  14:../CMSIS/Include/core_cmInstr.h ****    modification, are permitted provided that the following conditions are met:
+  15:../CMSIS/Include/core_cmInstr.h ****    - Redistributions of source code must retain the above copyright
+  16:../CMSIS/Include/core_cmInstr.h ****      notice, this list of conditions and the following disclaimer.
+  17:../CMSIS/Include/core_cmInstr.h ****    - Redistributions in binary form must reproduce the above copyright
+  18:../CMSIS/Include/core_cmInstr.h ****      notice, this list of conditions and the following disclaimer in the
+  19:../CMSIS/Include/core_cmInstr.h ****      documentation and/or other materials provided with the distribution.
+  20:../CMSIS/Include/core_cmInstr.h ****    - Neither the name of ARM nor the names of its contributors may be used
+  21:../CMSIS/Include/core_cmInstr.h ****      to endorse or promote products derived from this software without
+  22:../CMSIS/Include/core_cmInstr.h ****      specific prior written permission.
+  23:../CMSIS/Include/core_cmInstr.h ****    *
+  24:../CMSIS/Include/core_cmInstr.h ****    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  25:../CMSIS/Include/core_cmInstr.h ****    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  26:../CMSIS/Include/core_cmInstr.h ****    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  27:../CMSIS/Include/core_cmInstr.h ****    ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
+ARM GAS  /tmp/ccmuhVuw.s 			page 13
+
+
+  28:../CMSIS/Include/core_cmInstr.h ****    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  29:../CMSIS/Include/core_cmInstr.h ****    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  30:../CMSIS/Include/core_cmInstr.h ****    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  31:../CMSIS/Include/core_cmInstr.h ****    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  32:../CMSIS/Include/core_cmInstr.h ****    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  33:../CMSIS/Include/core_cmInstr.h ****    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  34:../CMSIS/Include/core_cmInstr.h ****    POSSIBILITY OF SUCH DAMAGE.
+  35:../CMSIS/Include/core_cmInstr.h ****    ---------------------------------------------------------------------------*/
+  36:../CMSIS/Include/core_cmInstr.h **** 
+  37:../CMSIS/Include/core_cmInstr.h **** 
+  38:../CMSIS/Include/core_cmInstr.h **** #ifndef __CORE_CMINSTR_H
+  39:../CMSIS/Include/core_cmInstr.h **** #define __CORE_CMINSTR_H
+  40:../CMSIS/Include/core_cmInstr.h **** 
+  41:../CMSIS/Include/core_cmInstr.h **** 
+  42:../CMSIS/Include/core_cmInstr.h **** /* ##########################  Core Instruction Access  ######################### */
+  43:../CMSIS/Include/core_cmInstr.h **** /** \defgroup CMSIS_Core_InstructionInterface CMSIS Core Instruction Interface
+  44:../CMSIS/Include/core_cmInstr.h ****   Access to dedicated instructions
+  45:../CMSIS/Include/core_cmInstr.h ****   @{
+  46:../CMSIS/Include/core_cmInstr.h **** */
+  47:../CMSIS/Include/core_cmInstr.h **** 
+  48:../CMSIS/Include/core_cmInstr.h **** #if   defined ( __CC_ARM ) /*------------------RealView Compiler -----------------*/
+  49:../CMSIS/Include/core_cmInstr.h **** /* ARM armcc specific functions */
+  50:../CMSIS/Include/core_cmInstr.h **** 
+  51:../CMSIS/Include/core_cmInstr.h **** #if (__ARMCC_VERSION < 400677)
+  52:../CMSIS/Include/core_cmInstr.h ****   #error "Please use ARM Compiler Toolchain V4.0.677 or later!"
+  53:../CMSIS/Include/core_cmInstr.h **** #endif
+  54:../CMSIS/Include/core_cmInstr.h **** 
+  55:../CMSIS/Include/core_cmInstr.h **** 
+  56:../CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+  57:../CMSIS/Include/core_cmInstr.h **** 
+  58:../CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+  59:../CMSIS/Include/core_cmInstr.h ****  */
+  60:../CMSIS/Include/core_cmInstr.h **** #define __NOP                             __nop
+  61:../CMSIS/Include/core_cmInstr.h **** 
+  62:../CMSIS/Include/core_cmInstr.h **** 
+  63:../CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+  64:../CMSIS/Include/core_cmInstr.h **** 
+  65:../CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+  66:../CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+  67:../CMSIS/Include/core_cmInstr.h ****  */
+  68:../CMSIS/Include/core_cmInstr.h **** #define __WFI                             __wfi
+  69:../CMSIS/Include/core_cmInstr.h **** 
+  70:../CMSIS/Include/core_cmInstr.h **** 
+  71:../CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Event
+  72:../CMSIS/Include/core_cmInstr.h **** 
+  73:../CMSIS/Include/core_cmInstr.h ****     Wait For Event is a hint instruction that permits the processor to enter
+  74:../CMSIS/Include/core_cmInstr.h ****     a low-power state until one of a number of events occurs.
+  75:../CMSIS/Include/core_cmInstr.h ****  */
+  76:../CMSIS/Include/core_cmInstr.h **** #define __WFE                             __wfe
+  77:../CMSIS/Include/core_cmInstr.h **** 
+  78:../CMSIS/Include/core_cmInstr.h **** 
+  79:../CMSIS/Include/core_cmInstr.h **** /** \brief  Send Event
+  80:../CMSIS/Include/core_cmInstr.h **** 
+  81:../CMSIS/Include/core_cmInstr.h ****     Send Event is a hint instruction. It causes an event to be signaled to the CPU.
+  82:../CMSIS/Include/core_cmInstr.h ****  */
+  83:../CMSIS/Include/core_cmInstr.h **** #define __SEV                             __sev
+  84:../CMSIS/Include/core_cmInstr.h **** 
+ARM GAS  /tmp/ccmuhVuw.s 			page 14
+
+
+  85:../CMSIS/Include/core_cmInstr.h **** 
+  86:../CMSIS/Include/core_cmInstr.h **** /** \brief  Instruction Synchronization Barrier
+  87:../CMSIS/Include/core_cmInstr.h **** 
+  88:../CMSIS/Include/core_cmInstr.h ****     Instruction Synchronization Barrier flushes the pipeline in the processor,
+  89:../CMSIS/Include/core_cmInstr.h ****     so that all instructions following the ISB are fetched from cache or
+  90:../CMSIS/Include/core_cmInstr.h ****     memory, after the instruction has been completed.
+  91:../CMSIS/Include/core_cmInstr.h ****  */
+  92:../CMSIS/Include/core_cmInstr.h **** #define __ISB()                           __isb(0xF)
+  93:../CMSIS/Include/core_cmInstr.h **** 
+  94:../CMSIS/Include/core_cmInstr.h **** 
+  95:../CMSIS/Include/core_cmInstr.h **** /** \brief  Data Synchronization Barrier
+  96:../CMSIS/Include/core_cmInstr.h **** 
+  97:../CMSIS/Include/core_cmInstr.h ****     This function acts as a special kind of Data Memory Barrier.
+  98:../CMSIS/Include/core_cmInstr.h ****     It completes when all explicit memory accesses before this instruction complete.
+  99:../CMSIS/Include/core_cmInstr.h ****  */
+ 100:../CMSIS/Include/core_cmInstr.h **** #define __DSB()                           __dsb(0xF)
+ 101:../CMSIS/Include/core_cmInstr.h **** 
+ 102:../CMSIS/Include/core_cmInstr.h **** 
+ 103:../CMSIS/Include/core_cmInstr.h **** /** \brief  Data Memory Barrier
+ 104:../CMSIS/Include/core_cmInstr.h **** 
+ 105:../CMSIS/Include/core_cmInstr.h ****     This function ensures the apparent order of the explicit memory operations before
+ 106:../CMSIS/Include/core_cmInstr.h ****     and after the instruction, without ensuring their completion.
+ 107:../CMSIS/Include/core_cmInstr.h ****  */
+ 108:../CMSIS/Include/core_cmInstr.h **** #define __DMB()                           __dmb(0xF)
+ 109:../CMSIS/Include/core_cmInstr.h **** 
+ 110:../CMSIS/Include/core_cmInstr.h **** 
+ 111:../CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (32 bit)
+ 112:../CMSIS/Include/core_cmInstr.h **** 
+ 113:../CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in integer value.
+ 114:../CMSIS/Include/core_cmInstr.h **** 
+ 115:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 116:../CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 117:../CMSIS/Include/core_cmInstr.h ****  */
+ 118:../CMSIS/Include/core_cmInstr.h **** #define __REV                             __rev
+ 119:../CMSIS/Include/core_cmInstr.h **** 
+ 120:../CMSIS/Include/core_cmInstr.h **** 
+ 121:../CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (16 bit)
+ 122:../CMSIS/Include/core_cmInstr.h **** 
+ 123:../CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in two unsigned short values.
+ 124:../CMSIS/Include/core_cmInstr.h **** 
+ 125:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 126:../CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 127:../CMSIS/Include/core_cmInstr.h ****  */
+ 128:../CMSIS/Include/core_cmInstr.h **** #ifndef __NO_EMBEDDED_ASM
+ 129:../CMSIS/Include/core_cmInstr.h **** __attribute__((section(".rev16_text"))) __STATIC_INLINE __ASM uint32_t __REV16(uint32_t value)
+ 130:../CMSIS/Include/core_cmInstr.h **** {
+ 131:../CMSIS/Include/core_cmInstr.h ****   rev16 r0, r0
+ 132:../CMSIS/Include/core_cmInstr.h ****   bx lr
+ 133:../CMSIS/Include/core_cmInstr.h **** }
+ 134:../CMSIS/Include/core_cmInstr.h **** #endif
+ 135:../CMSIS/Include/core_cmInstr.h **** 
+ 136:../CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order in signed short value
+ 137:../CMSIS/Include/core_cmInstr.h **** 
+ 138:../CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in a signed short value with sign extension to integer.
+ 139:../CMSIS/Include/core_cmInstr.h **** 
+ 140:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 141:../CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ARM GAS  /tmp/ccmuhVuw.s 			page 15
+
+
+ 142:../CMSIS/Include/core_cmInstr.h ****  */
+ 143:../CMSIS/Include/core_cmInstr.h **** #ifndef __NO_EMBEDDED_ASM
+ 144:../CMSIS/Include/core_cmInstr.h **** __attribute__((section(".revsh_text"))) __STATIC_INLINE __ASM int32_t __REVSH(int32_t value)
+ 145:../CMSIS/Include/core_cmInstr.h **** {
+ 146:../CMSIS/Include/core_cmInstr.h ****   revsh r0, r0
+ 147:../CMSIS/Include/core_cmInstr.h ****   bx lr
+ 148:../CMSIS/Include/core_cmInstr.h **** }
+ 149:../CMSIS/Include/core_cmInstr.h **** #endif
+ 150:../CMSIS/Include/core_cmInstr.h **** 
+ 151:../CMSIS/Include/core_cmInstr.h **** 
+ 152:../CMSIS/Include/core_cmInstr.h **** /** \brief  Rotate Right in unsigned value (32 bit)
+ 153:../CMSIS/Include/core_cmInstr.h **** 
+ 154:../CMSIS/Include/core_cmInstr.h ****     This function Rotate Right (immediate) provides the value of the contents of a register rotated
+ 155:../CMSIS/Include/core_cmInstr.h **** 
+ 156:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to rotate
+ 157:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Number of Bits to rotate
+ 158:../CMSIS/Include/core_cmInstr.h ****     \return               Rotated value
+ 159:../CMSIS/Include/core_cmInstr.h ****  */
+ 160:../CMSIS/Include/core_cmInstr.h **** #define __ROR                             __ror
+ 161:../CMSIS/Include/core_cmInstr.h **** 
+ 162:../CMSIS/Include/core_cmInstr.h **** 
+ 163:../CMSIS/Include/core_cmInstr.h **** /** \brief  Breakpoint
+ 164:../CMSIS/Include/core_cmInstr.h **** 
+ 165:../CMSIS/Include/core_cmInstr.h ****     This function causes the processor to enter Debug state.
+ 166:../CMSIS/Include/core_cmInstr.h ****     Debug tools can use this to investigate system state when the instruction at a particular addre
+ 167:../CMSIS/Include/core_cmInstr.h **** 
+ 168:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  is ignored by the processor.
+ 169:../CMSIS/Include/core_cmInstr.h ****                    If required, a debugger can use it to store additional information about the bre
+ 170:../CMSIS/Include/core_cmInstr.h ****  */
+ 171:../CMSIS/Include/core_cmInstr.h **** #define __BKPT(value)                       __breakpoint(value)
+ 172:../CMSIS/Include/core_cmInstr.h **** 
+ 173:../CMSIS/Include/core_cmInstr.h **** 
+ 174:../CMSIS/Include/core_cmInstr.h **** #if       (__CORTEX_M >= 0x03)
+ 175:../CMSIS/Include/core_cmInstr.h **** 
+ 176:../CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse bit order of value
+ 177:../CMSIS/Include/core_cmInstr.h **** 
+ 178:../CMSIS/Include/core_cmInstr.h ****     This function reverses the bit order of the given value.
+ 179:../CMSIS/Include/core_cmInstr.h **** 
+ 180:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 181:../CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 182:../CMSIS/Include/core_cmInstr.h ****  */
+ 183:../CMSIS/Include/core_cmInstr.h **** #define __RBIT                            __rbit
+ 184:../CMSIS/Include/core_cmInstr.h **** 
+ 185:../CMSIS/Include/core_cmInstr.h **** 
+ 186:../CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (8 bit)
+ 187:../CMSIS/Include/core_cmInstr.h **** 
+ 188:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 8 bit value.
+ 189:../CMSIS/Include/core_cmInstr.h **** 
+ 190:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 191:../CMSIS/Include/core_cmInstr.h ****     \return             value of type uint8_t at (*ptr)
+ 192:../CMSIS/Include/core_cmInstr.h ****  */
+ 193:../CMSIS/Include/core_cmInstr.h **** #define __LDREXB(ptr)                     ((uint8_t ) __ldrex(ptr))
+ 194:../CMSIS/Include/core_cmInstr.h **** 
+ 195:../CMSIS/Include/core_cmInstr.h **** 
+ 196:../CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (16 bit)
+ 197:../CMSIS/Include/core_cmInstr.h **** 
+ 198:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 16 bit values.
+ARM GAS  /tmp/ccmuhVuw.s 			page 16
+
+
+ 199:../CMSIS/Include/core_cmInstr.h **** 
+ 200:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 201:../CMSIS/Include/core_cmInstr.h ****     \return        value of type uint16_t at (*ptr)
+ 202:../CMSIS/Include/core_cmInstr.h ****  */
+ 203:../CMSIS/Include/core_cmInstr.h **** #define __LDREXH(ptr)                     ((uint16_t) __ldrex(ptr))
+ 204:../CMSIS/Include/core_cmInstr.h **** 
+ 205:../CMSIS/Include/core_cmInstr.h **** 
+ 206:../CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (32 bit)
+ 207:../CMSIS/Include/core_cmInstr.h **** 
+ 208:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 32 bit values.
+ 209:../CMSIS/Include/core_cmInstr.h **** 
+ 210:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 211:../CMSIS/Include/core_cmInstr.h ****     \return        value of type uint32_t at (*ptr)
+ 212:../CMSIS/Include/core_cmInstr.h ****  */
+ 213:../CMSIS/Include/core_cmInstr.h **** #define __LDREXW(ptr)                     ((uint32_t ) __ldrex(ptr))
+ 214:../CMSIS/Include/core_cmInstr.h **** 
+ 215:../CMSIS/Include/core_cmInstr.h **** 
+ 216:../CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (8 bit)
+ 217:../CMSIS/Include/core_cmInstr.h **** 
+ 218:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 8 bit values.
+ 219:../CMSIS/Include/core_cmInstr.h **** 
+ 220:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 221:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 222:../CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 223:../CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 224:../CMSIS/Include/core_cmInstr.h ****  */
+ 225:../CMSIS/Include/core_cmInstr.h **** #define __STREXB(value, ptr)              __strex(value, ptr)
+ 226:../CMSIS/Include/core_cmInstr.h **** 
+ 227:../CMSIS/Include/core_cmInstr.h **** 
+ 228:../CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (16 bit)
+ 229:../CMSIS/Include/core_cmInstr.h **** 
+ 230:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 16 bit values.
+ 231:../CMSIS/Include/core_cmInstr.h **** 
+ 232:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 233:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 234:../CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 235:../CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 236:../CMSIS/Include/core_cmInstr.h ****  */
+ 237:../CMSIS/Include/core_cmInstr.h **** #define __STREXH(value, ptr)              __strex(value, ptr)
+ 238:../CMSIS/Include/core_cmInstr.h **** 
+ 239:../CMSIS/Include/core_cmInstr.h **** 
+ 240:../CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (32 bit)
+ 241:../CMSIS/Include/core_cmInstr.h **** 
+ 242:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 32 bit values.
+ 243:../CMSIS/Include/core_cmInstr.h **** 
+ 244:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 245:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 246:../CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 247:../CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 248:../CMSIS/Include/core_cmInstr.h ****  */
+ 249:../CMSIS/Include/core_cmInstr.h **** #define __STREXW(value, ptr)              __strex(value, ptr)
+ 250:../CMSIS/Include/core_cmInstr.h **** 
+ 251:../CMSIS/Include/core_cmInstr.h **** 
+ 252:../CMSIS/Include/core_cmInstr.h **** /** \brief  Remove the exclusive lock
+ 253:../CMSIS/Include/core_cmInstr.h **** 
+ 254:../CMSIS/Include/core_cmInstr.h ****     This function removes the exclusive lock which is created by LDREX.
+ 255:../CMSIS/Include/core_cmInstr.h **** 
+ARM GAS  /tmp/ccmuhVuw.s 			page 17
+
+
+ 256:../CMSIS/Include/core_cmInstr.h ****  */
+ 257:../CMSIS/Include/core_cmInstr.h **** #define __CLREX                           __clrex
+ 258:../CMSIS/Include/core_cmInstr.h **** 
+ 259:../CMSIS/Include/core_cmInstr.h **** 
+ 260:../CMSIS/Include/core_cmInstr.h **** /** \brief  Signed Saturate
+ 261:../CMSIS/Include/core_cmInstr.h **** 
+ 262:../CMSIS/Include/core_cmInstr.h ****     This function saturates a signed value.
+ 263:../CMSIS/Include/core_cmInstr.h **** 
+ 264:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 265:../CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (1..32)
+ 266:../CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 267:../CMSIS/Include/core_cmInstr.h ****  */
+ 268:../CMSIS/Include/core_cmInstr.h **** #define __SSAT                            __ssat
+ 269:../CMSIS/Include/core_cmInstr.h **** 
+ 270:../CMSIS/Include/core_cmInstr.h **** 
+ 271:../CMSIS/Include/core_cmInstr.h **** /** \brief  Unsigned Saturate
+ 272:../CMSIS/Include/core_cmInstr.h **** 
+ 273:../CMSIS/Include/core_cmInstr.h ****     This function saturates an unsigned value.
+ 274:../CMSIS/Include/core_cmInstr.h **** 
+ 275:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 276:../CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (0..31)
+ 277:../CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 278:../CMSIS/Include/core_cmInstr.h ****  */
+ 279:../CMSIS/Include/core_cmInstr.h **** #define __USAT                            __usat
+ 280:../CMSIS/Include/core_cmInstr.h **** 
+ 281:../CMSIS/Include/core_cmInstr.h **** 
+ 282:../CMSIS/Include/core_cmInstr.h **** /** \brief  Count leading zeros
+ 283:../CMSIS/Include/core_cmInstr.h **** 
+ 284:../CMSIS/Include/core_cmInstr.h ****     This function counts the number of leading zeros of a data value.
+ 285:../CMSIS/Include/core_cmInstr.h **** 
+ 286:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to count the leading zeros
+ 287:../CMSIS/Include/core_cmInstr.h ****     \return             number of leading zeros in value
+ 288:../CMSIS/Include/core_cmInstr.h ****  */
+ 289:../CMSIS/Include/core_cmInstr.h **** #define __CLZ                             __clz
+ 290:../CMSIS/Include/core_cmInstr.h **** 
+ 291:../CMSIS/Include/core_cmInstr.h **** #endif /* (__CORTEX_M >= 0x03) */
+ 292:../CMSIS/Include/core_cmInstr.h **** 
+ 293:../CMSIS/Include/core_cmInstr.h **** 
+ 294:../CMSIS/Include/core_cmInstr.h **** 
+ 295:../CMSIS/Include/core_cmInstr.h **** #elif defined ( __ICCARM__ ) /*------------------ ICC Compiler -------------------*/
+ 296:../CMSIS/Include/core_cmInstr.h **** /* IAR iccarm specific functions */
+ 297:../CMSIS/Include/core_cmInstr.h **** 
+ 298:../CMSIS/Include/core_cmInstr.h **** #include <cmsis_iar.h>
+ 299:../CMSIS/Include/core_cmInstr.h **** 
+ 300:../CMSIS/Include/core_cmInstr.h **** 
+ 301:../CMSIS/Include/core_cmInstr.h **** #elif defined ( __TMS470__ ) /*---------------- TI CCS Compiler ------------------*/
+ 302:../CMSIS/Include/core_cmInstr.h **** /* TI CCS specific functions */
+ 303:../CMSIS/Include/core_cmInstr.h **** 
+ 304:../CMSIS/Include/core_cmInstr.h **** #include <cmsis_ccs.h>
+ 305:../CMSIS/Include/core_cmInstr.h **** 
+ 306:../CMSIS/Include/core_cmInstr.h **** 
+ 307:../CMSIS/Include/core_cmInstr.h **** #elif defined ( __GNUC__ ) /*------------------ GNU Compiler ---------------------*/
+ 308:../CMSIS/Include/core_cmInstr.h **** /* GNU gcc specific functions */
+ 309:../CMSIS/Include/core_cmInstr.h **** 
+ 310:../CMSIS/Include/core_cmInstr.h **** /* Define macros for porting to both thumb1 and thumb2.
+ 311:../CMSIS/Include/core_cmInstr.h ****  * For thumb1, use low register (r0-r7), specified by constrant "l"
+ 312:../CMSIS/Include/core_cmInstr.h ****  * Otherwise, use general registers, specified by constrant "r" */
+ARM GAS  /tmp/ccmuhVuw.s 			page 18
+
+
+ 313:../CMSIS/Include/core_cmInstr.h **** #if defined (__thumb__) && !defined (__thumb2__)
+ 314:../CMSIS/Include/core_cmInstr.h **** #define __CMSIS_GCC_OUT_REG(r) "=l" (r)
+ 315:../CMSIS/Include/core_cmInstr.h **** #define __CMSIS_GCC_USE_REG(r) "l" (r)
+ 316:../CMSIS/Include/core_cmInstr.h **** #else
+ 317:../CMSIS/Include/core_cmInstr.h **** #define __CMSIS_GCC_OUT_REG(r) "=r" (r)
+ 318:../CMSIS/Include/core_cmInstr.h **** #define __CMSIS_GCC_USE_REG(r) "r" (r)
+ 319:../CMSIS/Include/core_cmInstr.h **** #endif
+ 320:../CMSIS/Include/core_cmInstr.h **** 
+ 321:../CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+ 322:../CMSIS/Include/core_cmInstr.h **** 
+ 323:../CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+ 324:../CMSIS/Include/core_cmInstr.h ****  */
+ 325:../CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) __STATIC_INLINE void __NOP(void)
+ 326:../CMSIS/Include/core_cmInstr.h **** {
+ 327:../CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("nop");
+ 328:../CMSIS/Include/core_cmInstr.h **** }
+ 329:../CMSIS/Include/core_cmInstr.h **** 
+ 330:../CMSIS/Include/core_cmInstr.h **** 
+ 331:../CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+ 332:../CMSIS/Include/core_cmInstr.h **** 
+ 333:../CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+ 334:../CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+ 335:../CMSIS/Include/core_cmInstr.h ****  */
+ 336:../CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) __STATIC_INLINE void __WFI(void)
+ 337:../CMSIS/Include/core_cmInstr.h **** {
+ 338:../CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("wfi");
+ 284              		.loc 3 338 0
+ 285              	@ 338 "../CMSIS/Include/core_cmInstr.h" 1
+ 286 000c 30BF     		wfi
+ 287              	@ 0 "" 2
+ 288              		.thumb
+ 289              	.LBE6:
+ 290              	.LBE5:
+ 205:../emlib/inc/em_emu.h ****   __WFI();
+ 206:../emlib/inc/em_emu.h **** }
+ 291              		.loc 2 206 0
+ 292 000e 7047     		bx	lr
+ 293              	.L11:
+ 294              		.align	2
+ 295              	.L10:
+ 296 0010 00ED00E0 		.word	-536810240
+ 297              		.cfi_endproc
+ 298              	.LFE79:
+ 300              		.comm	g_DMA_ControlBlock,256,256
+ 301              		.comm	g_DMA_Callback,96,4
+ 302              		.comm	g_flgIRQ,1,1
+ 303              		.comm	g_EM1_ModuleMask,2,2
+ 304              		.section	.rodata.l_ExtIntCfg,"a",%progbits
+ 305              		.align	2
+ 308              	l_ExtIntCfg:
+ 309 0000 3800     		.short	56
+ 310 0002 0000     		.space	2
+ 311 0004 00000000 		.word	KeyHandler
+ 312 0008 0000     		.short	0
+ 313 000a 0000     		.space	2
+ 314 000c 00000000 		.word	0
+ 315              		.section	.rodata.l_KeyInit,"a",%progbits
+ARM GAS  /tmp/ccmuhVuw.s 			page 19
+
+
+ 316              		.align	2
+ 319              	l_KeyInit:
+ 320 0000 EE02     		.short	750
+ 321 0002 FA00     		.short	250
+ 322 0004 00000000 		.word	DisplayKeyHandler
+ 323              		.section	.rodata.l_LCD_Field,"a",%progbits
+ 324              		.align	2
+ 327              	l_LCD_Field:
+ 328 0000 00       		.byte	0
+ 329 0001 00       		.byte	0
+ 330 0002 10       		.byte	16
+ 331 0003 00       		.byte	0
+ 332 0004 01       		.byte	1
+ 333 0005 10       		.byte	16
+ 334 0006 00       		.byte	0
+ 335 0007 00       		.byte	0
+ 336 0008 10       		.byte	16
+ 337 0009 00       		.byte	0
+ 338 000a 01       		.byte	1
+ 339 000b 10       		.byte	16
+ 340 000c 00       		.byte	0
+ 341 000d 00       		.byte	0
+ 342 000e 10       		.byte	16
+ 343 000f 00       		.byte	0
+ 344 0010 01       		.byte	1
+ 345 0011 10       		.byte	16
+ 346 0012 05       		.byte	5
+ 347 0013 01       		.byte	1
+ 348 0014 0B       		.byte	11
+ 349 0015 00       		.byte	0
+ 350 0016 00       		.byte	0
+ 351 0017 10       		.byte	16
+ 352              		.section	.rodata
+ 353              		.align	2
+ 354              	.LC0:
+ 355 0000 3E3E3E20 		.ascii	">>> HRDevice <<<\000"
+ 355      48524465 
+ 355      76696365 
+ 355      203C3C3C 
+ 355      00
+ 356 0011 000000   		.align	2
+ 357              	.LC1:
+ 358 0014 53757070 		.ascii	"Supply Battery\000"
+ 358      6C792042 
+ 358      61747465 
+ 358      727900
+ 359 0023 00       		.align	2
+ 360              	.LC2:
+ 361 0024 4D616E75 		.ascii	"Manufacturer\000"
+ 361      66616374 
+ 361      75726572 
+ 361      00
+ 362 0031 000000   		.align	2
+ 363              	.LC3:
+ 364 0034 44657669 		.ascii	"Device Name\000"
+ 364      6365204E 
+ 364      616D6500 
+ARM GAS  /tmp/ccmuhVuw.s 			page 20
+
+
+ 365              		.align	2
+ 366              	.LC4:
+ 367 0040 44657669 		.ascii	"Device Type\000"
+ 367      63652054 
+ 367      79706500 
+ 368              		.align	2
+ 369              	.LC5:
+ 370 004c 53657269 		.ascii	"Serial Number\000"
+ 370      616C204E 
+ 370      756D6265 
+ 370      7200
+ 371 005a 0000     		.align	2
+ 372              	.LC6:
+ 373 005c 50726F64 		.ascii	"Production Date\000"
+ 373      75637469 
+ 373      6F6E2044 
+ 373      61746500 
+ 374              		.align	2
+ 375              	.LC7:
+ 376 006c 4D616E75 		.ascii	"Manufact. Data\000"
+ 376      66616374 
+ 376      2E204461 
+ 376      746100
+ 377 007b 00       		.align	2
+ 378              	.LC8:
+ 379 007c 4D616E75 		.ascii	"Manufact. Access\000"
+ 379      66616374 
+ 379      2E204163 
+ 379      63657373 
+ 379      00
+ 380 008d 000000   		.align	2
+ 381              	.LC9:
+ 382 0090 53706563 		.ascii	"Specificat. Info\000"
+ 382      69666963 
+ 382      61742E20 
+ 382      496E666F 
+ 382      00
+ 383 00a1 000000   		.align	2
+ 384              	.LC10:
+ 385 00a4 42617474 		.ascii	"Battery Mode\000"
+ 385      65727920 
+ 385      4D6F6465 
+ 385      00
+ 386 00b1 000000   		.align	2
+ 387              	.LC11:
+ 388 00b4 42617474 		.ascii	"Battery Status\000"
+ 388      65727920 
+ 388      53746174 
+ 388      757300
+ 389 00c3 00       		.align	2
+ 390              	.LC12:
+ 391 00c4 436F7265 		.ascii	"Core Temperature\000"
+ 391      2054656D 
+ 391      70657261 
+ 391      74757265 
+ 391      00
+ 392 00d5 000000   		.align	2
+ARM GAS  /tmp/ccmuhVuw.s 			page 21
+
+
+ 393              	.LC13:
+ 394 00d8 41637475 		.ascii	"Actual Voltage\000"
+ 394      616C2056 
+ 394      6F6C7461 
+ 394      676500
+ 395 00e7 00       		.align	2
+ 396              	.LC14:
+ 397 00e8 41637475 		.ascii	"Actual Current\000"
+ 397      616C2043 
+ 397      75727265 
+ 397      6E7400
+ 398 00f7 00       		.align	2
+ 399              	.LC15:
+ 400 00f8 41766572 		.ascii	"Average Current\000"
+ 400      61676520 
+ 400      43757272 
+ 400      656E7400 
+ 401              		.align	2
+ 402              	.LC16:
+ 403 0108 52656C2E 		.ascii	"Rel.Charge State\000"
+ 403      43686172 
+ 403      67652053 
+ 403      74617465 
+ 403      00
+ 404 0119 000000   		.align	2
+ 405              	.LC17:
+ 406 011c 4162732E 		.ascii	"Abs.Charge State\000"
+ 406      43686172 
+ 406      67652053 
+ 406      74617465 
+ 406      00
+ 407 012d 000000   		.align	2
+ 408              	.LC18:
+ 409 0130 52656D61 		.ascii	"Remain. Capacity\000"
+ 409      696E2E20 
+ 409      43617061 
+ 409      63697479 
+ 409      00
+ 410 0141 000000   		.align	2
+ 411              	.LC19:
+ 412 0144 52656D61 		.ascii	"Remain.Cap.Alarm\000"
+ 412      696E2E43 
+ 412      61702E41 
+ 412      6C61726D 
+ 412      00
+ 413 0155 000000   		.align	2
+ 414              	.LC20:
+ 415 0158 46756C6C 		.ascii	"Full Charge Cap.\000"
+ 415      20436861 
+ 415      72676520 
+ 415      4361702E 
+ 415      00
+ 416 0169 000000   		.align	2
+ 417              	.LC21:
+ 418 016c 52756E74 		.ascii	"Runtime to Empty\000"
+ 418      696D6520 
+ 418      746F2045 
+ARM GAS  /tmp/ccmuhVuw.s 			page 22
+
+
+ 418      6D707479 
+ 418      00
+ 419 017d 000000   		.align	2
+ 420              	.LC22:
+ 421 0180 52656D61 		.ascii	"Remain.TimeAlarm\000"
+ 421      696E2E54 
+ 421      696D6541 
+ 421      6C61726D 
+ 421      00
+ 422 0191 000000   		.align	2
+ 423              	.LC23:
+ 424 0194 41767254 		.ascii	"AvrTime to Empty\000"
+ 424      696D6520 
+ 424      746F2045 
+ 424      6D707479 
+ 424      00
+ 425 01a5 000000   		.align	2
+ 426              	.LC24:
+ 427 01a8 4176722E 		.ascii	"Avr.Time to Full\000"
+ 427      54696D65 
+ 427      20746F20 
+ 427      46756C6C 
+ 427      00
+ 428 01b9 000000   		.align	2
+ 429              	.LC25:
+ 430 01bc 43686172 		.ascii	"Charging Current\000"
+ 430      67696E67 
+ 430      20437572 
+ 430      72656E74 
+ 430      00
+ 431 01cd 000000   		.align	2
+ 432              	.LC26:
+ 433 01d0 43686172 		.ascii	"Charging Voltage\000"
+ 433      67696E67 
+ 433      20566F6C 
+ 433      74616765 
+ 433      00
+ 434 01e1 000000   		.align	2
+ 435              	.LC27:
+ 436 01e4 43686172 		.ascii	"Charge Cycle Cnt\000"
+ 436      67652043 
+ 436      79636C65 
+ 436      20436E74 
+ 436      00
+ 437 01f5 000000   		.align	2
+ 438              	.LC28:
+ 439 01f8 44657369 		.ascii	"Design Capacity\000"
+ 439      676E2043 
+ 439      61706163 
+ 439      69747900 
+ 440              		.align	2
+ 441              	.LC29:
+ 442 0208 44657369 		.ascii	"Design Voltage\000"
+ 442      676E2056 
+ 442      6F6C7461 
+ 442      676500
+ 443 0217 00       		.align	2
+ARM GAS  /tmp/ccmuhVuw.s 			page 23
+
+
+ 444              	.LC30:
+ 445 0218 5368756E 		.ascii	"Shunt Resistance\000"
+ 445      74205265 
+ 445      73697374 
+ 445      616E6365 
+ 445      00
+ 446 0229 000000   		.align	2
+ 447              	.LC31:
+ 448 022c 43656C6C 		.ascii	"Cells in series\000"
+ 448      7320696E 
+ 448      20736572 
+ 448      69657300 
+ 449              		.align	2
+ 450              	.LC32:
+ 451 023c 4F766572 		.ascii	"Overcurr. React.\000"
+ 451      63757272 
+ 451      2E205265 
+ 451      6163742E 
+ 451      00
+ 452 024d 000000   		.align	2
+ 453              	.LC33:
+ 454 0250 4F766572 		.ascii	"Overcurr. Charge\000"
+ 454      63757272 
+ 454      2E204368 
+ 454      61726765 
+ 454      00
+ 455 0261 000000   		.align	2
+ 456              	.LC34:
+ 457 0264 4F766572 		.ascii	"Overcurr.Dischar\000"
+ 457      63757272 
+ 457      2E446973 
+ 457      63686172 
+ 457      00
+ 458 0275 000000   		.align	2
+ 459              	.LC35:
+ 460 0278 48696768 		.ascii	"Highcurr. React.\000"
+ 460      63757272 
+ 460      2E205265 
+ 460      6163742E 
+ 460      00
+ 461 0289 000000   		.align	2
+ 462              	.LC36:
+ 463 028c 48696768 		.ascii	"Highcurr. Charge\000"
+ 463      63757272 
+ 463      2E204368 
+ 463      61726765 
+ 463      00
+ 464 029d 000000   		.align	2
+ 465              	.LC37:
+ 466 02a0 48696768 		.ascii	"Highcurr.Dischar\000"
+ 466      63757272 
+ 466      2E446973 
+ 466      63686172 
+ 466      00
+ 467 02b1 000000   		.align	2
+ 468              	.LC38:
+ 469 02b4 43656C6C 		.ascii	"Cell #1 Voltage\000"
+ARM GAS  /tmp/ccmuhVuw.s 			page 24
+
+
+ 469      20233120 
+ 469      566F6C74 
+ 469      61676500 
+ 470              		.align	2
+ 471              	.LC39:
+ 472 02c4 43656C6C 		.ascii	"Cell #2 Voltage\000"
+ 472      20233220 
+ 472      566F6C74 
+ 472      61676500 
+ 473              		.align	2
+ 474              	.LC40:
+ 475 02d4 43656C6C 		.ascii	"Cell #3 Voltage\000"
+ 475      20233320 
+ 475      566F6C74 
+ 475      61676500 
+ 476              		.align	2
+ 477              	.LC41:
+ 478 02e4 43656C6C 		.ascii	"Cell #4 Voltage\000"
+ 478      20233420 
+ 478      566F6C74 
+ 478      61676500 
+ 479              		.align	2
+ 480              	.LC42:
+ 481 02f4 43656C6C 		.ascii	"Cell Min Voltage\000"
+ 481      204D696E 
+ 481      20566F6C 
+ 481      74616765 
+ 481      00
+ 482 0305 000000   		.align	2
+ 483              	.LC43:
+ 484 0308 43656C6C 		.ascii	"Cell Max Voltage\000"
+ 484      204D6178 
+ 484      20566F6C 
+ 484      74616765 
+ 484      00
+ 485 0319 000000   		.align	2
+ 486              	.LC44:
+ 487 031c 43656C6C 		.ascii	"Cell PwrOff Volt\000"
+ 487      20507772 
+ 487      4F666620 
+ 487      566F6C74 
+ 487      00
+ 488              		.section	.rodata.l_Item,"a",%progbits
+ 489              		.align	2
+ 492              	l_Item:
+ 493 0000 00000000 		.word	.LC0
+ 494 0004 FFFF     		.short	-1
+ 495 0006 00       		.byte	0
+ 496 0007 00       		.space	1
+ 497 0008 14000000 		.word	.LC1
+ 498 000c FFFF     		.short	-1
+ 499 000e 01       		.byte	1
+ 500 000f 00       		.space	1
+ 501 0010 24000000 		.word	.LC2
+ 502 0014 2010     		.short	4128
+ 503 0016 02       		.byte	2
+ 504 0017 00       		.space	1
+ARM GAS  /tmp/ccmuhVuw.s 			page 25
+
+
+ 505 0018 34000000 		.word	.LC3
+ 506 001c 2110     		.short	4129
+ 507 001e 02       		.byte	2
+ 508 001f 00       		.space	1
+ 509 0020 40000000 		.word	.LC4
+ 510 0024 2210     		.short	4130
+ 511 0026 02       		.byte	2
+ 512 0027 00       		.space	1
+ 513 0028 4C000000 		.word	.LC5
+ 514 002c 1C00     		.short	28
+ 515 002e 05       		.byte	5
+ 516 002f 00       		.space	1
+ 517 0030 5C000000 		.word	.LC6
+ 518 0034 1B00     		.short	27
+ 519 0036 0E       		.byte	14
+ 520 0037 00       		.space	1
+ 521 0038 6C000000 		.word	.LC7
+ 522 003c 2310     		.short	4131
+ 523 003e 02       		.byte	2
+ 524 003f 00       		.space	1
+ 525 0040 7C000000 		.word	.LC8
+ 526 0044 0000     		.short	0
+ 527 0046 03       		.byte	3
+ 528 0047 00       		.space	1
+ 529 0048 90000000 		.word	.LC9
+ 530 004c 1A00     		.short	26
+ 531 004e 03       		.byte	3
+ 532 004f 00       		.space	1
+ 533 0050 A4000000 		.word	.LC10
+ 534 0054 0300     		.short	3
+ 535 0056 03       		.byte	3
+ 536 0057 00       		.space	1
+ 537 0058 B4000000 		.word	.LC11
+ 538 005c 1600     		.short	22
+ 539 005e 03       		.byte	3
+ 540 005f 00       		.space	1
+ 541 0060 C4000000 		.word	.LC12
+ 542 0064 0800     		.short	8
+ 543 0066 0F       		.byte	15
+ 544 0067 00       		.space	1
+ 545 0068 D8000000 		.word	.LC13
+ 546 006c 0900     		.short	9
+ 547 006e 0A       		.byte	10
+ 548 006f 00       		.space	1
+ 549 0070 E8000000 		.word	.LC14
+ 550 0074 0A00     		.short	10
+ 551 0076 0B       		.byte	11
+ 552 0077 00       		.space	1
+ 553 0078 F8000000 		.word	.LC15
+ 554 007c 0B00     		.short	11
+ 555 007e 0B       		.byte	11
+ 556 007f 00       		.space	1
+ 557 0080 08010000 		.word	.LC16
+ 558 0084 0D00     		.short	13
+ 559 0086 06       		.byte	6
+ 560 0087 00       		.space	1
+ 561 0088 1C010000 		.word	.LC17
+ARM GAS  /tmp/ccmuhVuw.s 			page 26
+
+
+ 562 008c 0E00     		.short	14
+ 563 008e 06       		.byte	6
+ 564 008f 00       		.space	1
+ 565 0090 30010000 		.word	.LC18
+ 566 0094 0F00     		.short	15
+ 567 0096 0C       		.byte	12
+ 568 0097 00       		.space	1
+ 569 0098 44010000 		.word	.LC19
+ 570 009c 0100     		.short	1
+ 571 009e 0C       		.byte	12
+ 572 009f 00       		.space	1
+ 573 00a0 58010000 		.word	.LC20
+ 574 00a4 1000     		.short	16
+ 575 00a6 0C       		.byte	12
+ 576 00a7 00       		.space	1
+ 577 00a8 6C010000 		.word	.LC21
+ 578 00ac 1100     		.short	17
+ 579 00ae 07       		.byte	7
+ 580 00af 00       		.space	1
+ 581 00b0 80010000 		.word	.LC22
+ 582 00b4 0200     		.short	2
+ 583 00b6 07       		.byte	7
+ 584 00b7 00       		.space	1
+ 585 00b8 94010000 		.word	.LC23
+ 586 00bc 1200     		.short	18
+ 587 00be 07       		.byte	7
+ 588 00bf 00       		.space	1
+ 589 00c0 A8010000 		.word	.LC24
+ 590 00c4 1300     		.short	19
+ 591 00c6 07       		.byte	7
+ 592 00c7 00       		.space	1
+ 593 00c8 BC010000 		.word	.LC25
+ 594 00cc 1400     		.short	20
+ 595 00ce 0B       		.byte	11
+ 596 00cf 00       		.space	1
+ 597 00d0 D0010000 		.word	.LC26
+ 598 00d4 1500     		.short	21
+ 599 00d6 0A       		.byte	10
+ 600 00d7 00       		.space	1
+ 601 00d8 E4010000 		.word	.LC27
+ 602 00dc 1700     		.short	23
+ 603 00de 04       		.byte	4
+ 604 00df 00       		.space	1
+ 605 00e0 F8010000 		.word	.LC28
+ 606 00e4 1800     		.short	24
+ 607 00e6 0C       		.byte	12
+ 608 00e7 00       		.space	1
+ 609 00e8 08020000 		.word	.LC29
+ 610 00ec 1900     		.short	25
+ 611 00ee 0A       		.byte	10
+ 612 00ef 00       		.space	1
+ 613 00f0 18020000 		.word	.LC30
+ 614 00f4 2A00     		.short	42
+ 615 00f6 0D       		.byte	13
+ 616 00f7 00       		.space	1
+ 617 00f8 2C020000 		.word	.LC31
+ 618 00fc 3C00     		.short	60
+ARM GAS  /tmp/ccmuhVuw.s 			page 27
+
+
+ 619 00fe 04       		.byte	4
+ 620 00ff 00       		.space	1
+ 621 0100 3C020000 		.word	.LC32
+ 622 0104 3D00     		.short	61
+ 623 0106 08       		.byte	8
+ 624 0107 00       		.space	1
+ 625 0108 50020000 		.word	.LC33
+ 626 010c 3E00     		.short	62
+ 627 010e 0B       		.byte	11
+ 628 010f 00       		.space	1
+ 629 0110 64020000 		.word	.LC34
+ 630 0114 3F00     		.short	63
+ 631 0116 0B       		.byte	11
+ 632 0117 00       		.space	1
+ 633 0118 78020000 		.word	.LC35
+ 634 011c 4000     		.short	64
+ 635 011e 09       		.byte	9
+ 636 011f 00       		.space	1
+ 637 0120 8C020000 		.word	.LC36
+ 638 0124 4100     		.short	65
+ 639 0126 0B       		.byte	11
+ 640 0127 00       		.space	1
+ 641 0128 A0020000 		.word	.LC37
+ 642 012c 4200     		.short	66
+ 643 012e 0B       		.byte	11
+ 644 012f 00       		.space	1
+ 645 0130 B4020000 		.word	.LC38
+ 646 0134 4700     		.short	71
+ 647 0136 0A       		.byte	10
+ 648 0137 00       		.space	1
+ 649 0138 C4020000 		.word	.LC39
+ 650 013c 4600     		.short	70
+ 651 013e 0A       		.byte	10
+ 652 013f 00       		.space	1
+ 653 0140 D4020000 		.word	.LC40
+ 654 0144 4500     		.short	69
+ 655 0146 0A       		.byte	10
+ 656 0147 00       		.space	1
+ 657 0148 E4020000 		.word	.LC41
+ 658 014c 4400     		.short	68
+ 659 014e 0A       		.byte	10
+ 660 014f 00       		.space	1
+ 661 0150 F4020000 		.word	.LC42
+ 662 0154 5400     		.short	84
+ 663 0156 0A       		.byte	10
+ 664 0157 00       		.space	1
+ 665 0158 08030000 		.word	.LC43
+ 666 015c 5500     		.short	85
+ 667 015e 0A       		.byte	10
+ 668 015f 00       		.space	1
+ 669 0160 1C030000 		.word	.LC44
+ 670 0164 5600     		.short	86
+ 671 0166 0A       		.byte	10
+ 672 0167 00       		.space	1
+ 673              		.section	.rodata
+ 674 032d 000000   		.align	2
+ 675              	.LC45:
+ARM GAS  /tmp/ccmuhVuw.s 			page 28
+
+
+ 676 0330 0A2A2A2A 		.ascii	"\012***** HRDevice V\000"
+ 676      2A2A2048 
+ 676      52446576 
+ 676      69636520 
+ 676      5600
+ 677 0342 0000     		.align	2
+ 678              	.LC46:
+ 679 0344 2000     		.ascii	" \000"
+ 680 0346 0000     		.align	2
+ 681              	.LC47:
+ 682 0348 202A2A2A 		.ascii	" *****\012\012\000"
+ 682      2A2A0A0A 
+ 682      00
+ 683 0351 000000   		.align	2
+ 684              	.LC48:
+ 685 0354 56257320 		.ascii	"V%s %s\000"
+ 685      257300
+ 686 035b 00       		.section	.text.main,"ax",%progbits
+ 687              		.align	2
+ 688              		.global	main
+ 689              		.thumb
+ 690              		.thumb_func
+ 692              	main:
+ 693              	.LFB113:
+ 694              		.file 4 "../main.c"
+   1:../main.c     **** /***************************************************************************//**
+   2:../main.c     ****  * @file
+   3:../main.c     ****  * @brief	Akku LCD
+   4:../main.c     ****  * @author	Ralf Gerhauser
+   5:../main.c     ****  * @version	2016-11-22
+   6:../main.c     ****  *
+   7:../main.c     ****  * This application consists of the following modules:
+   8:../main.c     ****  * - ExtInt.c - External interrupt handler.
+   9:../main.c     ****  * - Keys.c - Key interrupt handling and translation.
+  10:../main.c     ****  * - AlarmClock.c - Alarm clock and timers facility.
+  11:../main.c     ****  * - clock.c - An implementation of the POSIX time() function.
+  12:../main.c     ****  * - LCD_DOGM162.c - Driver for the DOGM162 LC-Display.
+  13:../main.c     ****  * - LEUART.c - Driver for the Low-Energy UART.
+  14:../main.c     ****  * - Display.c - Display manager for LCD.
+  15:../main.c     ****  * - BatteryMon.c - Battery monitor, allows to read the state of the
+  16:../main.c     ****  *   battery via the SMBus.
+  17:../main.c     ****  *
+  18:../main.c     ****  * Parts of the code are based on the example code of AN0006 "tickless calender"
+  19:../main.c     ****  * from Energy Micro AS.
+  20:../main.c     ****  *
+  21:../main.c     ****  ***************************************************************************//**
+  22:../main.c     ****  *
+  23:../main.c     ****  * Parts are Copyright 2013 Energy Micro AS, http://www.energymicro.com
+  24:../main.c     ****  *
+  25:../main.c     ****  *******************************************************************************
+  26:../main.c     ****  *
+  27:../main.c     ****  * Permission is granted to anyone to use this software for any purpose,
+  28:../main.c     ****  * including commercial applications, and to alter it and redistribute it
+  29:../main.c     ****  * freely, subject to the following restrictions:
+  30:../main.c     ****  *
+  31:../main.c     ****  * 1. The origin of this software must not be misrepresented; you must not
+  32:../main.c     ****  *    claim that you wrote the original software.
+ARM GAS  /tmp/ccmuhVuw.s 			page 29
+
+
+  33:../main.c     ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  34:../main.c     ****  *    misrepresented as being the original software.
+  35:../main.c     ****  * 3. This notice may not be removed or altered from any source distribution.
+  36:../main.c     ****  * 4. The source and compiled code may only be used on Energy Micro "EFM32"
+  37:../main.c     ****  *    microcontrollers and "EFR4" radios.
+  38:../main.c     ****  *
+  39:../main.c     ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  40:../main.c     ****  * obligation to support this Software. Energy Micro AS is providing the
+  41:../main.c     ****  * Software "AS IS", with no express or implied warranties of any kind,
+  42:../main.c     ****  * including, but not limited to, any implied warranties of merchantability
+  43:../main.c     ****  * or fitness for any particular purpose or warranties against infringement
+  44:../main.c     ****  * of any proprietary rights of a third party.
+  45:../main.c     ****  *
+  46:../main.c     ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  47:../main.c     ****  * special damages, or any other relief, or for any claim by any third party,
+  48:../main.c     ****  * arising from your use of this Software.
+  49:../main.c     ****  *
+  50:../main.c     ****  ****************************************************************************//*
+  51:../main.c     **** Revision History:
+  52:../main.c     **** 2016-11-22,rage	Added DMA Channel Assignment for LEUART support.
+  53:../main.c     **** 		Changed l_ExtIntCfg for new version of ExtInt module.
+  54:../main.c     **** 		Initialize LEUART.
+  55:../main.c     **** 		Use separate format types for Overcurrent and Highcurrent
+  56:../main.c     **** 		Reaction Times.
+  57:../main.c     **** 2015-10-12,rage	Removed LED initialization, updated documentation.
+  58:../main.c     **** 2015-06-22,rage	Initial version.
+  59:../main.c     **** */
+  60:../main.c     **** 
+  61:../main.c     **** /*!
+  62:../main.c     ****  * @mainpage
+  63:../main.c     ****  * <b>Description</b><br>
+  64:../main.c     ****  * Akku_LCD is an application to display actual values of a battery pack.
+  65:../main.c     ****  * For that purpose the Akku_LCD board must be connected to the battery
+  66:../main.c     ****  * controller via its SMBus.
+  67:../main.c     ****  *
+  68:../main.c     ****  * The system consists of the following components:
+  69:../main.c     ****  *
+  70:../main.c     ****  * <b>Microcontroller</b><br>
+  71:../main.c     ****  * The heart of the board is an EFM32G230 microcontroller.  It provides two
+  72:../main.c     ****  * different clock domains: All low-energy peripheral is clocked via a
+  73:../main.c     ****  * 32.768kHz external XTAL.  The MCU and other high performance peripheral
+  74:../main.c     ****  * uses a high-frequency clock.  The board can be configured to use the
+  75:../main.c     ****  * internal RC-oscillator, or an external 32MHz XTAL for that purpose,
+  76:../main.c     ****  * see define @ref USE_EXT_32MHZ_CLOCK.
+  77:../main.c     ****  *
+  78:../main.c     ****  * <b>Keys (Push Buttons)</b><br>
+  79:../main.c     ****  * There exist 3 push buttons on the board (description of the keys is left to
+  80:../main.c     ****  * right).  When asserted, the following action will be taken:
+  81:../main.c     ****  * - SW1 is the POWER button.  It is used to switch on the device and
+  82:../main.c     ****  *   additionally selects the first item, i.e. the firmware version and date.
+  83:../main.c     ****  * - SW3 is the NEXT key.  It leads to the next menu item.
+  84:../main.c     ****  *   This key has a auto-repeat functionality when kept asserted.
+  85:../main.c     ****  * - SW2 is the PREV key.  It returns to the previous menu item.
+  86:../main.c     ****  *   This key has a auto-repeat functionality when kept asserted.
+  87:../main.c     ****  *
+  88:../main.c     ****  * The duration how long the respective information is displayed before
+  89:../main.c     ****  * switching the LCD off again, can be adjusted by the define @ref
+ARM GAS  /tmp/ccmuhVuw.s 			page 30
+
+
+  90:../main.c     ****  * LCD_POWER_OFF_TIMEOUT.
+  91:../main.c     ****  *
+  92:../main.c     ****  * Another timeout define is the @ref POWER_OFF_TIMEOUT.  It specifies the
+  93:../main.c     ****  * number of seconds after which the whole device is powered off if no
+  94:../main.c     ****  * key assertion is detected.  @ref POWER_OFF_TIMEOUT should be greater
+  95:../main.c     ****  * or eqal @ref LCD_POWER_OFF_TIMEOUT.
+  96:../main.c     ****  *
+  97:../main.c     ****  * <b>LC-Display</b><br>
+  98:../main.c     ****  * The display provides 2 lines á 16 characters.  It is connected to the
+  99:../main.c     ****  * EFM32 microcontroller via a parallel bus interface.  To save power, the
+ 100:../main.c     ****  * whole display usually is switched off and only activated by asserting a
+ 101:../main.c     ****  * push button.  After a power-up or reset, the LCD displays the firmware
+ 102:../main.c     ****  * version until a push button is asserted.
+ 103:../main.c     ****  *
+ 104:../main.c     ****  * The visual contrast of the LCD can be adjusted via @ref l_Contrast.
+ 105:../main.c     ****  *
+ 106:../main.c     ****  * <b>Battery Monitor</b><br>
+ 107:../main.c     ****  * The battery pack has its own controller.  It is connected to the EFM32
+ 108:../main.c     ****  * microcontroller via I2C-bus.  The battery monitor routines  allow to request
+ 109:../main.c     ****  * status information from the battery pack.  This module additionally provides
+ 110:../main.c     ****  * function ReadVdd() to read the voltage of the local supply battery.
+ 111:../main.c     ****  *
+ 112:../main.c     ****  * <b>Firmware</b><br>
+ 113:../main.c     ****  * The firmware consists of an initialization part and a main loop, also called
+ 114:../main.c     ****  * service execution loop.  The initialization part sets up all modules, enables
+ 115:../main.c     ****  * devices and interrupts.  The service execution loop handles all tasks that
+ 116:../main.c     ****  * must not be executed in interrupt context.
+ 117:../main.c     ****  *
+ 118:../main.c     ****  * After power-up or reset the following actions are performed:
+ 119:../main.c     ****  * -# Basic initialization of MCU and clocks
+ 120:../main.c     ****  * -# The Hold-Power pin is activated
+ 121:../main.c     ****  * -# Further hardware initialization (Keys, Interrupts, Alarm Clock)
+ 122:../main.c     ****  * -# The LC-Display is activated and the firmware version is shown
+ 123:../main.c     ****  * -# The Battery Monitor is initialized
+ 124:../main.c     ****  *
+ 125:../main.c     ****  * The program then enters the Service Execution Loop which takes care of:
+ 126:../main.c     ****  * - Power managemnet for the LC-Display
+ 127:../main.c     ****  * - Battery monitoring
+ 128:../main.c     ****  * - Entering the right energy mode
+ 129:../main.c     ****  */
+ 130:../main.c     **** /*=============================== Header Files ===============================*/
+ 131:../main.c     **** 
+ 132:../main.c     **** #include <stdio.h>
+ 133:../main.c     **** #include "em_device.h"
+ 134:../main.c     **** #include "em_chip.h"
+ 135:../main.c     **** #include "em_cmu.h"
+ 136:../main.c     **** #include "em_emu.h"
+ 137:../main.c     **** #include "em_dma.h"
+ 138:../main.c     **** #include "config.h"		// include project configuration parameters
+ 139:../main.c     **** #include "ExtInt.h"
+ 140:../main.c     **** #include "Keys.h"
+ 141:../main.c     **** #include "AlarmClock.h"
+ 142:../main.c     **** #include "Display.h"
+ 143:../main.c     **** #include "LCD_DOGM162.h"
+ 144:../main.c     **** #include "LEUART.h"
+ 145:../main.c     **** 
+ 146:../main.c     **** /*================================ Global Data ===============================*/
+ARM GAS  /tmp/ccmuhVuw.s 			page 31
+
+
+ 147:../main.c     **** 
+ 148:../main.c     **** extern char const prjVersion[];
+ 149:../main.c     **** extern char const prjDate[];
+ 150:../main.c     **** extern char const prjTime[];
+ 151:../main.c     **** 
+ 152:../main.c     **** 
+ 153:../main.c     **** /*! @brief Global DMA Control Block.
+ 154:../main.c     ****  *
+ 155:../main.c     ****  * It contains the configuration for all 8 DMA channels which may be used by
+ 156:../main.c     ****  * various peripheral devices, e.g. ADC, DAC, USART, LEUART, I2C, and others.
+ 157:../main.c     ****  * The entries of this array will be set by the initialization routines of the
+ 158:../main.c     ****  * driver, which was assigned to the respective channel.  Unused entries remain
+ 159:../main.c     ****  * zero.  There is a total of 16 entries in the array.  The first 8 are used
+ 160:../main.c     ****  * for the primary DMA structures, the second 8 for alternate DMA structures
+ 161:../main.c     ****  * as used for DMA scatter-gather mode, where one buffer is still available,
+ 162:../main.c     ****  * while the other can be re-configured.  This application uses only the first
+ 163:../main.c     ****  * 8 entries.
+ 164:../main.c     ****  *
+ 165:../main.c     ****  * @see  DMA Channel Assignment
+ 166:../main.c     ****  *
+ 167:../main.c     ****  * @note This array must be aligned to 256!
+ 168:../main.c     ****  */
+ 169:../main.c     **** #if defined (__ICCARM__)
+ 170:../main.c     ****     #pragma data_alignment=256
+ 171:../main.c     ****     DMA_DESCRIPTOR_TypeDef g_DMA_ControlBlock[DMA_CHAN_COUNT * 2];
+ 172:../main.c     **** #elif defined (__CC_ARM)
+ 173:../main.c     ****     DMA_DESCRIPTOR_TypeDef g_DMA_ControlBlock[DMA_CHAN_COUNT * 2] __attribute__ ((aligned(256)));
+ 174:../main.c     **** #elif defined (__GNUC__)
+ 175:../main.c     ****     DMA_DESCRIPTOR_TypeDef g_DMA_ControlBlock[DMA_CHAN_COUNT * 2] __attribute__ ((aligned(256)));
+ 176:../main.c     **** #else
+ 177:../main.c     ****     #error Undefined toolkit, need to define alignment
+ 178:../main.c     **** #endif
+ 179:../main.c     **** 
+ 180:../main.c     **** 
+ 181:../main.c     **** /*! @brief Global DMA Callback Structure.
+ 182:../main.c     ****  *
+ 183:../main.c     ****  * This array contains the addresses of the DMA callback functions, which are
+ 184:../main.c     ****  * executed for a dedicated DMA channel at the end of a DMA transfer.
+ 185:../main.c     ****  * The entries of this array will be set by the initialization routines of the
+ 186:../main.c     ****  * driver, which was assigned to the respective channel.  Unused entries remain
+ 187:../main.c     ****  * zero.
+ 188:../main.c     ****  */
+ 189:../main.c     **** DMA_CB_TypeDef g_DMA_Callback[DMA_CHAN_COUNT];
+ 190:../main.c     **** 
+ 191:../main.c     **** /*! @brief Flag to indicate that an Interrupt occurred in the meantime.
+ 192:../main.c     ****  *
+ 193:../main.c     ****  * This flag must be set <b>true</b> by any interrupt service routine that
+ 194:../main.c     ****  * requires actions in the service execution loop of main().  This prevents
+ 195:../main.c     ****  * the system from entering sleep mode, so the action can be taken before.
+ 196:../main.c     ****  */
+ 197:../main.c     **** volatile bool		g_flgIRQ;
+ 198:../main.c     **** 
+ 199:../main.c     **** /*! @brief Modules that require EM1.
+ 200:../main.c     ****  *
+ 201:../main.c     ****  * This global variable is a bit mask for all modules that require EM1.
+ 202:../main.c     ****  * Standard peripherals would stop working in EM2 because clocks, etc. are
+ 203:../main.c     ****  * disabled.  Therefore it is required for software modules that make use
+ARM GAS  /tmp/ccmuhVuw.s 			page 32
+
+
+ 204:../main.c     ****  * of such devices, to set the appropriate bit in this mask, as long as they
+ 205:../main.c     ****  * need EM1.  This prevents the power management of this application to enter
+ 206:../main.c     ****  * EM2.  The enumeration @ref EM1_MODULES lists those modules.
+ 207:../main.c     ****  * Low-Power peripherals, e.g. the LEUART still work in EM1.
+ 208:../main.c     ****  *
+ 209:../main.c     ****  * Examples:
+ 210:../main.c     ****  *
+ 211:../main.c     ****    @code
+ 212:../main.c     ****    // Module RFID requires EM1, set bit in bit mask
+ 213:../main.c     ****    Bit(g_EM1_ModuleMask, EM1_MOD_RFID) = 1;
+ 214:../main.c     ****    ...
+ 215:../main.c     ****    // Module RFID is no longer active, clear bit in bit mask
+ 216:../main.c     ****    Bit(g_EM1_ModuleMask, EM1_MOD_RFID) = 0;
+ 217:../main.c     ****    @endcode
+ 218:../main.c     ****  */
+ 219:../main.c     **** volatile uint16_t	g_EM1_ModuleMask;
+ 220:../main.c     **** 
+ 221:../main.c     **** /*================================ Local Data ================================*/
+ 222:../main.c     **** 
+ 223:../main.c     ****     /*! EXTI initialization structure
+ 224:../main.c     ****      *
+ 225:../main.c     ****      * Connect the external interrupts of the push buttons to the key handler.
+ 226:../main.c     ****      */
+ 227:../main.c     **** static const EXTI_INIT  l_ExtIntCfg[] =
+ 228:../main.c     **** {   //	IntBitMask,	IntFct
+ 229:../main.c     ****     {	KEY_EXTI_MASK,	KeyHandler	},	// Keys
+ 230:../main.c     ****     {	0,		NULL		}
+ 231:../main.c     **** };
+ 232:../main.c     **** 
+ 233:../main.c     ****     /*!
+ 234:../main.c     ****      * Initialization structure to define the timings for the autorepeat (AR)
+ 235:../main.c     ****      * threshold and rate (in milliseconds), and a function to be called for
+ 236:../main.c     ****      * each translated key.
+ 237:../main.c     ****      */
+ 238:../main.c     **** static const KEY_INIT  l_KeyInit =
+ 239:../main.c     **** {
+ 240:../main.c     ****     .AR_Threshold = AUTOREPEAT_THRESHOLD,
+ 241:../main.c     ****     .AR_Rate	= AUTOREPEAT_RATE,
+ 242:../main.c     ****     .KeyFct	= DisplayKeyHandler
+ 243:../main.c     **** };
+ 244:../main.c     **** 
+ 245:../main.c     ****     /*! LCD field definitions
+ 246:../main.c     ****      *
+ 247:../main.c     ****      * This array specifies the location and size of fields on the LC-Display.
+ 248:../main.c     ****      *
+ 249:../main.c     ****      * @warning	Enum @ref LCD_FIELD_ID is used as index within this array,
+ 250:../main.c     ****      * 		therefore care has to be taken to keep it "in sync"!
+ 251:../main.c     ****      */
+ 252:../main.c     **** static const LCD_FIELD l_LCD_Field[LCD_FIELD_ID_CNT] =
+ 253:../main.c     **** {
+ 254:../main.c     ****     /* X,  Y,	Width	*/
+ 255:../main.c     ****     {  0,  0,	16	},	//!< 0: LCD_LINE1_BLANK
+ 256:../main.c     ****     {  0,  1,	16	},	//!< 1: LCD_LINE2_BLANK
+ 257:../main.c     ****     {  0,  0,	16	},	//!< 2: LCD_LINE1_TEXT
+ 258:../main.c     ****     {  0,  1,	16	},	//!< 3: LCD_LINE2_TEXT
+ 259:../main.c     ****     {  0,  0,	16	},	//!< 4: LCD_ITEM_DESC
+ 260:../main.c     ****     {  0,  1,	16	},	//!< 5: LCD_ITEM_ADDR
+ARM GAS  /tmp/ccmuhVuw.s 			page 33
+
+
+ 261:../main.c     ****     {  5,  1,	11	},	//!< 6: LCD_ITEM_DATA
+ 262:../main.c     ****     {  0,  0,	16	},	//!< 7: LCD_CLOCK (no RTC, just display the uptime)
+ 263:../main.c     **** };
+ 264:../main.c     **** 
+ 265:../main.c     ****     /*! List of items which can be displayed
+ 266:../main.c     ****      *
+ 267:../main.c     ****      * This array contains a list of items that can be displayed on the LCD.
+ 268:../main.c     ****      * Element 0 is a special case, it shows the name, version, and date of
+ 269:../main.c     ****      * the firmware image.  Usually up/down push buttons are used to select
+ 270:../main.c     ****      * the item to be displayed.
+ 271:../main.c     ****      *
+ 272:../main.c     ****      * The order of these items may be rearranged by the user.  Single or
+ 273:../main.c     ****      * groups of entries can be de-activated by commenting them out.
+ 274:../main.c     ****      */
+ 275:../main.c     **** static const ITEM l_Item[] =
+ 276:../main.c     **** {  // [1234567890123456]    Cmd				Frmt
+ 277:../main.c     ****     { ">>> HRDevice <<<",   SBS_NONE,			FRMT_FW_VERSION	},
+ 278:../main.c     ****     { "Supply Battery",	    SBS_NONE,			FRMT_CR2032_BAT	},
+ 279:../main.c     ****     { "Manufacturer",	    SBS_ManufacturerName,	FRMT_STRING	},
+ 280:../main.c     ****     { "Device Name",	    SBS_DeviceName,		FRMT_STRING	},
+ 281:../main.c     ****     { "Device Type",	    SBS_DeviceChemistry,	FRMT_STRING	},
+ 282:../main.c     ****     { "Serial Number",	    SBS_SerialNumber,		FRMT_SERNUM	},
+ 283:../main.c     ****     { "Production Date",    SBS_ManufactureDate,	FRMT_DATE	},
+ 284:../main.c     ****     { "Manufact. Data",	    SBS_ManufacturerData,	FRMT_STRING	},
+ 285:../main.c     ****     { "Manufact. Access",   SBS_ManufacturerAccess,	FRMT_HEX	},
+ 286:../main.c     ****     { "Specificat. Info",   SBS_SpecificationInfo,	FRMT_HEX	},
+ 287:../main.c     ****     { "Battery Mode",	    SBS_BatteryMode,		FRMT_HEX	},
+ 288:../main.c     ****     { "Battery Status",	    SBS_BatteryStatus,		FRMT_HEX	},
+ 289:../main.c     ****     { "Core Temperature",   SBS_CoreTemperature,	FRMT_TEMP	},
+ 290:../main.c     ****     { "Actual Voltage",	    SBS_Voltage,		FRMT_MILLIVOLT	},
+ 291:../main.c     ****     { "Actual Current",	    SBS_BatteryCurrent,		FRMT_MILLIAMP	},
+ 292:../main.c     ****     { "Average Current",    SBS_BatteryAverageCurrent,	FRMT_MILLIAMP	},
+ 293:../main.c     ****     { "Rel.Charge State",   SBS_RelativeStateOfCharge,	FRMT_PERCENT	},
+ 294:../main.c     ****     { "Abs.Charge State",   SBS_AbsoluteStateOfCharge,	FRMT_PERCENT	},
+ 295:../main.c     ****     { "Remain. Capacity",   SBS_RemainingCapacity,	FRMT_MILLIAMPH	},
+ 296:../main.c     ****     { "Remain.Cap.Alarm",   SBS_RemainingCapacityAlarm,	FRMT_MILLIAMPH	},
+ 297:../main.c     ****     { "Full Charge Cap.",   SBS_FullChargeCapacity,	FRMT_MILLIAMPH	},
+ 298:../main.c     ****     { "Runtime to Empty",   SBS_RunTimeToEmpty,		FRMT_DURATION	},
+ 299:../main.c     ****     { "Remain.TimeAlarm",   SBS_RemainingTimeAlarm,	FRMT_DURATION	},
+ 300:../main.c     ****     { "AvrTime to Empty",   SBS_AverageTimeToEmpty,	FRMT_DURATION	},
+ 301:../main.c     ****     { "Avr.Time to Full",   SBS_AverageTimeToFull,	FRMT_DURATION	},
+ 302:../main.c     ****     { "Charging Current",   SBS_ChargingCurrent,	FRMT_MILLIAMP	},
+ 303:../main.c     ****     { "Charging Voltage",   SBS_ChargingVoltage,	FRMT_MILLIVOLT	},
+ 304:../main.c     ****     { "Charge Cycle Cnt",   SBS_ChargerCycleCount,	FRMT_INTEGER	},
+ 305:../main.c     ****     { "Design Capacity",    SBS_DesignCapacity,		FRMT_MILLIAMPH	},
+ 306:../main.c     ****     { "Design Voltage",	    SBS_DesignVoltage,		FRMT_MILLIVOLT	},
+ 307:../main.c     ****     { "Shunt Resistance",   SBS_ShuntResistance,	FRMT_MICROOHM	},
+ 308:../main.c     ****     { "Cells in series",    SBS_CellsInSeries,		FRMT_INTEGER	},
+ 309:../main.c     ****     { "Overcurr. React.",   SBS_OverCurrentReactionTime,FRMT_OC_REATIME },
+ 310:../main.c     ****     { "Overcurr. Charge",   SBS_OverCurrentCharge,	FRMT_MILLIAMP	},
+ 311:../main.c     ****     { "Overcurr.Dischar",   SBS_OverCurrentDischarge,	FRMT_MILLIAMP	},
+ 312:../main.c     ****     { "Highcurr. React.",   SBS_HighCurrentReactionTime,FRMT_HC_REATIME },
+ 313:../main.c     ****     { "Highcurr. Charge",   SBS_HighCurrentCharge,	FRMT_MILLIAMP	},
+ 314:../main.c     ****     { "Highcurr.Dischar",   SBS_HighCurrentDischarge,	FRMT_MILLIAMP	},
+ 315:../main.c     ****     { "Cell #1 Voltage",    SBS_VoltageCell1,		FRMT_MILLIVOLT	},
+ 316:../main.c     ****     { "Cell #2 Voltage",    SBS_VoltageCell2,		FRMT_MILLIVOLT	},
+ 317:../main.c     ****     { "Cell #3 Voltage",    SBS_VoltageCell3,		FRMT_MILLIVOLT	},
+ARM GAS  /tmp/ccmuhVuw.s 			page 34
+
+
+ 318:../main.c     ****     { "Cell #4 Voltage",    SBS_VoltageCell4,		FRMT_MILLIVOLT	},
+ 319:../main.c     ****     { "Cell Min Voltage",   SBS_CellMinVoltage,		FRMT_MILLIVOLT	},
+ 320:../main.c     ****     { "Cell Max Voltage",   SBS_CellMaxVoltage,		FRMT_MILLIVOLT	},
+ 321:../main.c     ****     { "Cell PwrOff Volt",   SBS_CellPowerOffVoltage,	FRMT_MILLIVOLT	},
+ 322:../main.c     **** };
+ 323:../main.c     **** 
+ 324:../main.c     **** #define ITEM_CNT	ELEM_CNT(l_Item)
+ 325:../main.c     **** 
+ 326:../main.c     **** /*=========================== Forward Declarations ===========================*/
+ 327:../main.c     **** 
+ 328:../main.c     **** static void cmuSetup(void);
+ 329:../main.c     **** 
+ 330:../main.c     **** 
+ 331:../main.c     **** /******************************************************************************
+ 332:../main.c     ****  * @brief  Main function
+ 333:../main.c     ****  *****************************************************************************/
+ 334:../main.c     **** int main( void )
+ 335:../main.c     **** {
+ 695              		.loc 4 335 0
+ 696              		.cfi_startproc
+ 697              		@ args = 0, pretend = 0, frame = 0
+ 698              		@ frame_needed = 0, uses_anonymous_args = 0
+ 699 0000 08B5     		push	{r3, lr}
+ 700              		.cfi_def_cfa_offset 8
+ 701              		.cfi_offset 3, -8
+ 702              		.cfi_offset 14, -4
+ 336:../main.c     ****     /* Initialize chip - handle erratas */
+ 337:../main.c     ****     CHIP_Init();
+ 703              		.loc 4 337 0
+ 704 0002 FFF7FEFF 		bl	CHIP_Init
+ 338:../main.c     **** 
+ 339:../main.c     ****     /* Set up clocks */
+ 340:../main.c     ****     cmuSetup();
+ 705              		.loc 4 340 0
+ 706 0006 FFF7FEFF 		bl	cmuSetup
+ 341:../main.c     **** 
+ 342:../main.c     ****     /* Init Low Energy UART with 9600bd (this is the maximum) */
+ 343:../main.c     ****     drvLEUART_Init (9600);
+ 707              		.loc 4 343 0
+ 708 000a 4FF41650 		mov	r0, #9600
+ 709 000e FFF7FEFF 		bl	drvLEUART_Init
+ 344:../main.c     **** 
+ 345:../main.c     **** #ifdef DEBUG
+ 346:../main.c     ****     dbgInit();
+ 710              		.loc 4 346 0
+ 711 0012 FFF7FEFF 		bl	dbgInit
+ 347:../main.c     **** 
+ 348:../main.c     ****     /* Output version string to SWO or LEUART */
+ 349:../main.c     ****     DBG_PUTS("\n***** HRDevice V");
+ 712              		.loc 4 349 0
+ 713 0016 2248     		ldr	r0, .L18
+ 714 0018 FFF7FEFF 		bl	ITM_SendStr
+ 350:../main.c     ****     DBG_PUTS(prjVersion);
+ 715              		.loc 4 350 0
+ 716 001c 2148     		ldr	r0, .L18+4
+ 717 001e FFF7FEFF 		bl	ITM_SendStr
+ 351:../main.c     ****     DBG_PUTS(" ");
+ARM GAS  /tmp/ccmuhVuw.s 			page 35
+
+
+ 718              		.loc 4 351 0
+ 719 0022 2148     		ldr	r0, .L18+8
+ 720 0024 FFF7FEFF 		bl	ITM_SendStr
+ 352:../main.c     ****     DBG_PUTS(prjDate);
+ 721              		.loc 4 352 0
+ 722 0028 2048     		ldr	r0, .L18+12
+ 723 002a FFF7FEFF 		bl	ITM_SendStr
+ 353:../main.c     ****     DBG_PUTS(" *****\n\n");
+ 724              		.loc 4 353 0
+ 725 002e 2048     		ldr	r0, .L18+16
+ 726 0030 FFF7FEFF 		bl	ITM_SendStr
+ 354:../main.c     **** #endif
+ 355:../main.c     **** 
+ 356:../main.c     ****     /*
+ 357:../main.c     ****      * All modules that make use of external interrupts (EXTI) should be
+ 358:../main.c     ****      * initialized before calling ExtIntInit() because this enables the
+ 359:../main.c     ****      * interrupts, so IRQ handler may be executed immediately!
+ 360:../main.c     ****      */
+ 361:../main.c     **** 
+ 362:../main.c     ****     /* Initialize key hardware */
+ 363:../main.c     ****     KeyInit (&l_KeyInit);
+ 727              		.loc 4 363 0
+ 728 0034 1F48     		ldr	r0, .L18+20
+ 729 0036 FFF7FEFF 		bl	KeyInit
+ 364:../main.c     **** 
+ 365:../main.c     ****     /*
+ 366:../main.c     ****      * Initialize (and enable) External Interrupts
+ 367:../main.c     ****      */
+ 368:../main.c     ****     ExtIntInit (l_ExtIntCfg);
+ 730              		.loc 4 368 0
+ 731 003a 1F48     		ldr	r0, .L18+24
+ 732 003c FFF7FEFF 		bl	ExtIntInit
+ 369:../main.c     **** 
+ 370:../main.c     ****     /* Initialize the Alarm Clock module */
+ 371:../main.c     ****     AlarmClockInit();
+ 733              		.loc 4 371 0
+ 734 0040 FFF7FEFF 		bl	AlarmClockInit
+ 372:../main.c     **** 
+ 373:../main.c     ****     /* Verify element count */
+ 374:../main.c     ****     EFM_ASSERT(ELEM_CNT(l_LCD_Field) == LCD_FIELD_ID_CNT);
+ 375:../main.c     **** 
+ 376:../main.c     ****     /* Initialize display - show firmware version */
+ 377:../main.c     ****     DisplayInit (l_LCD_Field, l_Item, ITEM_CNT);
+ 735              		.loc 4 377 0
+ 736 0044 1D48     		ldr	r0, .L18+28
+ 737 0046 1E49     		ldr	r1, .L18+32
+ 738 0048 2D22     		movs	r2, #45
+ 739 004a FFF7FEFF 		bl	DisplayInit
+ 378:../main.c     ****     LCD_Printf (LCD_LINE1_TEXT, ">>> HRDevice <<<");
+ 740              		.loc 4 378 0
+ 741 004e 0220     		movs	r0, #2
+ 742 0050 1C49     		ldr	r1, .L18+36
+ 743 0052 FFF7FEFF 		bl	LCD_Printf
+ 379:../main.c     ****     LCD_Printf (LCD_LINE2_TEXT, "V%s %s", prjVersion, prjDate);
+ 744              		.loc 4 379 0
+ 745 0056 0320     		movs	r0, #3
+ 746 0058 1B49     		ldr	r1, .L18+40
+ARM GAS  /tmp/ccmuhVuw.s 			page 36
+
+
+ 747 005a 124A     		ldr	r2, .L18+4
+ 748 005c 134B     		ldr	r3, .L18+12
+ 749 005e FFF7FEFF 		bl	LCD_Printf
+ 380:../main.c     **** 
+ 381:../main.c     ****     /* Initialize Battery Monitor */
+ 382:../main.c     ****     BatteryMonInit();
+ 750              		.loc 4 382 0
+ 751 0062 FFF7FEFF 		bl	BatteryMonInit
+ 383:../main.c     **** 
+ 384:../main.c     ****     /* Enable all other External Interrupts */
+ 385:../main.c     ****     ExtIntEnableAll();
+ 752              		.loc 4 385 0
+ 753 0066 FFF7FEFF 		bl	ExtIntEnableAll
+ 754              	.L17:
+ 386:../main.c     **** 
+ 387:../main.c     **** 
+ 388:../main.c     ****     /* ============================================ *
+ 389:../main.c     ****      * ========== Service Execution Loop ========== *
+ 390:../main.c     ****      * ============================================ */
+ 391:../main.c     ****     while (1)
+ 392:../main.c     ****     {
+ 393:../main.c     **** 	/* Update or power-off the LC-Display, update measurements */
+ 394:../main.c     **** 	DisplayUpdateCheck();
+ 755              		.loc 4 394 0
+ 756 006a FFF7FEFF 		bl	DisplayUpdateCheck
+ 395:../main.c     **** 
+ 396:../main.c     **** 	/*
+ 397:../main.c     **** 	 * Check for current power mode:  If a minimum of one active module
+ 398:../main.c     **** 	 * requires EM1, i.e. <g_EM1_ModuleMask> is not 0, this will be
+ 399:../main.c     **** 	 * entered.  If no one requires EM1 activity, EM2 is entered.
+ 400:../main.c     **** 	 */
+ 401:../main.c     **** 	if (! g_flgIRQ)		// enter EM only if no IRQ occured
+ 757              		.loc 4 401 0
+ 758 006e 174B     		ldr	r3, .L18+44
+ 759 0070 1B78     		ldrb	r3, [r3]
+ 760 0072 DBB2     		uxtb	r3, r3
+ 761 0074 83F00103 		eor	r3, r3, #1
+ 762 0078 DBB2     		uxtb	r3, r3
+ 763 007a 002B     		cmp	r3, #0
+ 764 007c 0BD0     		beq	.L13
+ 402:../main.c     **** 	{
+ 403:../main.c     **** 	    if (g_EM1_ModuleMask)
+ 765              		.loc 4 403 0
+ 766 007e 144B     		ldr	r3, .L18+48
+ 767 0080 1B88     		ldrh	r3, [r3]	@ movhi
+ 768 0082 9BB2     		uxth	r3, r3
+ 769 0084 002B     		cmp	r3, #0
+ 770 0086 02D0     		beq	.L14
+ 404:../main.c     **** 		EMU_EnterEM1();		// EM1 - Sleep Mode
+ 771              		.loc 4 404 0
+ 772 0088 FFF7FEFF 		bl	EMU_EnterEM1
+ 405:../main.c     **** 	    else
+ 406:../main.c     **** 		EMU_EnterEM2(true);	// EM2 - Deep Sleep Mode
+ 407:../main.c     **** 	}
+ 408:../main.c     **** 	else
+ 409:../main.c     **** 	{
+ 410:../main.c     **** 	    g_flgIRQ = false;	// clear flag to enter EM the next time
+ARM GAS  /tmp/ccmuhVuw.s 			page 37
+
+
+ 411:../main.c     **** 	}
+ 412:../main.c     ****     }
+ 773              		.loc 4 412 0
+ 774 008c EDE7     		b	.L17
+ 775              	.L14:
+ 406:../main.c     **** 		EMU_EnterEM2(true);	// EM2 - Deep Sleep Mode
+ 776              		.loc 4 406 0
+ 777 008e 0120     		movs	r0, #1
+ 778 0090 FFF7FEFF 		bl	EMU_EnterEM2
+ 779              		.loc 4 412 0
+ 780 0094 E9E7     		b	.L17
+ 781              	.L13:
+ 410:../main.c     **** 	    g_flgIRQ = false;	// clear flag to enter EM the next time
+ 782              		.loc 4 410 0
+ 783 0096 0D4B     		ldr	r3, .L18+44
+ 784 0098 0022     		movs	r2, #0
+ 785 009a 1A70     		strb	r2, [r3]
+ 786              		.loc 4 412 0
+ 787 009c E5E7     		b	.L17
+ 788              	.L19:
+ 789 009e 00BF     		.align	2
+ 790              	.L18:
+ 791 00a0 30030000 		.word	.LC45
+ 792 00a4 00000000 		.word	prjVersion
+ 793 00a8 44030000 		.word	.LC46
+ 794 00ac 00000000 		.word	prjDate
+ 795 00b0 48030000 		.word	.LC47
+ 796 00b4 00000000 		.word	l_KeyInit
+ 797 00b8 00000000 		.word	l_ExtIntCfg
+ 798 00bc 00000000 		.word	l_LCD_Field
+ 799 00c0 00000000 		.word	l_Item
+ 800 00c4 00000000 		.word	.LC0
+ 801 00c8 54030000 		.word	.LC48
+ 802 00cc 00000000 		.word	g_flgIRQ
+ 803 00d0 00000000 		.word	g_EM1_ModuleMask
+ 804              		.cfi_endproc
+ 805              	.LFE113:
+ 807              		.section	.text.cmuSetup,"ax",%progbits
+ 808              		.align	2
+ 809              		.thumb
+ 810              		.thumb_func
+ 812              	cmuSetup:
+ 813              	.LFB114:
+ 413:../main.c     **** }
+ 414:../main.c     **** 
+ 415:../main.c     **** 
+ 416:../main.c     **** /******************************************************************************
+ 417:../main.c     ****  * @brief   Configure Clocks
+ 418:../main.c     ****  *
+ 419:../main.c     ****  * This local routine is called once from main() to configure all required
+ 420:../main.c     ****  * clocks of the EFM32 device.
+ 421:../main.c     ****  *
+ 422:../main.c     ****  *****************************************************************************/
+ 423:../main.c     **** static void cmuSetup(void)
+ 424:../main.c     **** {
+ 814              		.loc 4 424 0
+ 815              		.cfi_startproc
+ARM GAS  /tmp/ccmuhVuw.s 			page 38
+
+
+ 816              		@ args = 0, pretend = 0, frame = 0
+ 817              		@ frame_needed = 0, uses_anonymous_args = 0
+ 818 0000 08B5     		push	{r3, lr}
+ 819              		.cfi_def_cfa_offset 8
+ 820              		.cfi_offset 3, -8
+ 821              		.cfi_offset 14, -4
+ 425:../main.c     ****     /* Start LFXO and wait until it is stable */
+ 426:../main.c     ****     CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
+ 822              		.loc 4 426 0
+ 823 0002 0020     		movs	r0, #0
+ 824 0004 0121     		movs	r1, #1
+ 825 0006 0122     		movs	r2, #1
+ 826 0008 FFF7FEFF 		bl	CMU_OscillatorEnable
+ 427:../main.c     **** 
+ 428:../main.c     **** #if USE_EXT_32MHZ_CLOCK
+ 429:../main.c     ****     /* Start HFXO and wait until it is stable */
+ 430:../main.c     ****     CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
+ 431:../main.c     **** 
+ 432:../main.c     ****     /* Select HFXO as clock source for HFCLK */
+ 433:../main.c     ****     CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+ 434:../main.c     **** 
+ 435:../main.c     ****     /* Disable HFRCO */
+ 436:../main.c     ****     CMU_OscillatorEnable(cmuOsc_HFRCO, false, false);
+ 437:../main.c     **** #endif
+ 438:../main.c     **** 
+ 439:../main.c     ****     /* Route the LFXO clock to the RTC and set the prescaler */
+ 440:../main.c     ****     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);	// RTC
+ 827              		.loc 4 440 0
+ 828 000c 0E48     		ldr	r0, .L21
+ 829 000e 0221     		movs	r1, #2
+ 830 0010 FFF7FEFF 		bl	CMU_ClockSelectSet
+ 441:../main.c     ****     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);	// LEUART0/1
+ 831              		.loc 4 441 0
+ 832 0014 0D48     		ldr	r0, .L21+4
+ 833 0016 0221     		movs	r1, #2
+ 834 0018 FFF7FEFF 		bl	CMU_ClockSelectSet
+ 442:../main.c     ****     CMU_ClockEnable(cmuClock_RTC, true);
+ 835              		.loc 4 442 0
+ 836 001c 0C48     		ldr	r0, .L21+8
+ 837 001e 0121     		movs	r1, #1
+ 838 0020 FFF7FEFF 		bl	CMU_ClockEnable
+ 443:../main.c     **** 
+ 444:../main.c     ****     /* Prescaler of 1 = 30 us of resolution and overflow each 8 min */
+ 445:../main.c     ****     CMU_ClockDivSet(cmuClock_RTC, cmuClkDiv_1);
+ 839              		.loc 4 445 0
+ 840 0024 0A48     		ldr	r0, .L21+8
+ 841 0026 0121     		movs	r1, #1
+ 842 0028 FFF7FEFF 		bl	CMU_ClockDivSet
+ 446:../main.c     **** 
+ 447:../main.c     ****     /* Enable clock to low energy modules */
+ 448:../main.c     ****     CMU_ClockEnable(cmuClock_CORELE, true);
+ 843              		.loc 4 448 0
+ 844 002c 0948     		ldr	r0, .L21+12
+ 845 002e 0121     		movs	r1, #1
+ 846 0030 FFF7FEFF 		bl	CMU_ClockEnable
+ 449:../main.c     **** 
+ 450:../main.c     ****     /* Enable clock for HF peripherals (ADC, DAC, I2C, TIMER, and USART) */
+ARM GAS  /tmp/ccmuhVuw.s 			page 39
+
+
+ 451:../main.c     ****     CMU_ClockEnable(cmuClock_HFPER, true);
+ 847              		.loc 4 451 0
+ 848 0034 0848     		ldr	r0, .L21+16
+ 849 0036 0121     		movs	r1, #1
+ 850 0038 FFF7FEFF 		bl	CMU_ClockEnable
+ 452:../main.c     **** 
+ 453:../main.c     ****     /* Enable clock to GPIO */
+ 454:../main.c     ****     CMU_ClockEnable(cmuClock_GPIO, true);
+ 851              		.loc 4 454 0
+ 852 003c 0748     		ldr	r0, .L21+20
+ 853 003e 0121     		movs	r1, #1
+ 854 0040 FFF7FEFF 		bl	CMU_ClockEnable
+ 455:../main.c     **** }
+ 855              		.loc 4 455 0
+ 856 0044 08BD     		pop	{r3, pc}
+ 857              	.L22:
+ 858 0046 00BF     		.align	2
+ 859              	.L21:
+ 860 0048 02000600 		.word	393218
+ 861 004c 03001200 		.word	1179651
+ 862 0050 30040800 		.word	525360
+ 863 0054 00230400 		.word	271104
+ 864 0058 10810200 		.word	164112
+ 865 005c 00C20200 		.word	180736
+ 866              		.cfi_endproc
+ 867              	.LFE114:
+ 869              		.text
+ 870              	.Letext0:
+ 871              		.file 5 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 872              		.file 6 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 873              		.file 7 "../CMSIS/Include/core_cm3.h"
+ 874              		.file 8 "../Device/EnergyMicro/EFM32G/Include/efm32g_dma_descriptor.h"
+ 875              		.file 9 "../emlib/inc/em_system.h"
+ 876              		.file 10 "../emlib/inc/em_cmu.h"
+ 877              		.file 11 "../emlib/inc/em_dma.h"
+ 878              		.file 12 "../drivers/ExtInt.h"
+ 879              		.file 13 "../drivers/Keys.h"
+ 880              		.file 14 "../drivers/BatteryMon.h"
+ 881              		.file 15 "../drivers/Display.h"

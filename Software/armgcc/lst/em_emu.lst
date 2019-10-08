@@ -1,0 +1,2248 @@
+ARM GAS  /tmp/ccbsZeEa.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"em_emu.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.text.SystemCoreClockUpdate,"ax",%progbits
+  19              		.align	2
+  20              		.thumb
+  21              		.thumb_func
+  23              	SystemCoreClockUpdate:
+  24              	.LFB56:
+  25              		.file 1 "../Device/EnergyMicro/EFM32G/Include/system_efm32g.h"
+   1:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** /***************************************************************************//**
+   2:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * @file
+   3:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * @brief CMSIS Cortex-M3 System Layer for EFM32G devices.
+   4:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * @author Energy Micro AS
+   5:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * @version 3.20.2
+   6:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *******************************************************************************
+   7:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * @section License
+   8:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *******************************************************************************
+  10:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *
+  11:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * including commercial applications, and to alter it and redistribute it
+  13:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * freely, subject to the following restrictions:
+  14:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *
+  15:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *    claim that you wrote the original software.
+  17:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *    misrepresented as being the original software.
+  19:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *
+  21:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * including, but not limited to, any implied warranties of merchantability
+  25:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * or fitness for any particular purpose or warranties against infringement
+  26:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * of any proprietary rights of a third party.
+  27:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *
+  28:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * arising from your use of this Software.
+  31:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *
+  32:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  ******************************************************************************/
+  33:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** 
+ARM GAS  /tmp/ccbsZeEa.s 			page 2
+
+
+  34:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** #ifndef __SYSTEM_EFM32G_H
+  35:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** #define __SYSTEM_EFM32G_H
+  36:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** 
+  37:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** #ifdef __cplusplus
+  38:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** extern "C" {
+  39:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** #endif
+  40:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** 
+  41:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** #include <stdint.h>
+  42:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** 
+  43:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** /*******************************************************************************
+  44:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  **************************   GLOBAL VARIABLES   *******************************
+  45:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  ******************************************************************************/
+  46:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** 
+  47:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** extern uint32_t SystemCoreClock;    /**< System Clock Frequency (Core Clock) */
+  48:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** 
+  49:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** /*******************************************************************************
+  50:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *****************************   PROTOTYPES   **********************************
+  51:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  ******************************************************************************/
+  52:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** 
+  53:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** /* Interrupt routines - prototypes */
+  54:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** #if defined(_EFM32_GECKO_FAMILY)
+  55:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void Reset_Handler(void);
+  56:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void NMI_Handler(void);
+  57:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void HardFault_Handler(void);
+  58:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void MemManage_Handler(void);
+  59:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void BusFault_Handler(void);
+  60:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void UsageFault_Handler(void);
+  61:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void SVC_Handler(void);
+  62:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void DebugMon_Handler(void);
+  63:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void PendSV_Handler(void);
+  64:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void SysTick_Handler(void);
+  65:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void DMA_IRQHandler(void);
+  66:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void GPIO_EVEN_IRQHandler(void);
+  67:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void TIMER0_IRQHandler(void);
+  68:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void USART0_RX_IRQHandler(void);
+  69:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void USART0_TX_IRQHandler(void);
+  70:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void ACMP0_IRQHandler(void);
+  71:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void ADC0_IRQHandler(void);
+  72:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void DAC0_IRQHandler(void);
+  73:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void I2C0_IRQHandler(void);
+  74:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void GPIO_ODD_IRQHandler(void);
+  75:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void TIMER1_IRQHandler(void);
+  76:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void TIMER2_IRQHandler(void);
+  77:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void USART1_RX_IRQHandler(void);
+  78:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void USART1_TX_IRQHandler(void);
+  79:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void USART2_RX_IRQHandler(void);
+  80:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void USART2_TX_IRQHandler(void);
+  81:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void UART0_RX_IRQHandler(void);
+  82:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void UART0_TX_IRQHandler(void);
+  83:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void LEUART0_IRQHandler(void);
+  84:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void LEUART1_IRQHandler(void);
+  85:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void LETIMER0_IRQHandler(void);
+  86:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void PCNT0_IRQHandler(void);
+  87:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void PCNT1_IRQHandler(void);
+  88:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void PCNT2_IRQHandler(void);
+  89:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void RTC_IRQHandler(void);
+  90:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void CMU_IRQHandler(void);
+ARM GAS  /tmp/ccbsZeEa.s 			page 3
+
+
+  91:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void VCMP_IRQHandler(void);
+  92:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void LCD_IRQHandler(void);
+  93:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void MSC_IRQHandler(void);
+  94:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** void AES_IRQHandler(void);
+  95:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** #endif
+  96:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** 
+  97:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** uint32_t SystemCoreClockGet(void);
+  98:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** 
+  99:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** /**************************************************************************//**
+ 100:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * @brief
+ 101:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *   Update CMSIS SystemCoreClock variable.
+ 102:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *
+ 103:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  * @details
+ 104:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *   CMSIS defines a global variable SystemCoreClock that shall hold the
+ 105:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *   core frequency in Hz. If the core frequency is dynamically changed, the
+ 106:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *   variable must be kept updated in order to be CMSIS compliant.
+ 107:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *
+ 108:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *   Notice that if only changing core clock frequency through the EFM32 CMU
+ 109:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *   API, this variable will be kept updated. This function is only provided
+ 110:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *   for CMSIS compliance and if a user modifies the the core clock outside
+ 111:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *   the CMU API.
+ 112:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****  *****************************************************************************/
+ 113:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** static __INLINE void SystemCoreClockUpdate(void)
+ 114:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** {
+  26              		.loc 1 114 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 0
+  29              		@ frame_needed = 0, uses_anonymous_args = 0
+  30 0000 08B5     		push	{r3, lr}
+  31              		.cfi_def_cfa_offset 8
+  32              		.cfi_offset 3, -8
+  33              		.cfi_offset 14, -4
+ 115:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h ****   SystemCoreClockGet();
+  34              		.loc 1 115 0
+  35 0002 FFF7FEFF 		bl	SystemCoreClockGet
+ 116:../Device/EnergyMicro/EFM32G/Include/system_efm32g.h **** }
+  36              		.loc 1 116 0
+  37 0006 08BD     		pop	{r3, pc}
+  38              		.cfi_endproc
+  39              	.LFE56:
+  41              		.section	.text.CMU_Lock,"ax",%progbits
+  42              		.align	2
+  43              		.thumb
+  44              		.thumb_func
+  46              	CMU_Lock:
+  47              	.LFB72:
+  48              		.file 2 "../emlib/inc/em_cmu.h"
+   1:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+   2:../emlib/inc/em_cmu.h ****  * @file
+   3:../emlib/inc/em_cmu.h ****  * @brief Clock management unit (CMU) API
+   4:../emlib/inc/em_cmu.h ****  * @author Energy Micro AS
+   5:../emlib/inc/em_cmu.h ****  * @version 3.20.2
+   6:../emlib/inc/em_cmu.h ****  *******************************************************************************
+   7:../emlib/inc/em_cmu.h ****  * @section License
+   8:../emlib/inc/em_cmu.h ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/inc/em_cmu.h ****  *******************************************************************************
+  10:../emlib/inc/em_cmu.h ****  *
+ARM GAS  /tmp/ccbsZeEa.s 			page 4
+
+
+  11:../emlib/inc/em_cmu.h ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/inc/em_cmu.h ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/inc/em_cmu.h ****  * freely, subject to the following restrictions:
+  14:../emlib/inc/em_cmu.h ****  *
+  15:../emlib/inc/em_cmu.h ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/inc/em_cmu.h ****  *    claim that you wrote the original software.
+  17:../emlib/inc/em_cmu.h ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/inc/em_cmu.h ****  *    misrepresented as being the original software.
+  19:../emlib/inc/em_cmu.h ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/inc/em_cmu.h ****  *
+  21:../emlib/inc/em_cmu.h ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/inc/em_cmu.h ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/inc/em_cmu.h ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/inc/em_cmu.h ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/inc/em_cmu.h ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/inc/em_cmu.h ****  * of any proprietary rights of a third party.
+  27:../emlib/inc/em_cmu.h ****  *
+  28:../emlib/inc/em_cmu.h ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/inc/em_cmu.h ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/inc/em_cmu.h ****  * arising from your use of this Software.
+  31:../emlib/inc/em_cmu.h ****  *
+  32:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+  33:../emlib/inc/em_cmu.h **** #ifndef __EM_CMU_H
+  34:../emlib/inc/em_cmu.h **** #define __EM_CMU_H
+  35:../emlib/inc/em_cmu.h **** 
+  36:../emlib/inc/em_cmu.h **** #include "em_device.h"
+  37:../emlib/inc/em_cmu.h **** #if defined( CMU_PRESENT )
+  38:../emlib/inc/em_cmu.h **** 
+  39:../emlib/inc/em_cmu.h **** #include <stdbool.h>
+  40:../emlib/inc/em_cmu.h **** #include "em_bitband.h"
+  41:../emlib/inc/em_cmu.h **** 
+  42:../emlib/inc/em_cmu.h **** #ifdef __cplusplus
+  43:../emlib/inc/em_cmu.h **** extern "C" {
+  44:../emlib/inc/em_cmu.h **** #endif
+  45:../emlib/inc/em_cmu.h **** 
+  46:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+  47:../emlib/inc/em_cmu.h ****  * @addtogroup EM_Library
+  48:../emlib/inc/em_cmu.h ****  * @{
+  49:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+  50:../emlib/inc/em_cmu.h **** 
+  51:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+  52:../emlib/inc/em_cmu.h ****  * @addtogroup CMU
+  53:../emlib/inc/em_cmu.h ****  * @{
+  54:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+  55:../emlib/inc/em_cmu.h **** 
+  56:../emlib/inc/em_cmu.h **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  57:../emlib/inc/em_cmu.h **** 
+  58:../emlib/inc/em_cmu.h **** /* Select register ids, for internal use */
+  59:../emlib/inc/em_cmu.h **** #define CMU_NOSEL_REG              0
+  60:../emlib/inc/em_cmu.h **** #define CMU_HFCLKSEL_REG           1
+  61:../emlib/inc/em_cmu.h **** #define CMU_LFACLKSEL_REG          2
+  62:../emlib/inc/em_cmu.h **** #define CMU_LFBCLKSEL_REG          3
+  63:../emlib/inc/em_cmu.h **** #define CMU_DBGCLKSEL_REG          4
+  64:../emlib/inc/em_cmu.h **** #if defined( USB_PRESENT )
+  65:../emlib/inc/em_cmu.h **** #define CMU_USBCCLKSEL_REG         5
+  66:../emlib/inc/em_cmu.h **** #endif
+  67:../emlib/inc/em_cmu.h **** 
+ARM GAS  /tmp/ccbsZeEa.s 			page 5
+
+
+  68:../emlib/inc/em_cmu.h **** #define CMU_SEL_REG_POS            0
+  69:../emlib/inc/em_cmu.h **** #define CMU_SEL_REG_MASK           0xf
+  70:../emlib/inc/em_cmu.h **** 
+  71:../emlib/inc/em_cmu.h **** /* Divisor register ids, for internal use */
+  72:../emlib/inc/em_cmu.h **** #define CMU_NODIV_REG              0
+  73:../emlib/inc/em_cmu.h **** #define CMU_HFPERCLKDIV_REG        1
+  74:../emlib/inc/em_cmu.h **** #define CMU_HFCORECLKDIV_REG       2
+  75:../emlib/inc/em_cmu.h **** #define CMU_LFAPRESC0_REG          3
+  76:../emlib/inc/em_cmu.h **** #define CMU_LFBPRESC0_REG          4
+  77:../emlib/inc/em_cmu.h **** #if defined( _CMU_CTRL_HFCLKDIV_MASK )
+  78:../emlib/inc/em_cmu.h **** #define CMU_HFCLKDIV_REG           5
+  79:../emlib/inc/em_cmu.h **** #endif
+  80:../emlib/inc/em_cmu.h **** #define CMU_DIV_REG_POS            4
+  81:../emlib/inc/em_cmu.h **** #define CMU_DIV_REG_MASK           0xf
+  82:../emlib/inc/em_cmu.h **** 
+  83:../emlib/inc/em_cmu.h **** /* Enable register ids, for internal use */
+  84:../emlib/inc/em_cmu.h **** #define CMU_NO_EN_REG              0
+  85:../emlib/inc/em_cmu.h **** #define CMU_HFPERCLKDIV_EN_REG     1
+  86:../emlib/inc/em_cmu.h **** #define CMU_HFPERCLKEN0_EN_REG     2
+  87:../emlib/inc/em_cmu.h **** #define CMU_HFCORECLKEN0_EN_REG    3
+  88:../emlib/inc/em_cmu.h **** #define CMU_LFACLKEN0_EN_REG       4
+  89:../emlib/inc/em_cmu.h **** #define CMU_LFBCLKEN0_EN_REG       5
+  90:../emlib/inc/em_cmu.h **** #define CMU_PCNT_EN_REG            6
+  91:../emlib/inc/em_cmu.h **** 
+  92:../emlib/inc/em_cmu.h **** #define CMU_EN_REG_POS             8
+  93:../emlib/inc/em_cmu.h **** #define CMU_EN_REG_MASK            0xf
+  94:../emlib/inc/em_cmu.h **** 
+  95:../emlib/inc/em_cmu.h **** /* Enable register bit position, for internal use */
+  96:../emlib/inc/em_cmu.h **** #define CMU_EN_BIT_POS             12
+  97:../emlib/inc/em_cmu.h **** #define CMU_EN_BIT_MASK            0x1f
+  98:../emlib/inc/em_cmu.h **** 
+  99:../emlib/inc/em_cmu.h **** /* Clock branch bitfield position, for internal use */
+ 100:../emlib/inc/em_cmu.h **** #define CMU_HF_CLK_BRANCH          0
+ 101:../emlib/inc/em_cmu.h **** #define CMU_HFPER_CLK_BRANCH       1
+ 102:../emlib/inc/em_cmu.h **** #define CMU_HFCORE_CLK_BRANCH      2
+ 103:../emlib/inc/em_cmu.h **** #define CMU_LFA_CLK_BRANCH         3
+ 104:../emlib/inc/em_cmu.h **** #define CMU_RTC_CLK_BRANCH         4
+ 105:../emlib/inc/em_cmu.h **** #define CMU_LETIMER_CLK_BRANCH     5
+ 106:../emlib/inc/em_cmu.h **** #define CMU_LCDPRE_CLK_BRANCH      6
+ 107:../emlib/inc/em_cmu.h **** #define CMU_LCD_CLK_BRANCH         7
+ 108:../emlib/inc/em_cmu.h **** #define CMU_LESENSE_CLK_BRANCH     8
+ 109:../emlib/inc/em_cmu.h **** #define CMU_LFB_CLK_BRANCH         9
+ 110:../emlib/inc/em_cmu.h **** #define CMU_LEUART0_CLK_BRANCH     10
+ 111:../emlib/inc/em_cmu.h **** #define CMU_LEUART1_CLK_BRANCH     11
+ 112:../emlib/inc/em_cmu.h **** #define CMU_DBG_CLK_BRANCH         12
+ 113:../emlib/inc/em_cmu.h **** #define CMU_AUX_CLK_BRANCH         13
+ 114:../emlib/inc/em_cmu.h **** #define CMU_USBC_CLK_BRANCH        14
+ 115:../emlib/inc/em_cmu.h **** 
+ 116:../emlib/inc/em_cmu.h **** #define CMU_CLK_BRANCH_POS         17
+ 117:../emlib/inc/em_cmu.h **** #define CMU_CLK_BRANCH_MASK        0x1f
+ 118:../emlib/inc/em_cmu.h **** 
+ 119:../emlib/inc/em_cmu.h **** /** @endcond */
+ 120:../emlib/inc/em_cmu.h **** 
+ 121:../emlib/inc/em_cmu.h **** /*******************************************************************************
+ 122:../emlib/inc/em_cmu.h ****  ********************************   ENUMS   ************************************
+ 123:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+ 124:../emlib/inc/em_cmu.h **** 
+ARM GAS  /tmp/ccbsZeEa.s 			page 6
+
+
+ 125:../emlib/inc/em_cmu.h **** /** Clock divisors. These values are valid for prescalers. */
+ 126:../emlib/inc/em_cmu.h **** #define cmuClkDiv_1     1     /**< Divide clock by 1. */
+ 127:../emlib/inc/em_cmu.h **** #define cmuClkDiv_2     2     /**< Divide clock by 2. */
+ 128:../emlib/inc/em_cmu.h **** #define cmuClkDiv_4     4     /**< Divide clock by 4. */
+ 129:../emlib/inc/em_cmu.h **** #define cmuClkDiv_8     8     /**< Divide clock by 8. */
+ 130:../emlib/inc/em_cmu.h **** #define cmuClkDiv_16    16    /**< Divide clock by 16. */
+ 131:../emlib/inc/em_cmu.h **** #define cmuClkDiv_32    32    /**< Divide clock by 32. */
+ 132:../emlib/inc/em_cmu.h **** #define cmuClkDiv_64    64    /**< Divide clock by 64. */
+ 133:../emlib/inc/em_cmu.h **** #define cmuClkDiv_128   128   /**< Divide clock by 128. */
+ 134:../emlib/inc/em_cmu.h **** #define cmuClkDiv_256   256   /**< Divide clock by 256. */
+ 135:../emlib/inc/em_cmu.h **** #define cmuClkDiv_512   512   /**< Divide clock by 512. */
+ 136:../emlib/inc/em_cmu.h **** #define cmuClkDiv_1024  1024  /**< Divide clock by 1024. */
+ 137:../emlib/inc/em_cmu.h **** #define cmuClkDiv_2048  2048  /**< Divide clock by 2048. */
+ 138:../emlib/inc/em_cmu.h **** #define cmuClkDiv_4096  4096  /**< Divide clock by 4096. */
+ 139:../emlib/inc/em_cmu.h **** #define cmuClkDiv_8192  8192  /**< Divide clock by 8192. */
+ 140:../emlib/inc/em_cmu.h **** #define cmuClkDiv_16384 16384 /**< Divide clock by 16384. */
+ 141:../emlib/inc/em_cmu.h **** #define cmuClkDiv_32768 32768 /**< Divide clock by 32768. */
+ 142:../emlib/inc/em_cmu.h **** 
+ 143:../emlib/inc/em_cmu.h **** /** Clock divider configuration */
+ 144:../emlib/inc/em_cmu.h **** typedef uint32_t CMU_ClkDiv_TypeDef;
+ 145:../emlib/inc/em_cmu.h **** 
+ 146:../emlib/inc/em_cmu.h **** /** High frequency RC bands. */
+ 147:../emlib/inc/em_cmu.h **** typedef enum
+ 148:../emlib/inc/em_cmu.h **** {
+ 149:../emlib/inc/em_cmu.h ****   /** 1MHz RC band. */
+ 150:../emlib/inc/em_cmu.h ****   cmuHFRCOBand_1MHz  = _CMU_HFRCOCTRL_BAND_1MHZ,
+ 151:../emlib/inc/em_cmu.h ****   /** 7MHz RC band. */
+ 152:../emlib/inc/em_cmu.h ****   cmuHFRCOBand_7MHz  = _CMU_HFRCOCTRL_BAND_7MHZ,
+ 153:../emlib/inc/em_cmu.h ****   /** 11MHz RC band. */
+ 154:../emlib/inc/em_cmu.h ****   cmuHFRCOBand_11MHz = _CMU_HFRCOCTRL_BAND_11MHZ,
+ 155:../emlib/inc/em_cmu.h ****   /** 14MHz RC band. */
+ 156:../emlib/inc/em_cmu.h ****   cmuHFRCOBand_14MHz = _CMU_HFRCOCTRL_BAND_14MHZ,
+ 157:../emlib/inc/em_cmu.h ****   /** 21MHz RC band. */
+ 158:../emlib/inc/em_cmu.h ****   cmuHFRCOBand_21MHz = _CMU_HFRCOCTRL_BAND_21MHZ,
+ 159:../emlib/inc/em_cmu.h **** #if defined( _CMU_HFRCOCTRL_BAND_28MHZ )
+ 160:../emlib/inc/em_cmu.h ****   /** 28MHz RC band. */
+ 161:../emlib/inc/em_cmu.h ****   cmuHFRCOBand_28MHz = _CMU_HFRCOCTRL_BAND_28MHZ
+ 162:../emlib/inc/em_cmu.h **** #endif
+ 163:../emlib/inc/em_cmu.h **** } CMU_HFRCOBand_TypeDef;
+ 164:../emlib/inc/em_cmu.h **** 
+ 165:../emlib/inc/em_cmu.h **** 
+ 166:../emlib/inc/em_cmu.h **** #if defined( _CMU_AUXHFRCOCTRL_BAND_MASK )
+ 167:../emlib/inc/em_cmu.h **** /** AUX High frequency RC bands. */
+ 168:../emlib/inc/em_cmu.h **** typedef enum
+ 169:../emlib/inc/em_cmu.h **** {
+ 170:../emlib/inc/em_cmu.h ****   /** 1MHz RC band. */
+ 171:../emlib/inc/em_cmu.h ****   cmuAUXHFRCOBand_1MHz  = _CMU_AUXHFRCOCTRL_BAND_1MHZ,
+ 172:../emlib/inc/em_cmu.h ****   /** 7MHz RC band. */
+ 173:../emlib/inc/em_cmu.h ****   cmuAUXHFRCOBand_7MHz  = _CMU_AUXHFRCOCTRL_BAND_7MHZ,
+ 174:../emlib/inc/em_cmu.h ****   /** 11MHz RC band. */
+ 175:../emlib/inc/em_cmu.h ****   cmuAUXHFRCOBand_11MHz = _CMU_AUXHFRCOCTRL_BAND_11MHZ,
+ 176:../emlib/inc/em_cmu.h ****   /** 14MHz RC band. */
+ 177:../emlib/inc/em_cmu.h ****   cmuAUXHFRCOBand_14MHz = _CMU_AUXHFRCOCTRL_BAND_14MHZ,
+ 178:../emlib/inc/em_cmu.h ****   /** 21MHz RC band. */
+ 179:../emlib/inc/em_cmu.h ****   cmuAUXHFRCOBand_21MHz = _CMU_AUXHFRCOCTRL_BAND_21MHZ,
+ 180:../emlib/inc/em_cmu.h **** #if defined( _CMU_AUXHFRCOCTRL_BAND_28MHZ )
+ 181:../emlib/inc/em_cmu.h ****   /** 28MHz RC band. */
+ARM GAS  /tmp/ccbsZeEa.s 			page 7
+
+
+ 182:../emlib/inc/em_cmu.h ****   cmuAUXHFRCOBand_28MHz = _CMU_AUXHFRCOCTRL_BAND_28MHZ
+ 183:../emlib/inc/em_cmu.h **** #endif
+ 184:../emlib/inc/em_cmu.h **** } CMU_AUXHFRCOBand_TypeDef;
+ 185:../emlib/inc/em_cmu.h **** #endif
+ 186:../emlib/inc/em_cmu.h **** 
+ 187:../emlib/inc/em_cmu.h **** /** Clock points in CMU. Please refer to CMU overview in reference manual. */
+ 188:../emlib/inc/em_cmu.h **** typedef enum
+ 189:../emlib/inc/em_cmu.h **** {
+ 190:../emlib/inc/em_cmu.h ****   /*******************/
+ 191:../emlib/inc/em_cmu.h ****   /* HF clock branch */
+ 192:../emlib/inc/em_cmu.h ****   /*******************/
+ 193:../emlib/inc/em_cmu.h **** 
+ 194:../emlib/inc/em_cmu.h ****   /** High frequency clock */
+ 195:../emlib/inc/em_cmu.h **** #if defined( _CMU_CTRL_HFCLKDIV_MASK )
+ 196:../emlib/inc/em_cmu.h ****   cmuClock_HF = (CMU_HFCLKDIV_REG << CMU_DIV_REG_POS) |
+ 197:../emlib/inc/em_cmu.h ****                 (CMU_HFCLKSEL_REG << CMU_SEL_REG_POS) |
+ 198:../emlib/inc/em_cmu.h ****                 (CMU_NO_EN_REG << CMU_EN_REG_POS) |
+ 199:../emlib/inc/em_cmu.h ****                 (0 << CMU_EN_BIT_POS) |
+ 200:../emlib/inc/em_cmu.h ****                 (CMU_HF_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 201:../emlib/inc/em_cmu.h **** #else
+ 202:../emlib/inc/em_cmu.h ****   cmuClock_HF = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 203:../emlib/inc/em_cmu.h ****                 (CMU_HFCLKSEL_REG << CMU_SEL_REG_POS) |
+ 204:../emlib/inc/em_cmu.h ****                 (CMU_NO_EN_REG << CMU_EN_REG_POS) |
+ 205:../emlib/inc/em_cmu.h ****                 (0 << CMU_EN_BIT_POS) |
+ 206:../emlib/inc/em_cmu.h ****                 (CMU_HF_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 207:../emlib/inc/em_cmu.h **** #endif
+ 208:../emlib/inc/em_cmu.h **** 
+ 209:../emlib/inc/em_cmu.h ****   /** Debug clock */
+ 210:../emlib/inc/em_cmu.h ****   cmuClock_DBG = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 211:../emlib/inc/em_cmu.h ****                  (CMU_DBGCLKSEL_REG << CMU_SEL_REG_POS) |
+ 212:../emlib/inc/em_cmu.h ****                  (CMU_NO_EN_REG << CMU_EN_REG_POS) |
+ 213:../emlib/inc/em_cmu.h ****                  (0 << CMU_EN_BIT_POS) |
+ 214:../emlib/inc/em_cmu.h ****                  (CMU_DBG_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 215:../emlib/inc/em_cmu.h **** 
+ 216:../emlib/inc/em_cmu.h ****   /** AUX clock */
+ 217:../emlib/inc/em_cmu.h ****   cmuClock_AUX = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 218:../emlib/inc/em_cmu.h ****                  (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 219:../emlib/inc/em_cmu.h ****                  (CMU_NO_EN_REG << CMU_EN_REG_POS) |
+ 220:../emlib/inc/em_cmu.h ****                  (0 << CMU_EN_BIT_POS) |
+ 221:../emlib/inc/em_cmu.h ****                  (CMU_AUX_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 222:../emlib/inc/em_cmu.h **** 
+ 223:../emlib/inc/em_cmu.h ****   /**********************************/
+ 224:../emlib/inc/em_cmu.h ****   /* HF peripheral clock sub-branch */
+ 225:../emlib/inc/em_cmu.h ****   /**********************************/
+ 226:../emlib/inc/em_cmu.h **** 
+ 227:../emlib/inc/em_cmu.h ****   /** High frequency peripheral clock */
+ 228:../emlib/inc/em_cmu.h ****   cmuClock_HFPER = (CMU_HFPERCLKDIV_REG << CMU_DIV_REG_POS) |
+ 229:../emlib/inc/em_cmu.h ****                    (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 230:../emlib/inc/em_cmu.h ****                    (CMU_HFPERCLKDIV_EN_REG << CMU_EN_REG_POS) |
+ 231:../emlib/inc/em_cmu.h ****                    (_CMU_HFPERCLKDIV_HFPERCLKEN_SHIFT << CMU_EN_BIT_POS) |
+ 232:../emlib/inc/em_cmu.h ****                    (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 233:../emlib/inc/em_cmu.h **** 
+ 234:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_USART0_MASK)
+ 235:../emlib/inc/em_cmu.h ****   /** Universal sync/async receiver/transmitter 0 clock. */
+ 236:../emlib/inc/em_cmu.h ****   cmuClock_USART0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 237:../emlib/inc/em_cmu.h ****                     (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 238:../emlib/inc/em_cmu.h ****                     (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ARM GAS  /tmp/ccbsZeEa.s 			page 8
+
+
+ 239:../emlib/inc/em_cmu.h ****                     (_CMU_HFPERCLKEN0_USART0_SHIFT << CMU_EN_BIT_POS) |
+ 240:../emlib/inc/em_cmu.h ****                     (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 241:../emlib/inc/em_cmu.h **** #endif
+ 242:../emlib/inc/em_cmu.h **** 
+ 243:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_USART1_MASK)
+ 244:../emlib/inc/em_cmu.h ****   /** Universal sync/async receiver/transmitter 1 clock. */
+ 245:../emlib/inc/em_cmu.h ****   cmuClock_USART1 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 246:../emlib/inc/em_cmu.h ****                     (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 247:../emlib/inc/em_cmu.h ****                     (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 248:../emlib/inc/em_cmu.h ****                     (_CMU_HFPERCLKEN0_USART1_SHIFT << CMU_EN_BIT_POS) |
+ 249:../emlib/inc/em_cmu.h ****                     (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 250:../emlib/inc/em_cmu.h **** #endif
+ 251:../emlib/inc/em_cmu.h **** 
+ 252:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_USART2_MASK)
+ 253:../emlib/inc/em_cmu.h ****   /** Universal sync/async receiver/transmitter 2 clock. */
+ 254:../emlib/inc/em_cmu.h ****   cmuClock_USART2 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 255:../emlib/inc/em_cmu.h ****                     (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 256:../emlib/inc/em_cmu.h ****                     (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 257:../emlib/inc/em_cmu.h ****                     (_CMU_HFPERCLKEN0_USART2_SHIFT << CMU_EN_BIT_POS) |
+ 258:../emlib/inc/em_cmu.h ****                     (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 259:../emlib/inc/em_cmu.h **** #endif
+ 260:../emlib/inc/em_cmu.h **** 
+ 261:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_UART0_MASK)
+ 262:../emlib/inc/em_cmu.h ****   /** Universal async receiver/transmitter 0 clock. */
+ 263:../emlib/inc/em_cmu.h ****   cmuClock_UART0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 264:../emlib/inc/em_cmu.h ****                    (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 265:../emlib/inc/em_cmu.h ****                    (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 266:../emlib/inc/em_cmu.h ****                    (_CMU_HFPERCLKEN0_UART0_SHIFT << CMU_EN_BIT_POS) |
+ 267:../emlib/inc/em_cmu.h ****                    (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 268:../emlib/inc/em_cmu.h **** #endif
+ 269:../emlib/inc/em_cmu.h **** 
+ 270:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_UART1_MASK)
+ 271:../emlib/inc/em_cmu.h ****   /** Universal async receiver/transmitter 1 clock. */
+ 272:../emlib/inc/em_cmu.h ****   cmuClock_UART1 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 273:../emlib/inc/em_cmu.h ****                    (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 274:../emlib/inc/em_cmu.h ****                    (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 275:../emlib/inc/em_cmu.h ****                    (_CMU_HFPERCLKEN0_UART1_SHIFT << CMU_EN_BIT_POS) |
+ 276:../emlib/inc/em_cmu.h ****                    (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 277:../emlib/inc/em_cmu.h **** #endif
+ 278:../emlib/inc/em_cmu.h **** 
+ 279:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_TIMER0_MASK)
+ 280:../emlib/inc/em_cmu.h ****   /** Timer 0 clock. */
+ 281:../emlib/inc/em_cmu.h ****   cmuClock_TIMER0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 282:../emlib/inc/em_cmu.h ****                     (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 283:../emlib/inc/em_cmu.h ****                     (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 284:../emlib/inc/em_cmu.h ****                     (_CMU_HFPERCLKEN0_TIMER0_SHIFT << CMU_EN_BIT_POS) |
+ 285:../emlib/inc/em_cmu.h ****                     (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 286:../emlib/inc/em_cmu.h **** #endif
+ 287:../emlib/inc/em_cmu.h **** 
+ 288:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_TIMER1_MASK)
+ 289:../emlib/inc/em_cmu.h ****   /** Timer 1 clock. */
+ 290:../emlib/inc/em_cmu.h ****   cmuClock_TIMER1 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 291:../emlib/inc/em_cmu.h ****                     (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 292:../emlib/inc/em_cmu.h ****                     (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 293:../emlib/inc/em_cmu.h ****                     (_CMU_HFPERCLKEN0_TIMER1_SHIFT << CMU_EN_BIT_POS) |
+ 294:../emlib/inc/em_cmu.h ****                     (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 295:../emlib/inc/em_cmu.h **** #endif
+ARM GAS  /tmp/ccbsZeEa.s 			page 9
+
+
+ 296:../emlib/inc/em_cmu.h **** 
+ 297:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_TIMER2_MASK)
+ 298:../emlib/inc/em_cmu.h ****   /** Timer 2 clock. */
+ 299:../emlib/inc/em_cmu.h ****   cmuClock_TIMER2 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 300:../emlib/inc/em_cmu.h ****                     (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 301:../emlib/inc/em_cmu.h ****                     (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 302:../emlib/inc/em_cmu.h ****                     (_CMU_HFPERCLKEN0_TIMER2_SHIFT << CMU_EN_BIT_POS) |
+ 303:../emlib/inc/em_cmu.h ****                     (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 304:../emlib/inc/em_cmu.h **** #endif
+ 305:../emlib/inc/em_cmu.h **** 
+ 306:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_TIMER3_MASK)
+ 307:../emlib/inc/em_cmu.h ****   /** Timer 3 clock. */
+ 308:../emlib/inc/em_cmu.h ****   cmuClock_TIMER3 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 309:../emlib/inc/em_cmu.h ****                     (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 310:../emlib/inc/em_cmu.h ****                     (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 311:../emlib/inc/em_cmu.h ****                     (_CMU_HFPERCLKEN0_TIMER3_SHIFT << CMU_EN_BIT_POS) |
+ 312:../emlib/inc/em_cmu.h ****                     (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 313:../emlib/inc/em_cmu.h **** #endif
+ 314:../emlib/inc/em_cmu.h **** 
+ 315:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_ACMP0_MASK)
+ 316:../emlib/inc/em_cmu.h ****   /** Analog comparator 0 clock. */
+ 317:../emlib/inc/em_cmu.h ****   cmuClock_ACMP0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 318:../emlib/inc/em_cmu.h ****                    (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 319:../emlib/inc/em_cmu.h ****                    (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 320:../emlib/inc/em_cmu.h ****                    (_CMU_HFPERCLKEN0_ACMP0_SHIFT << CMU_EN_BIT_POS) |
+ 321:../emlib/inc/em_cmu.h ****                    (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 322:../emlib/inc/em_cmu.h **** #endif
+ 323:../emlib/inc/em_cmu.h **** 
+ 324:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_ACMP1_MASK)
+ 325:../emlib/inc/em_cmu.h ****   /** Analog comparator 1 clock. */
+ 326:../emlib/inc/em_cmu.h ****   cmuClock_ACMP1 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 327:../emlib/inc/em_cmu.h ****                    (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 328:../emlib/inc/em_cmu.h ****                    (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 329:../emlib/inc/em_cmu.h ****                    (_CMU_HFPERCLKEN0_ACMP1_SHIFT << CMU_EN_BIT_POS) |
+ 330:../emlib/inc/em_cmu.h ****                    (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 331:../emlib/inc/em_cmu.h **** #endif
+ 332:../emlib/inc/em_cmu.h **** 
+ 333:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_PRS_MASK)
+ 334:../emlib/inc/em_cmu.h ****   /** Peripheral reflex system clock. */
+ 335:../emlib/inc/em_cmu.h ****   cmuClock_PRS = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 336:../emlib/inc/em_cmu.h ****                  (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 337:../emlib/inc/em_cmu.h ****                  (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 338:../emlib/inc/em_cmu.h ****                  (_CMU_HFPERCLKEN0_PRS_SHIFT << CMU_EN_BIT_POS) |
+ 339:../emlib/inc/em_cmu.h ****                  (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 340:../emlib/inc/em_cmu.h **** #endif
+ 341:../emlib/inc/em_cmu.h **** 
+ 342:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_DAC0_MASK)
+ 343:../emlib/inc/em_cmu.h ****   /** Digital to analog converter 0 clock. */
+ 344:../emlib/inc/em_cmu.h ****   cmuClock_DAC0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 345:../emlib/inc/em_cmu.h ****                   (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 346:../emlib/inc/em_cmu.h ****                   (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 347:../emlib/inc/em_cmu.h ****                   (_CMU_HFPERCLKEN0_DAC0_SHIFT << CMU_EN_BIT_POS) |
+ 348:../emlib/inc/em_cmu.h ****                   (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 349:../emlib/inc/em_cmu.h **** #endif
+ 350:../emlib/inc/em_cmu.h **** 
+ 351:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_IDAC0_MASK)
+ 352:../emlib/inc/em_cmu.h ****   /** Digital to analog converter 0 clock. */
+ARM GAS  /tmp/ccbsZeEa.s 			page 10
+
+
+ 353:../emlib/inc/em_cmu.h ****   cmuClock_IDAC0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 354:../emlib/inc/em_cmu.h ****                   (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 355:../emlib/inc/em_cmu.h ****                   (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 356:../emlib/inc/em_cmu.h ****                   (_CMU_HFPERCLKEN0_IDAC0_SHIFT << CMU_EN_BIT_POS) |
+ 357:../emlib/inc/em_cmu.h ****                   (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 358:../emlib/inc/em_cmu.h **** #endif
+ 359:../emlib/inc/em_cmu.h **** 
+ 360:../emlib/inc/em_cmu.h **** #if defined(GPIO_PRESENT)
+ 361:../emlib/inc/em_cmu.h ****   /** General purpose input/output clock. */
+ 362:../emlib/inc/em_cmu.h ****   cmuClock_GPIO = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 363:../emlib/inc/em_cmu.h ****                   (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 364:../emlib/inc/em_cmu.h ****                   (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 365:../emlib/inc/em_cmu.h ****                   (_CMU_HFPERCLKEN0_GPIO_SHIFT << CMU_EN_BIT_POS) |
+ 366:../emlib/inc/em_cmu.h ****                   (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 367:../emlib/inc/em_cmu.h **** #endif
+ 368:../emlib/inc/em_cmu.h **** 
+ 369:../emlib/inc/em_cmu.h **** #if defined(VCMP_PRESENT)
+ 370:../emlib/inc/em_cmu.h ****   /** Voltage comparator clock. */
+ 371:../emlib/inc/em_cmu.h ****   cmuClock_VCMP = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 372:../emlib/inc/em_cmu.h ****                   (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 373:../emlib/inc/em_cmu.h ****                   (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 374:../emlib/inc/em_cmu.h ****                   (_CMU_HFPERCLKEN0_VCMP_SHIFT << CMU_EN_BIT_POS) |
+ 375:../emlib/inc/em_cmu.h ****                   (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 376:../emlib/inc/em_cmu.h **** #endif
+ 377:../emlib/inc/em_cmu.h **** 
+ 378:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_ADC0_MASK)
+ 379:../emlib/inc/em_cmu.h ****   /** Analog to digital converter 0 clock. */
+ 380:../emlib/inc/em_cmu.h ****   cmuClock_ADC0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 381:../emlib/inc/em_cmu.h ****                   (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 382:../emlib/inc/em_cmu.h ****                   (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 383:../emlib/inc/em_cmu.h ****                   (_CMU_HFPERCLKEN0_ADC0_SHIFT << CMU_EN_BIT_POS) |
+ 384:../emlib/inc/em_cmu.h ****                   (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 385:../emlib/inc/em_cmu.h **** #endif
+ 386:../emlib/inc/em_cmu.h **** 
+ 387:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_I2C0_MASK)
+ 388:../emlib/inc/em_cmu.h ****   /** I2C 0 clock. */
+ 389:../emlib/inc/em_cmu.h ****   cmuClock_I2C0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 390:../emlib/inc/em_cmu.h ****                   (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 391:../emlib/inc/em_cmu.h ****                   (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 392:../emlib/inc/em_cmu.h ****                   (_CMU_HFPERCLKEN0_I2C0_SHIFT << CMU_EN_BIT_POS) |
+ 393:../emlib/inc/em_cmu.h ****                   (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 394:../emlib/inc/em_cmu.h **** #endif
+ 395:../emlib/inc/em_cmu.h **** 
+ 396:../emlib/inc/em_cmu.h **** #if defined(_CMU_HFPERCLKEN0_I2C1_MASK)
+ 397:../emlib/inc/em_cmu.h ****   /** I2C 1 clock. */
+ 398:../emlib/inc/em_cmu.h ****   cmuClock_I2C1 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 399:../emlib/inc/em_cmu.h ****                   (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 400:../emlib/inc/em_cmu.h ****                   (CMU_HFPERCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 401:../emlib/inc/em_cmu.h ****                   (_CMU_HFPERCLKEN0_I2C1_SHIFT << CMU_EN_BIT_POS) |
+ 402:../emlib/inc/em_cmu.h ****                   (CMU_HFPER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 403:../emlib/inc/em_cmu.h **** #endif
+ 404:../emlib/inc/em_cmu.h **** 
+ 405:../emlib/inc/em_cmu.h ****   /**********************/
+ 406:../emlib/inc/em_cmu.h ****   /* HF core sub-branch */
+ 407:../emlib/inc/em_cmu.h ****   /**********************/
+ 408:../emlib/inc/em_cmu.h **** 
+ 409:../emlib/inc/em_cmu.h ****   /** Core clock */
+ARM GAS  /tmp/ccbsZeEa.s 			page 11
+
+
+ 410:../emlib/inc/em_cmu.h ****   cmuClock_CORE = (CMU_HFCORECLKDIV_REG << CMU_DIV_REG_POS) |
+ 411:../emlib/inc/em_cmu.h ****                   (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 412:../emlib/inc/em_cmu.h ****                   (CMU_NO_EN_REG << CMU_EN_REG_POS) |
+ 413:../emlib/inc/em_cmu.h ****                   (0 << CMU_EN_BIT_POS) |
+ 414:../emlib/inc/em_cmu.h ****                   (CMU_HFCORE_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 415:../emlib/inc/em_cmu.h **** 
+ 416:../emlib/inc/em_cmu.h **** #if defined(AES_PRESENT)
+ 417:../emlib/inc/em_cmu.h ****   /** Advanced encryption standard accelerator clock. */
+ 418:../emlib/inc/em_cmu.h ****   cmuClock_AES = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 419:../emlib/inc/em_cmu.h ****                  (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 420:../emlib/inc/em_cmu.h ****                  (CMU_HFCORECLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 421:../emlib/inc/em_cmu.h ****                  (_CMU_HFCORECLKEN0_AES_SHIFT << CMU_EN_BIT_POS) |
+ 422:../emlib/inc/em_cmu.h ****                  (CMU_HFCORE_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 423:../emlib/inc/em_cmu.h **** #endif
+ 424:../emlib/inc/em_cmu.h **** 
+ 425:../emlib/inc/em_cmu.h **** #if defined(DMA_PRESENT)
+ 426:../emlib/inc/em_cmu.h ****   /** Direct memory access controller clock. */
+ 427:../emlib/inc/em_cmu.h ****   cmuClock_DMA = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 428:../emlib/inc/em_cmu.h ****                  (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 429:../emlib/inc/em_cmu.h ****                  (CMU_HFCORECLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 430:../emlib/inc/em_cmu.h ****                  (_CMU_HFCORECLKEN0_DMA_SHIFT << CMU_EN_BIT_POS) |
+ 431:../emlib/inc/em_cmu.h ****                  (CMU_HFCORE_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 432:../emlib/inc/em_cmu.h **** #endif
+ 433:../emlib/inc/em_cmu.h ****   /** Low energy clocking module clock. */
+ 434:../emlib/inc/em_cmu.h ****   cmuClock_CORELE = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 435:../emlib/inc/em_cmu.h ****                     (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 436:../emlib/inc/em_cmu.h ****                     (CMU_HFCORECLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 437:../emlib/inc/em_cmu.h ****                     (_CMU_HFCORECLKEN0_LE_SHIFT << CMU_EN_BIT_POS) |
+ 438:../emlib/inc/em_cmu.h ****                     (CMU_HFCORE_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 439:../emlib/inc/em_cmu.h **** 
+ 440:../emlib/inc/em_cmu.h **** #if defined(EBI_PRESENT)
+ 441:../emlib/inc/em_cmu.h ****   /** External bus interface clock. */
+ 442:../emlib/inc/em_cmu.h ****   cmuClock_EBI = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 443:../emlib/inc/em_cmu.h ****                  (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 444:../emlib/inc/em_cmu.h ****                  (CMU_HFCORECLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 445:../emlib/inc/em_cmu.h ****                  (_CMU_HFCORECLKEN0_EBI_SHIFT << CMU_EN_BIT_POS) |
+ 446:../emlib/inc/em_cmu.h ****                  (CMU_HFCORE_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 447:../emlib/inc/em_cmu.h **** #endif
+ 448:../emlib/inc/em_cmu.h **** 
+ 449:../emlib/inc/em_cmu.h **** #if defined(USB_PRESENT)
+ 450:../emlib/inc/em_cmu.h ****   /** USB Core clock. */
+ 451:../emlib/inc/em_cmu.h ****   cmuClock_USBC = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 452:../emlib/inc/em_cmu.h ****                   (CMU_USBCCLKSEL_REG << CMU_SEL_REG_POS) |
+ 453:../emlib/inc/em_cmu.h ****                   (CMU_HFCORECLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 454:../emlib/inc/em_cmu.h ****                   (_CMU_HFCORECLKEN0_USBC_SHIFT << CMU_EN_BIT_POS) |
+ 455:../emlib/inc/em_cmu.h ****                   (CMU_USBC_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 456:../emlib/inc/em_cmu.h **** 
+ 457:../emlib/inc/em_cmu.h **** #endif
+ 458:../emlib/inc/em_cmu.h **** 
+ 459:../emlib/inc/em_cmu.h **** #if defined(USB_PRESENT)
+ 460:../emlib/inc/em_cmu.h ****   /** USB clock. */
+ 461:../emlib/inc/em_cmu.h ****   cmuClock_USB = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 462:../emlib/inc/em_cmu.h ****                  (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 463:../emlib/inc/em_cmu.h ****                  (CMU_HFCORECLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 464:../emlib/inc/em_cmu.h ****                  (_CMU_HFCORECLKEN0_USB_SHIFT << CMU_EN_BIT_POS) |
+ 465:../emlib/inc/em_cmu.h ****                  (CMU_HFCORE_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 466:../emlib/inc/em_cmu.h **** #endif
+ARM GAS  /tmp/ccbsZeEa.s 			page 12
+
+
+ 467:../emlib/inc/em_cmu.h **** 
+ 468:../emlib/inc/em_cmu.h ****   /***************/
+ 469:../emlib/inc/em_cmu.h ****   /* LF A branch */
+ 470:../emlib/inc/em_cmu.h ****   /***************/
+ 471:../emlib/inc/em_cmu.h **** 
+ 472:../emlib/inc/em_cmu.h ****   /** Low frequency A clock */
+ 473:../emlib/inc/em_cmu.h ****   cmuClock_LFA = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 474:../emlib/inc/em_cmu.h ****                  (CMU_LFACLKSEL_REG << CMU_SEL_REG_POS) |
+ 475:../emlib/inc/em_cmu.h ****                  (CMU_NO_EN_REG << CMU_EN_REG_POS) |
+ 476:../emlib/inc/em_cmu.h ****                  (0 << CMU_EN_BIT_POS) |
+ 477:../emlib/inc/em_cmu.h ****                  (CMU_LFA_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 478:../emlib/inc/em_cmu.h **** 
+ 479:../emlib/inc/em_cmu.h **** #if defined(RTC_PRESENT)
+ 480:../emlib/inc/em_cmu.h ****   /** Real time counter clock. */
+ 481:../emlib/inc/em_cmu.h ****   cmuClock_RTC = (CMU_LFAPRESC0_REG << CMU_DIV_REG_POS) |
+ 482:../emlib/inc/em_cmu.h ****                  (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 483:../emlib/inc/em_cmu.h ****                  (CMU_LFACLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 484:../emlib/inc/em_cmu.h ****                  (_CMU_LFACLKEN0_RTC_SHIFT << CMU_EN_BIT_POS) |
+ 485:../emlib/inc/em_cmu.h ****                  (CMU_RTC_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 486:../emlib/inc/em_cmu.h **** #endif
+ 487:../emlib/inc/em_cmu.h **** 
+ 488:../emlib/inc/em_cmu.h **** #if defined(_CMU_LFACLKEN0_LETIMER0_MASK)
+ 489:../emlib/inc/em_cmu.h ****   /** Low energy timer 0 clock. */
+ 490:../emlib/inc/em_cmu.h ****   cmuClock_LETIMER0 = (CMU_LFAPRESC0_REG << CMU_DIV_REG_POS) |
+ 491:../emlib/inc/em_cmu.h ****                       (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 492:../emlib/inc/em_cmu.h ****                       (CMU_LFACLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 493:../emlib/inc/em_cmu.h ****                       (_CMU_LFACLKEN0_LETIMER0_SHIFT << CMU_EN_BIT_POS) |
+ 494:../emlib/inc/em_cmu.h ****                       (CMU_LETIMER_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 495:../emlib/inc/em_cmu.h **** #endif
+ 496:../emlib/inc/em_cmu.h **** 
+ 497:../emlib/inc/em_cmu.h **** #if defined(_CMU_LFACLKEN0_LCD_MASK)
+ 498:../emlib/inc/em_cmu.h ****   /** Liquid crystal display, pre FDIV clock. */
+ 499:../emlib/inc/em_cmu.h ****   cmuClock_LCDpre = (CMU_LFAPRESC0_REG << CMU_DIV_REG_POS) |
+ 500:../emlib/inc/em_cmu.h ****                     (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 501:../emlib/inc/em_cmu.h ****                     (CMU_NO_EN_REG << CMU_EN_REG_POS) |
+ 502:../emlib/inc/em_cmu.h ****                     (0 << CMU_EN_BIT_POS) |
+ 503:../emlib/inc/em_cmu.h ****                     (CMU_LCDPRE_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 504:../emlib/inc/em_cmu.h **** 
+ 505:../emlib/inc/em_cmu.h ****   /** Liquid crystal display clock. Please notice that FDIV prescaler
+ 506:../emlib/inc/em_cmu.h ****    * must be set by special API. */
+ 507:../emlib/inc/em_cmu.h ****   cmuClock_LCD = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 508:../emlib/inc/em_cmu.h ****                  (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 509:../emlib/inc/em_cmu.h ****                  (CMU_LFACLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 510:../emlib/inc/em_cmu.h ****                  (_CMU_LFACLKEN0_LCD_SHIFT << CMU_EN_BIT_POS) |
+ 511:../emlib/inc/em_cmu.h ****                  (CMU_LCD_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 512:../emlib/inc/em_cmu.h **** #endif
+ 513:../emlib/inc/em_cmu.h **** 
+ 514:../emlib/inc/em_cmu.h **** #if defined(_CMU_PCNTCTRL_PCNT0CLKEN_MASK)
+ 515:../emlib/inc/em_cmu.h ****   /** Pulse counter 0 clock. */
+ 516:../emlib/inc/em_cmu.h ****   cmuClock_PCNT0 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 517:../emlib/inc/em_cmu.h ****                    (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 518:../emlib/inc/em_cmu.h ****                    (CMU_PCNT_EN_REG << CMU_EN_REG_POS) |
+ 519:../emlib/inc/em_cmu.h ****                    (_CMU_PCNTCTRL_PCNT0CLKEN_SHIFT << CMU_EN_BIT_POS) |
+ 520:../emlib/inc/em_cmu.h ****                    (CMU_LFA_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 521:../emlib/inc/em_cmu.h **** #endif
+ 522:../emlib/inc/em_cmu.h **** 
+ 523:../emlib/inc/em_cmu.h **** #if defined(_CMU_PCNTCTRL_PCNT1CLKEN_MASK)
+ARM GAS  /tmp/ccbsZeEa.s 			page 13
+
+
+ 524:../emlib/inc/em_cmu.h ****   /** Pulse counter 1 clock. */
+ 525:../emlib/inc/em_cmu.h ****   cmuClock_PCNT1 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 526:../emlib/inc/em_cmu.h ****                    (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 527:../emlib/inc/em_cmu.h ****                    (CMU_PCNT_EN_REG << CMU_EN_REG_POS) |
+ 528:../emlib/inc/em_cmu.h ****                    (_CMU_PCNTCTRL_PCNT1CLKEN_SHIFT << CMU_EN_BIT_POS) |
+ 529:../emlib/inc/em_cmu.h ****                    (CMU_LFA_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 530:../emlib/inc/em_cmu.h **** #endif
+ 531:../emlib/inc/em_cmu.h **** 
+ 532:../emlib/inc/em_cmu.h **** #if defined(_CMU_PCNTCTRL_PCNT2CLKEN_MASK)
+ 533:../emlib/inc/em_cmu.h ****   /** Pulse counter 2 clock. */
+ 534:../emlib/inc/em_cmu.h ****   cmuClock_PCNT2 = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 535:../emlib/inc/em_cmu.h ****                    (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 536:../emlib/inc/em_cmu.h ****                    (CMU_PCNT_EN_REG << CMU_EN_REG_POS) |
+ 537:../emlib/inc/em_cmu.h ****                    (_CMU_PCNTCTRL_PCNT2CLKEN_SHIFT << CMU_EN_BIT_POS) |
+ 538:../emlib/inc/em_cmu.h ****                    (CMU_LFA_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 539:../emlib/inc/em_cmu.h **** #endif
+ 540:../emlib/inc/em_cmu.h **** #if defined(_CMU_LFACLKEN0_LESENSE_MASK)
+ 541:../emlib/inc/em_cmu.h ****   /** LESENSE clock. */
+ 542:../emlib/inc/em_cmu.h ****   cmuClock_LESENSE = (CMU_LFAPRESC0_REG << CMU_DIV_REG_POS) |
+ 543:../emlib/inc/em_cmu.h ****                      (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 544:../emlib/inc/em_cmu.h ****                      (CMU_LFACLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 545:../emlib/inc/em_cmu.h ****                      (_CMU_LFACLKEN0_LESENSE_SHIFT << CMU_EN_BIT_POS) |
+ 546:../emlib/inc/em_cmu.h ****                      (CMU_LESENSE_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 547:../emlib/inc/em_cmu.h **** #endif
+ 548:../emlib/inc/em_cmu.h **** 
+ 549:../emlib/inc/em_cmu.h ****   /***************/
+ 550:../emlib/inc/em_cmu.h ****   /* LF B branch */
+ 551:../emlib/inc/em_cmu.h ****   /***************/
+ 552:../emlib/inc/em_cmu.h **** 
+ 553:../emlib/inc/em_cmu.h ****   /** Low frequency B clock */
+ 554:../emlib/inc/em_cmu.h ****   cmuClock_LFB = (CMU_NODIV_REG << CMU_DIV_REG_POS) |
+ 555:../emlib/inc/em_cmu.h ****                  (CMU_LFBCLKSEL_REG << CMU_SEL_REG_POS) |
+ 556:../emlib/inc/em_cmu.h ****                  (CMU_NO_EN_REG << CMU_EN_REG_POS) |
+ 557:../emlib/inc/em_cmu.h ****                  (0 << CMU_EN_BIT_POS) |
+ 558:../emlib/inc/em_cmu.h ****                  (CMU_LFB_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 559:../emlib/inc/em_cmu.h **** 
+ 560:../emlib/inc/em_cmu.h **** #if defined(_CMU_LFBCLKEN0_LEUART0_MASK)
+ 561:../emlib/inc/em_cmu.h ****   /** Low energy universal asynchronous receiver/transmitter 0 clock. */
+ 562:../emlib/inc/em_cmu.h ****   cmuClock_LEUART0 = (CMU_LFBPRESC0_REG << CMU_DIV_REG_POS) |
+ 563:../emlib/inc/em_cmu.h ****                      (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 564:../emlib/inc/em_cmu.h ****                      (CMU_LFBCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 565:../emlib/inc/em_cmu.h ****                      (_CMU_LFBCLKEN0_LEUART0_SHIFT << CMU_EN_BIT_POS) |
+ 566:../emlib/inc/em_cmu.h ****                      (CMU_LEUART0_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 567:../emlib/inc/em_cmu.h **** #endif
+ 568:../emlib/inc/em_cmu.h **** 
+ 569:../emlib/inc/em_cmu.h **** #if defined(_CMU_LFBCLKEN0_LEUART1_MASK)
+ 570:../emlib/inc/em_cmu.h ****   /** Low energy universal asynchronous receiver/transmitter 1 clock. */
+ 571:../emlib/inc/em_cmu.h ****   cmuClock_LEUART1 = (CMU_LFBPRESC0_REG << CMU_DIV_REG_POS) |
+ 572:../emlib/inc/em_cmu.h ****                      (CMU_NOSEL_REG << CMU_SEL_REG_POS) |
+ 573:../emlib/inc/em_cmu.h ****                      (CMU_LFBCLKEN0_EN_REG << CMU_EN_REG_POS) |
+ 574:../emlib/inc/em_cmu.h ****                      (_CMU_LFBCLKEN0_LEUART1_SHIFT << CMU_EN_BIT_POS) |
+ 575:../emlib/inc/em_cmu.h ****                      (CMU_LEUART1_CLK_BRANCH << CMU_CLK_BRANCH_POS),
+ 576:../emlib/inc/em_cmu.h **** #endif
+ 577:../emlib/inc/em_cmu.h **** } CMU_Clock_TypeDef;
+ 578:../emlib/inc/em_cmu.h **** 
+ 579:../emlib/inc/em_cmu.h **** 
+ 580:../emlib/inc/em_cmu.h **** /** Oscillator types. */
+ARM GAS  /tmp/ccbsZeEa.s 			page 14
+
+
+ 581:../emlib/inc/em_cmu.h **** typedef enum
+ 582:../emlib/inc/em_cmu.h **** {
+ 583:../emlib/inc/em_cmu.h ****   cmuOsc_LFXO,     /**< Low frequency crystal oscillator. */
+ 584:../emlib/inc/em_cmu.h ****   cmuOsc_LFRCO,    /**< Low frequency RC oscillator. */
+ 585:../emlib/inc/em_cmu.h ****   cmuOsc_HFXO,     /**< High frequency crystal oscillator. */
+ 586:../emlib/inc/em_cmu.h ****   cmuOsc_HFRCO,    /**< High frequency RC oscillator. */
+ 587:../emlib/inc/em_cmu.h ****   cmuOsc_AUXHFRCO, /**< Auxiliary high frequency RC oscillator. */
+ 588:../emlib/inc/em_cmu.h **** #if !defined(_EFM32_GECKO_FAMILY)
+ 589:../emlib/inc/em_cmu.h ****   cmuOsc_ULFRCO    /**< Ultra low frequency RC oscillator. */
+ 590:../emlib/inc/em_cmu.h **** #endif
+ 591:../emlib/inc/em_cmu.h **** } CMU_Osc_TypeDef;
+ 592:../emlib/inc/em_cmu.h **** 
+ 593:../emlib/inc/em_cmu.h **** 
+ 594:../emlib/inc/em_cmu.h **** /** Selectable clock sources. */
+ 595:../emlib/inc/em_cmu.h **** typedef enum
+ 596:../emlib/inc/em_cmu.h **** {
+ 597:../emlib/inc/em_cmu.h ****   cmuSelect_Error,      /**< Usage error. */
+ 598:../emlib/inc/em_cmu.h ****   cmuSelect_Disabled,   /**< Clock selector disabled. */
+ 599:../emlib/inc/em_cmu.h ****   cmuSelect_LFXO,       /**< Low frequency crystal oscillator. */
+ 600:../emlib/inc/em_cmu.h ****   cmuSelect_LFRCO,      /**< Low frequency RC oscillator. */
+ 601:../emlib/inc/em_cmu.h ****   cmuSelect_HFXO,       /**< High frequency crystal oscillator. */
+ 602:../emlib/inc/em_cmu.h ****   cmuSelect_HFRCO,      /**< High frequency RC oscillator. */
+ 603:../emlib/inc/em_cmu.h ****   cmuSelect_CORELEDIV2, /**< Core low energy clock divided by 2. */
+ 604:../emlib/inc/em_cmu.h ****   cmuSelect_AUXHFRCO,   /**< Auxilliary clock source can be used for debug clock */
+ 605:../emlib/inc/em_cmu.h ****   cmuSelect_HFCLK,      /**< Divided HFCLK on Giant for debug clock, undivided on Tiny Gecko and fo
+ 606:../emlib/inc/em_cmu.h **** #if !defined(_EFM32_GECKO_FAMILY)
+ 607:../emlib/inc/em_cmu.h ****   cmuSelect_ULFRCO,     /**< Ultra low frequency RC oscillator. */
+ 608:../emlib/inc/em_cmu.h **** #endif
+ 609:../emlib/inc/em_cmu.h **** } CMU_Select_TypeDef;
+ 610:../emlib/inc/em_cmu.h **** 
+ 611:../emlib/inc/em_cmu.h **** 
+ 612:../emlib/inc/em_cmu.h **** /*******************************************************************************
+ 613:../emlib/inc/em_cmu.h ****  *****************************   PROTOTYPES   **********************************
+ 614:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+ 615:../emlib/inc/em_cmu.h **** 
+ 616:../emlib/inc/em_cmu.h **** void CMU_ClockEnable(CMU_Clock_TypeDef clock, bool enable);
+ 617:../emlib/inc/em_cmu.h **** uint32_t CMU_ClockFreqGet(CMU_Clock_TypeDef clock);
+ 618:../emlib/inc/em_cmu.h **** CMU_ClkDiv_TypeDef CMU_ClockDivGet(CMU_Clock_TypeDef clock);
+ 619:../emlib/inc/em_cmu.h **** CMU_Select_TypeDef CMU_ClockSelectGet(CMU_Clock_TypeDef clock);
+ 620:../emlib/inc/em_cmu.h **** void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div);
+ 621:../emlib/inc/em_cmu.h **** void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref);
+ 622:../emlib/inc/em_cmu.h **** 
+ 623:../emlib/inc/em_cmu.h **** CMU_HFRCOBand_TypeDef CMU_HFRCOBandGet(void);
+ 624:../emlib/inc/em_cmu.h **** void CMU_HFRCOBandSet(CMU_HFRCOBand_TypeDef band);
+ 625:../emlib/inc/em_cmu.h **** 
+ 626:../emlib/inc/em_cmu.h **** #if defined( _CMU_AUXHFRCOCTRL_BAND_MASK )
+ 627:../emlib/inc/em_cmu.h **** CMU_AUXHFRCOBand_TypeDef CMU_AUXHFRCOBandGet(void);
+ 628:../emlib/inc/em_cmu.h **** void CMU_AUXHFRCOBandSet(CMU_AUXHFRCOBand_TypeDef band);
+ 629:../emlib/inc/em_cmu.h **** #endif
+ 630:../emlib/inc/em_cmu.h **** 
+ 631:../emlib/inc/em_cmu.h **** void CMU_HFRCOStartupDelaySet(uint32_t delay);
+ 632:../emlib/inc/em_cmu.h **** uint32_t CMU_HFRCOStartupDelayGet(void);
+ 633:../emlib/inc/em_cmu.h **** 
+ 634:../emlib/inc/em_cmu.h **** void CMU_OscillatorEnable(CMU_Osc_TypeDef osc, bool enable, bool wait);
+ 635:../emlib/inc/em_cmu.h **** uint32_t CMU_OscillatorTuningGet(CMU_Osc_TypeDef osc);
+ 636:../emlib/inc/em_cmu.h **** void CMU_OscillatorTuningSet(CMU_Osc_TypeDef osc, uint32_t val);
+ 637:../emlib/inc/em_cmu.h **** 
+ARM GAS  /tmp/ccbsZeEa.s 			page 15
+
+
+ 638:../emlib/inc/em_cmu.h **** bool CMU_PCNTClockExternalGet(unsigned int inst);
+ 639:../emlib/inc/em_cmu.h **** void CMU_PCNTClockExternalSet(unsigned int inst, bool external);
+ 640:../emlib/inc/em_cmu.h **** 
+ 641:../emlib/inc/em_cmu.h **** uint32_t CMU_LCDClkFDIVGet(void);
+ 642:../emlib/inc/em_cmu.h **** void CMU_LCDClkFDIVSet(uint32_t div);
+ 643:../emlib/inc/em_cmu.h **** 
+ 644:../emlib/inc/em_cmu.h **** void CMU_FreezeEnable(bool enable);
+ 645:../emlib/inc/em_cmu.h **** uint32_t CMU_Calibrate(uint32_t HFCycles, CMU_Osc_TypeDef reference);
+ 646:../emlib/inc/em_cmu.h **** 
+ 647:../emlib/inc/em_cmu.h **** #if defined( _CMU_CALCTRL_UPSEL_MASK ) && defined( _CMU_CALCTRL_DOWNSEL_MASK )
+ 648:../emlib/inc/em_cmu.h **** void CMU_CalibrateConfig(uint32_t downCycles, CMU_Osc_TypeDef downSel,
+ 649:../emlib/inc/em_cmu.h ****                          CMU_Osc_TypeDef upSel);
+ 650:../emlib/inc/em_cmu.h **** #endif
+ 651:../emlib/inc/em_cmu.h **** 
+ 652:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+ 653:../emlib/inc/em_cmu.h ****  * @brief
+ 654:../emlib/inc/em_cmu.h ****  *   Clear one or more pending CMU interrupts.
+ 655:../emlib/inc/em_cmu.h ****  *
+ 656:../emlib/inc/em_cmu.h ****  * @param[in] flags
+ 657:../emlib/inc/em_cmu.h ****  *   CMU interrupt sources to clear.
+ 658:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+ 659:../emlib/inc/em_cmu.h **** __STATIC_INLINE void CMU_IntClear(uint32_t flags)
+ 660:../emlib/inc/em_cmu.h **** {
+ 661:../emlib/inc/em_cmu.h ****   CMU->IFC = flags;
+ 662:../emlib/inc/em_cmu.h **** }
+ 663:../emlib/inc/em_cmu.h **** 
+ 664:../emlib/inc/em_cmu.h **** 
+ 665:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+ 666:../emlib/inc/em_cmu.h ****  * @brief
+ 667:../emlib/inc/em_cmu.h ****  *   Disable one or more CMU interrupts.
+ 668:../emlib/inc/em_cmu.h ****  *
+ 669:../emlib/inc/em_cmu.h ****  * @param[in] flags
+ 670:../emlib/inc/em_cmu.h ****  *   CMU interrupt sources to disable.
+ 671:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+ 672:../emlib/inc/em_cmu.h **** __STATIC_INLINE void CMU_IntDisable(uint32_t flags)
+ 673:../emlib/inc/em_cmu.h **** {
+ 674:../emlib/inc/em_cmu.h ****   CMU->IEN &= ~flags;
+ 675:../emlib/inc/em_cmu.h **** }
+ 676:../emlib/inc/em_cmu.h **** 
+ 677:../emlib/inc/em_cmu.h **** 
+ 678:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+ 679:../emlib/inc/em_cmu.h ****  * @brief
+ 680:../emlib/inc/em_cmu.h ****  *   Enable one or more CMU interrupts.
+ 681:../emlib/inc/em_cmu.h ****  *
+ 682:../emlib/inc/em_cmu.h ****  * @note
+ 683:../emlib/inc/em_cmu.h ****  *   Depending on the use, a pending interrupt may already be set prior to
+ 684:../emlib/inc/em_cmu.h ****  *   enabling the interrupt. Consider using CMU_IntClear() prior to enabling
+ 685:../emlib/inc/em_cmu.h ****  *   if such a pending interrupt should be ignored.
+ 686:../emlib/inc/em_cmu.h ****  *
+ 687:../emlib/inc/em_cmu.h ****  * @param[in] flags
+ 688:../emlib/inc/em_cmu.h ****  *   CMU interrupt sources to enable.
+ 689:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+ 690:../emlib/inc/em_cmu.h **** __STATIC_INLINE void CMU_IntEnable(uint32_t flags)
+ 691:../emlib/inc/em_cmu.h **** {
+ 692:../emlib/inc/em_cmu.h ****   CMU->IEN |= flags;
+ 693:../emlib/inc/em_cmu.h **** }
+ 694:../emlib/inc/em_cmu.h **** 
+ARM GAS  /tmp/ccbsZeEa.s 			page 16
+
+
+ 695:../emlib/inc/em_cmu.h **** 
+ 696:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+ 697:../emlib/inc/em_cmu.h ****  * @brief
+ 698:../emlib/inc/em_cmu.h ****  *   Get pending CMU interrupts.
+ 699:../emlib/inc/em_cmu.h ****  *
+ 700:../emlib/inc/em_cmu.h ****  * @return
+ 701:../emlib/inc/em_cmu.h ****  *   CMU interrupt sources pending.
+ 702:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+ 703:../emlib/inc/em_cmu.h **** __STATIC_INLINE uint32_t CMU_IntGet(void)
+ 704:../emlib/inc/em_cmu.h **** {
+ 705:../emlib/inc/em_cmu.h ****   return CMU->IF;
+ 706:../emlib/inc/em_cmu.h **** }
+ 707:../emlib/inc/em_cmu.h **** 
+ 708:../emlib/inc/em_cmu.h **** 
+ 709:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+ 710:../emlib/inc/em_cmu.h ****  * @brief
+ 711:../emlib/inc/em_cmu.h ****  *   Get enabled and pending CMU interrupt flags.
+ 712:../emlib/inc/em_cmu.h ****  *
+ 713:../emlib/inc/em_cmu.h ****  * @details
+ 714:../emlib/inc/em_cmu.h ****  *   Useful for handling more interrupt sources in the same interrupt handler.
+ 715:../emlib/inc/em_cmu.h ****  *
+ 716:../emlib/inc/em_cmu.h ****  * @note
+ 717:../emlib/inc/em_cmu.h ****  *   The event bits are not cleared by the use of this function.
+ 718:../emlib/inc/em_cmu.h ****  *
+ 719:../emlib/inc/em_cmu.h ****  * @return
+ 720:../emlib/inc/em_cmu.h ****  *   Pending and enabled CMU interrupt sources.
+ 721:../emlib/inc/em_cmu.h ****  *   The return value is the bitwise AND combination of
+ 722:../emlib/inc/em_cmu.h ****  *   - the OR combination of enabled interrupt sources in CMU_IEN_nnn
+ 723:../emlib/inc/em_cmu.h ****  *   register (CMU_IEN_nnn) and
+ 724:../emlib/inc/em_cmu.h ****  *   - the OR combination of valid interrupt flags of the CMU module
+ 725:../emlib/inc/em_cmu.h ****  *   (CMU_IF_nnn).
+ 726:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+ 727:../emlib/inc/em_cmu.h **** __STATIC_INLINE uint32_t CMU_IntGetEnabled(void)
+ 728:../emlib/inc/em_cmu.h **** {
+ 729:../emlib/inc/em_cmu.h ****   uint32_t tmp = 0U;
+ 730:../emlib/inc/em_cmu.h **** 
+ 731:../emlib/inc/em_cmu.h **** 
+ 732:../emlib/inc/em_cmu.h ****   /* Store LESENSE->IEN in temporary variable in order to define explicit order
+ 733:../emlib/inc/em_cmu.h ****    * of volatile accesses. */
+ 734:../emlib/inc/em_cmu.h ****   tmp = CMU->IEN;
+ 735:../emlib/inc/em_cmu.h **** 
+ 736:../emlib/inc/em_cmu.h ****   /* Bitwise AND of pending and enabled interrupts */
+ 737:../emlib/inc/em_cmu.h ****   return CMU->IF & tmp;
+ 738:../emlib/inc/em_cmu.h **** }
+ 739:../emlib/inc/em_cmu.h **** 
+ 740:../emlib/inc/em_cmu.h **** 
+ 741:../emlib/inc/em_cmu.h **** /**************************************************************************//**
+ 742:../emlib/inc/em_cmu.h ****  * @brief
+ 743:../emlib/inc/em_cmu.h ****  *   Set one or more pending CMU interrupts from SW.
+ 744:../emlib/inc/em_cmu.h ****  *
+ 745:../emlib/inc/em_cmu.h ****  * @param[in] flags
+ 746:../emlib/inc/em_cmu.h ****  *   CMU interrupt sources to set to pending.
+ 747:../emlib/inc/em_cmu.h ****  *****************************************************************************/
+ 748:../emlib/inc/em_cmu.h **** __STATIC_INLINE void CMU_IntSet(uint32_t flags)
+ 749:../emlib/inc/em_cmu.h **** {
+ 750:../emlib/inc/em_cmu.h ****   CMU->IFS = flags;
+ 751:../emlib/inc/em_cmu.h **** }
+ARM GAS  /tmp/ccbsZeEa.s 			page 17
+
+
+ 752:../emlib/inc/em_cmu.h **** 
+ 753:../emlib/inc/em_cmu.h **** 
+ 754:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+ 755:../emlib/inc/em_cmu.h ****  * @brief
+ 756:../emlib/inc/em_cmu.h ****  *   Lock the CMU in order to protect some of its registers against unintended
+ 757:../emlib/inc/em_cmu.h ****  *   modification.
+ 758:../emlib/inc/em_cmu.h ****  *
+ 759:../emlib/inc/em_cmu.h ****  * @details
+ 760:../emlib/inc/em_cmu.h ****  *   Please refer to the reference manual for CMU registers that will be
+ 761:../emlib/inc/em_cmu.h ****  *   locked.
+ 762:../emlib/inc/em_cmu.h ****  *
+ 763:../emlib/inc/em_cmu.h ****  * @note
+ 764:../emlib/inc/em_cmu.h ****  *   If locking the CMU registers, they must be unlocked prior to using any
+ 765:../emlib/inc/em_cmu.h ****  *   CMU API functions modifying CMU registers protected by the lock.
+ 766:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+ 767:../emlib/inc/em_cmu.h **** __STATIC_INLINE void CMU_Lock(void)
+ 768:../emlib/inc/em_cmu.h **** {
+  49              		.loc 2 768 0
+  50              		.cfi_startproc
+  51              		@ args = 0, pretend = 0, frame = 0
+  52              		@ frame_needed = 0, uses_anonymous_args = 0
+  53              		@ link register save eliminated.
+ 769:../emlib/inc/em_cmu.h ****   CMU->LOCK = CMU_LOCK_LOCKKEY_LOCK;
+  54              		.loc 2 769 0
+  55 0000 024B     		ldr	r3, .L3
+  56 0002 0022     		movs	r2, #0
+  57 0004 C3F88420 		str	r2, [r3, #132]
+ 770:../emlib/inc/em_cmu.h **** }
+  58              		.loc 2 770 0
+  59 0008 7047     		bx	lr
+  60              	.L4:
+  61 000a 00BF     		.align	2
+  62              	.L3:
+  63 000c 00800C40 		.word	1074561024
+  64              		.cfi_endproc
+  65              	.LFE72:
+  67              		.section	.text.CMU_Unlock,"ax",%progbits
+  68              		.align	2
+  69              		.thumb
+  70              		.thumb_func
+  72              	CMU_Unlock:
+  73              	.LFB73:
+ 771:../emlib/inc/em_cmu.h **** 
+ 772:../emlib/inc/em_cmu.h **** 
+ 773:../emlib/inc/em_cmu.h **** /***************************************************************************//**
+ 774:../emlib/inc/em_cmu.h ****  * @brief
+ 775:../emlib/inc/em_cmu.h ****  *   Unlock the CMU so that writing to locked registers again is possible.
+ 776:../emlib/inc/em_cmu.h ****  ******************************************************************************/
+ 777:../emlib/inc/em_cmu.h **** __STATIC_INLINE void CMU_Unlock(void)
+ 778:../emlib/inc/em_cmu.h **** {
+  74              		.loc 2 778 0
+  75              		.cfi_startproc
+  76              		@ args = 0, pretend = 0, frame = 0
+  77              		@ frame_needed = 0, uses_anonymous_args = 0
+  78              		@ link register save eliminated.
+ 779:../emlib/inc/em_cmu.h ****   CMU->LOCK = CMU_LOCK_LOCKKEY_UNLOCK;
+  79              		.loc 2 779 0
+ARM GAS  /tmp/ccbsZeEa.s 			page 18
+
+
+  80 0000 024B     		ldr	r3, .L6
+  81 0002 45F60E02 		movw	r2, #22542
+  82 0006 C3F88420 		str	r2, [r3, #132]
+ 780:../emlib/inc/em_cmu.h **** }
+  83              		.loc 2 780 0
+  84 000a 7047     		bx	lr
+  85              	.L7:
+  86              		.align	2
+  87              	.L6:
+  88 000c 00800C40 		.word	1074561024
+  89              		.cfi_endproc
+  90              	.LFE73:
+  92              		.section	.bss.cmuStatus,"aw",%nobits
+  93              		.align	1
+  96              	cmuStatus:
+  97 0000 0000     		.space	2
+  98              		.section	.text.EMU_Restore,"ax",%progbits
+  99              		.align	2
+ 100              		.thumb
+ 101              		.thumb_func
+ 103              	EMU_Restore:
+ 104              	.LFB76:
+ 105              		.file 3 "../emlib/src/em_emu.c"
+   1:../emlib/src/em_emu.c **** /***************************************************************************//**
+   2:../emlib/src/em_emu.c ****  * @file
+   3:../emlib/src/em_emu.c ****  * @brief Energy Management Unit (EMU) Peripheral API
+   4:../emlib/src/em_emu.c ****  * @author Energy Micro AS
+   5:../emlib/src/em_emu.c ****  * @version 3.20.2
+   6:../emlib/src/em_emu.c ****  *******************************************************************************
+   7:../emlib/src/em_emu.c ****  * @section License
+   8:../emlib/src/em_emu.c ****  * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+   9:../emlib/src/em_emu.c ****  *******************************************************************************
+  10:../emlib/src/em_emu.c ****  *
+  11:../emlib/src/em_emu.c ****  * Permission is granted to anyone to use this software for any purpose,
+  12:../emlib/src/em_emu.c ****  * including commercial applications, and to alter it and redistribute it
+  13:../emlib/src/em_emu.c ****  * freely, subject to the following restrictions:
+  14:../emlib/src/em_emu.c ****  *
+  15:../emlib/src/em_emu.c ****  * 1. The origin of this software must not be misrepresented; you must not
+  16:../emlib/src/em_emu.c ****  *    claim that you wrote the original software.
+  17:../emlib/src/em_emu.c ****  * 2. Altered source versions must be plainly marked as such, and must not be
+  18:../emlib/src/em_emu.c ****  *    misrepresented as being the original software.
+  19:../emlib/src/em_emu.c ****  * 3. This notice may not be removed or altered from any source distribution.
+  20:../emlib/src/em_emu.c ****  *
+  21:../emlib/src/em_emu.c ****  * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
+  22:../emlib/src/em_emu.c ****  * obligation to support this Software. Energy Micro AS is providing the
+  23:../emlib/src/em_emu.c ****  * Software "AS IS", with no express or implied warranties of any kind,
+  24:../emlib/src/em_emu.c ****  * including, but not limited to, any implied warranties of merchantability
+  25:../emlib/src/em_emu.c ****  * or fitness for any particular purpose or warranties against infringement
+  26:../emlib/src/em_emu.c ****  * of any proprietary rights of a third party.
+  27:../emlib/src/em_emu.c ****  *
+  28:../emlib/src/em_emu.c ****  * Energy Micro AS will not be liable for any consequential, incidental, or
+  29:../emlib/src/em_emu.c ****  * special damages, or any other relief, or for any claim by any third party,
+  30:../emlib/src/em_emu.c ****  * arising from your use of this Software.
+  31:../emlib/src/em_emu.c ****  *
+  32:../emlib/src/em_emu.c ****  ******************************************************************************/
+  33:../emlib/src/em_emu.c **** #include "em_emu.h"
+  34:../emlib/src/em_emu.c **** #if defined( EMU_PRESENT )
+ARM GAS  /tmp/ccbsZeEa.s 			page 19
+
+
+  35:../emlib/src/em_emu.c **** 
+  36:../emlib/src/em_emu.c **** #include "em_cmu.h"
+  37:../emlib/src/em_emu.c **** #include "em_assert.h"
+  38:../emlib/src/em_emu.c **** 
+  39:../emlib/src/em_emu.c **** /***************************************************************************//**
+  40:../emlib/src/em_emu.c ****  * @addtogroup EM_Library
+  41:../emlib/src/em_emu.c ****  * @{
+  42:../emlib/src/em_emu.c ****  ******************************************************************************/
+  43:../emlib/src/em_emu.c **** 
+  44:../emlib/src/em_emu.c **** /***************************************************************************//**
+  45:../emlib/src/em_emu.c ****  * @addtogroup EMU
+  46:../emlib/src/em_emu.c ****  * @brief Energy Management Unit (EMU) Peripheral API
+  47:../emlib/src/em_emu.c ****  * @{
+  48:../emlib/src/em_emu.c ****  ******************************************************************************/
+  49:../emlib/src/em_emu.c **** 
+  50:../emlib/src/em_emu.c **** /* Consistency check, since restoring assumes similar bitpositions in */
+  51:../emlib/src/em_emu.c **** /* CMU OSCENCMD and STATUS regs */
+  52:../emlib/src/em_emu.c **** #if (CMU_STATUS_AUXHFRCOENS != CMU_OSCENCMD_AUXHFRCOEN)
+  53:../emlib/src/em_emu.c **** #error Conflict in AUXHFRCOENS and AUXHFRCOEN bitpositions
+  54:../emlib/src/em_emu.c **** #endif
+  55:../emlib/src/em_emu.c **** #if (CMU_STATUS_HFXOENS != CMU_OSCENCMD_HFXOEN)
+  56:../emlib/src/em_emu.c **** #error Conflict in HFXOENS and HFXOEN bitpositions
+  57:../emlib/src/em_emu.c **** #endif
+  58:../emlib/src/em_emu.c **** #if (CMU_STATUS_LFRCOENS != CMU_OSCENCMD_LFRCOEN)
+  59:../emlib/src/em_emu.c **** #error Conflict in LFRCOENS and LFRCOEN bitpositions
+  60:../emlib/src/em_emu.c **** #endif
+  61:../emlib/src/em_emu.c **** #if (CMU_STATUS_LFXOENS != CMU_OSCENCMD_LFXOEN)
+  62:../emlib/src/em_emu.c **** #error Conflict in LFXOENS and LFXOEN bitpositions
+  63:../emlib/src/em_emu.c **** #endif
+  64:../emlib/src/em_emu.c **** 
+  65:../emlib/src/em_emu.c **** /*******************************************************************************
+  66:../emlib/src/em_emu.c ****  **************************   LOCAL VARIABLES   ********************************
+  67:../emlib/src/em_emu.c ****  ******************************************************************************/
+  68:../emlib/src/em_emu.c **** 
+  69:../emlib/src/em_emu.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  70:../emlib/src/em_emu.c **** /**
+  71:../emlib/src/em_emu.c ****  * CMU configured oscillator selection and oscillator enable status. When a
+  72:../emlib/src/em_emu.c ****  * user configures oscillators, this varaiable shall shadow the configuration.
+  73:../emlib/src/em_emu.c ****  * It is used by the EMU module in order to be able to restore the oscillator
+  74:../emlib/src/em_emu.c ****  * config after having been in certain energy modes (since HW may automatically
+  75:../emlib/src/em_emu.c ****  * alter config when going into an energy mode). It is the responsibility of
+  76:../emlib/src/em_emu.c ****  * the CMU module to keep it up-to-date (or a user if not using the CMU API
+  77:../emlib/src/em_emu.c ****  * for oscillator control).
+  78:../emlib/src/em_emu.c ****  */
+  79:../emlib/src/em_emu.c **** static uint16_t cmuStatus;
+  80:../emlib/src/em_emu.c **** /** @endcond */
+  81:../emlib/src/em_emu.c **** 
+  82:../emlib/src/em_emu.c **** 
+  83:../emlib/src/em_emu.c **** /*******************************************************************************
+  84:../emlib/src/em_emu.c ****  **************************   LOCAL FUNCTIONS   ********************************
+  85:../emlib/src/em_emu.c ****  ******************************************************************************/
+  86:../emlib/src/em_emu.c **** 
+  87:../emlib/src/em_emu.c **** /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+  88:../emlib/src/em_emu.c **** 
+  89:../emlib/src/em_emu.c **** /***************************************************************************//**
+  90:../emlib/src/em_emu.c ****  * @brief
+  91:../emlib/src/em_emu.c ****  *   Restore oscillators and core clock after having been in EM2 or EM3.
+ARM GAS  /tmp/ccbsZeEa.s 			page 20
+
+
+  92:../emlib/src/em_emu.c ****  ******************************************************************************/
+  93:../emlib/src/em_emu.c **** static void EMU_Restore(void)
+  94:../emlib/src/em_emu.c **** {
+ 106              		.loc 3 94 0
+ 107              		.cfi_startproc
+ 108              		@ args = 0, pretend = 0, frame = 8
+ 109              		@ frame_needed = 0, uses_anonymous_args = 0
+ 110 0000 00B5     		push	{lr}
+ 111              		.cfi_def_cfa_offset 4
+ 112              		.cfi_offset 14, -4
+ 113 0002 83B0     		sub	sp, sp, #12
+ 114              		.cfi_def_cfa_offset 16
+  95:../emlib/src/em_emu.c ****   uint32_t cmuLocked;
+  96:../emlib/src/em_emu.c **** 
+  97:../emlib/src/em_emu.c ****   /* Although we could use the CMU API for most of the below handling, we */
+  98:../emlib/src/em_emu.c ****   /* would like this function to be as efficient as possible. */
+  99:../emlib/src/em_emu.c **** 
+ 100:../emlib/src/em_emu.c ****   /* CMU registers may be locked */
+ 101:../emlib/src/em_emu.c ****   cmuLocked = CMU->LOCK & CMU_LOCK_LOCKKEY_LOCKED;
+ 115              		.loc 3 101 0
+ 116 0004 264B     		ldr	r3, .L22
+ 117 0006 D3F88430 		ldr	r3, [r3, #132]
+ 118 000a 03F00103 		and	r3, r3, #1
+ 119 000e 0193     		str	r3, [sp, #4]
+ 102:../emlib/src/em_emu.c ****   CMU_Unlock();
+ 120              		.loc 3 102 0
+ 121 0010 FFF7FEFF 		bl	CMU_Unlock
+ 103:../emlib/src/em_emu.c **** 
+ 104:../emlib/src/em_emu.c ****   /* AUXHFRCO was automatically disabled (except if using debugger). */
+ 105:../emlib/src/em_emu.c ****   /* HFXO was automatically disabled. */
+ 106:../emlib/src/em_emu.c ****   /* LFRCO/LFXO were possibly disabled by SW in EM3. */
+ 107:../emlib/src/em_emu.c ****   /* Restore according to status prior to entering EM. */
+ 108:../emlib/src/em_emu.c ****   CMU->OSCENCMD = cmuStatus & (CMU_STATUS_AUXHFRCOENS |
+ 122              		.loc 3 108 0
+ 123 0014 224B     		ldr	r3, .L22
+ 124 0016 234A     		ldr	r2, .L22+4
+ 125 0018 1288     		ldrh	r2, [r2]
+ 126 001a 02F4AA72 		and	r2, r2, #340
+ 127 001e 1A62     		str	r2, [r3, #32]
+ 109:../emlib/src/em_emu.c ****                                CMU_STATUS_HFXOENS |
+ 110:../emlib/src/em_emu.c ****                                CMU_STATUS_LFRCOENS |
+ 111:../emlib/src/em_emu.c ****                                CMU_STATUS_LFXOENS);
+ 112:../emlib/src/em_emu.c **** 
+ 113:../emlib/src/em_emu.c ****   /* Restore oscillator used for clocking core */
+ 114:../emlib/src/em_emu.c ****   switch (cmuStatus & (CMU_STATUS_HFXOSEL | CMU_STATUS_HFRCOSEL |
+ 128              		.loc 3 114 0
+ 129 0020 204B     		ldr	r3, .L22+4
+ 130 0022 1B88     		ldrh	r3, [r3]
+ 131 0024 03F47053 		and	r3, r3, #15360
+ 132 0028 B3F5805F 		cmp	r3, #4096
+ 133 002c 06D0     		beq	.L19
+ 134 002e B3F5005F 		cmp	r3, #8192
+ 135 0032 0ED0     		beq	.L20
+ 136 0034 B3F5006F 		cmp	r3, #2048
+ 137 0038 16D0     		beq	.L21
+ 115:../emlib/src/em_emu.c ****                        CMU_STATUS_LFXOSEL | CMU_STATUS_LFRCOSEL))
+ 116:../emlib/src/em_emu.c ****   {
+ARM GAS  /tmp/ccbsZeEa.s 			page 21
+
+
+ 117:../emlib/src/em_emu.c ****   case CMU_STATUS_LFRCOSEL:
+ 118:../emlib/src/em_emu.c ****     /* Wait for LFRCO to stabilize */
+ 119:../emlib/src/em_emu.c ****     while (!(CMU->STATUS & CMU_STATUS_LFRCORDY))
+ 120:../emlib/src/em_emu.c ****       ;
+ 121:../emlib/src/em_emu.c ****     CMU->CMD = CMU_CMD_HFCLKSEL_LFRCO;
+ 122:../emlib/src/em_emu.c ****     break;
+ 123:../emlib/src/em_emu.c **** 
+ 124:../emlib/src/em_emu.c ****   case CMU_STATUS_LFXOSEL:
+ 125:../emlib/src/em_emu.c ****     /* Wait for LFXO to stabilize */
+ 126:../emlib/src/em_emu.c ****     while (!(CMU->STATUS & CMU_STATUS_LFXORDY))
+ 127:../emlib/src/em_emu.c ****       ;
+ 128:../emlib/src/em_emu.c ****     CMU->CMD = CMU_CMD_HFCLKSEL_LFXO;
+ 129:../emlib/src/em_emu.c ****     break;
+ 130:../emlib/src/em_emu.c **** 
+ 131:../emlib/src/em_emu.c ****   case CMU_STATUS_HFXOSEL:
+ 132:../emlib/src/em_emu.c ****     /* Wait for HFXO to stabilize */
+ 133:../emlib/src/em_emu.c ****     while (!(CMU->STATUS & CMU_STATUS_HFXORDY))
+ 134:../emlib/src/em_emu.c ****       ;
+ 135:../emlib/src/em_emu.c ****     CMU->CMD = CMU_CMD_HFCLKSEL_HFXO;
+ 136:../emlib/src/em_emu.c ****     break;
+ 137:../emlib/src/em_emu.c **** 
+ 138:../emlib/src/em_emu.c ****   default: /* CMU_STATUS_HFRCOSEL */
+ 139:../emlib/src/em_emu.c ****     /* If core clock was HFRCO core clock, it is automatically restored to */
+ 140:../emlib/src/em_emu.c ****     /* state prior to entering energy mode. No need for further action. */
+ 141:../emlib/src/em_emu.c ****     break;
+ 138              		.loc 3 141 0
+ 139 003a 20E0     		b	.L14
+ 140              	.L19:
+ 119:../emlib/src/em_emu.c ****     while (!(CMU->STATUS & CMU_STATUS_LFRCORDY))
+ 141              		.loc 3 119 0
+ 142 003c 00BF     		nop
+ 143              	.L13:
+ 119:../emlib/src/em_emu.c ****     while (!(CMU->STATUS & CMU_STATUS_LFRCORDY))
+ 144              		.loc 3 119 0 is_stmt 0 discriminator 1
+ 145 003e 184B     		ldr	r3, .L22
+ 146 0040 DB6A     		ldr	r3, [r3, #44]
+ 147 0042 03F08003 		and	r3, r3, #128
+ 148 0046 002B     		cmp	r3, #0
+ 149 0048 F9D0     		beq	.L13
+ 121:../emlib/src/em_emu.c ****     CMU->CMD = CMU_CMD_HFCLKSEL_LFRCO;
+ 150              		.loc 3 121 0 is_stmt 1
+ 151 004a 154B     		ldr	r3, .L22
+ 152 004c 0322     		movs	r2, #3
+ 153 004e 5A62     		str	r2, [r3, #36]
+ 122:../emlib/src/em_emu.c ****     break;
+ 154              		.loc 3 122 0
+ 155 0050 15E0     		b	.L14
+ 156              	.L20:
+ 126:../emlib/src/em_emu.c ****     while (!(CMU->STATUS & CMU_STATUS_LFXORDY))
+ 157              		.loc 3 126 0
+ 158 0052 00BF     		nop
+ 159              	.L15:
+ 126:../emlib/src/em_emu.c ****     while (!(CMU->STATUS & CMU_STATUS_LFXORDY))
+ 160              		.loc 3 126 0 is_stmt 0 discriminator 1
+ 161 0054 124B     		ldr	r3, .L22
+ 162 0056 DB6A     		ldr	r3, [r3, #44]
+ 163 0058 03F40073 		and	r3, r3, #512
+ARM GAS  /tmp/ccbsZeEa.s 			page 22
+
+
+ 164 005c 002B     		cmp	r3, #0
+ 165 005e F9D0     		beq	.L15
+ 128:../emlib/src/em_emu.c ****     CMU->CMD = CMU_CMD_HFCLKSEL_LFXO;
+ 166              		.loc 3 128 0 is_stmt 1
+ 167 0060 0F4B     		ldr	r3, .L22
+ 168 0062 0422     		movs	r2, #4
+ 169 0064 5A62     		str	r2, [r3, #36]
+ 129:../emlib/src/em_emu.c ****     break;
+ 170              		.loc 3 129 0
+ 171 0066 0AE0     		b	.L14
+ 172              	.L21:
+ 133:../emlib/src/em_emu.c ****     while (!(CMU->STATUS & CMU_STATUS_HFXORDY))
+ 173              		.loc 3 133 0
+ 174 0068 00BF     		nop
+ 175              	.L16:
+ 133:../emlib/src/em_emu.c ****     while (!(CMU->STATUS & CMU_STATUS_HFXORDY))
+ 176              		.loc 3 133 0 is_stmt 0 discriminator 1
+ 177 006a 0D4B     		ldr	r3, .L22
+ 178 006c DB6A     		ldr	r3, [r3, #44]
+ 179 006e 03F00803 		and	r3, r3, #8
+ 180 0072 002B     		cmp	r3, #0
+ 181 0074 F9D0     		beq	.L16
+ 135:../emlib/src/em_emu.c ****     CMU->CMD = CMU_CMD_HFCLKSEL_HFXO;
+ 182              		.loc 3 135 0 is_stmt 1
+ 183 0076 0A4B     		ldr	r3, .L22
+ 184 0078 0222     		movs	r2, #2
+ 185 007a 5A62     		str	r2, [r3, #36]
+ 136:../emlib/src/em_emu.c ****     break;
+ 186              		.loc 3 136 0
+ 187 007c 00BF     		nop
+ 188              	.L14:
+ 142:../emlib/src/em_emu.c ****   }
+ 143:../emlib/src/em_emu.c **** 
+ 144:../emlib/src/em_emu.c ****   /* If HFRCO was disabled before entering Energy Mode, turn it off again */
+ 145:../emlib/src/em_emu.c ****   /* as it is automatically enabled by wake up */
+ 146:../emlib/src/em_emu.c ****   if ( ! (cmuStatus & CMU_STATUS_HFRCOENS) )
+ 189              		.loc 3 146 0
+ 190 007e 094B     		ldr	r3, .L22+4
+ 191 0080 1B88     		ldrh	r3, [r3]
+ 192 0082 03F00103 		and	r3, r3, #1
+ 193 0086 002B     		cmp	r3, #0
+ 194 0088 02D1     		bne	.L17
+ 147:../emlib/src/em_emu.c ****   {
+ 148:../emlib/src/em_emu.c ****     CMU->OSCENCMD = CMU_OSCENCMD_HFRCODIS;
+ 195              		.loc 3 148 0
+ 196 008a 054B     		ldr	r3, .L22
+ 197 008c 0222     		movs	r2, #2
+ 198 008e 1A62     		str	r2, [r3, #32]
+ 199              	.L17:
+ 149:../emlib/src/em_emu.c ****   }
+ 150:../emlib/src/em_emu.c **** 
+ 151:../emlib/src/em_emu.c ****   /* Restore CMU register locking */
+ 152:../emlib/src/em_emu.c ****   if (cmuLocked)
+ 200              		.loc 3 152 0
+ 201 0090 019B     		ldr	r3, [sp, #4]
+ 202 0092 002B     		cmp	r3, #0
+ 203 0094 01D0     		beq	.L8
+ARM GAS  /tmp/ccbsZeEa.s 			page 23
+
+
+ 153:../emlib/src/em_emu.c ****   {
+ 154:../emlib/src/em_emu.c ****     CMU_Lock();
+ 204              		.loc 3 154 0
+ 205 0096 FFF7FEFF 		bl	CMU_Lock
+ 206              	.L8:
+ 155:../emlib/src/em_emu.c ****   }
+ 156:../emlib/src/em_emu.c **** }
+ 207              		.loc 3 156 0
+ 208 009a 03B0     		add	sp, sp, #12
+ 209              		@ sp needed
+ 210 009c 5DF804FB 		ldr	pc, [sp], #4
+ 211              	.L23:
+ 212              		.align	2
+ 213              	.L22:
+ 214 00a0 00800C40 		.word	1074561024
+ 215 00a4 00000000 		.word	cmuStatus
+ 216              		.cfi_endproc
+ 217              	.LFE76:
+ 219              		.section	.text.EMU_EnterEM2,"ax",%progbits
+ 220              		.align	2
+ 221              		.global	EMU_EnterEM2
+ 222              		.thumb
+ 223              		.thumb_func
+ 225              	EMU_EnterEM2:
+ 226              	.LFB77:
+ 157:../emlib/src/em_emu.c **** 
+ 158:../emlib/src/em_emu.c **** /** @endcond */
+ 159:../emlib/src/em_emu.c **** 
+ 160:../emlib/src/em_emu.c **** 
+ 161:../emlib/src/em_emu.c **** /*******************************************************************************
+ 162:../emlib/src/em_emu.c ****  **************************   GLOBAL FUNCTIONS   *******************************
+ 163:../emlib/src/em_emu.c ****  ******************************************************************************/
+ 164:../emlib/src/em_emu.c **** 
+ 165:../emlib/src/em_emu.c **** /***************************************************************************//**
+ 166:../emlib/src/em_emu.c ****  * @brief
+ 167:../emlib/src/em_emu.c ****  *   Enter energy mode 2 (EM2).
+ 168:../emlib/src/em_emu.c ****  *
+ 169:../emlib/src/em_emu.c ****  * @details
+ 170:../emlib/src/em_emu.c ****  *   When entering EM2, the high frequency clocks are disabled, ie HFXO, HFRCO
+ 171:../emlib/src/em_emu.c ****  *   and AUXHFRCO (for AUXHFRCO, see exception note below). When re-entering
+ 172:../emlib/src/em_emu.c ****  *   EM0, HFRCO is re-enabled and the core will be clocked by the configured
+ 173:../emlib/src/em_emu.c ****  *   HFRCO band. This ensures a quick wakeup from EM2.
+ 174:../emlib/src/em_emu.c ****  *
+ 175:../emlib/src/em_emu.c ****  *   However, prior to entering EM2, the core may have been using another
+ 176:../emlib/src/em_emu.c ****  *   oscillator than HFRCO. The @p restore parameter gives the user the option
+ 177:../emlib/src/em_emu.c ****  *   to restore all HF oscillators according to state prior to entering EM2,
+ 178:../emlib/src/em_emu.c ****  *   as well as the clock used to clock the core. This restore procedure is
+ 179:../emlib/src/em_emu.c ****  *   handled by SW. However, since handled by SW, it will not be restored
+ 180:../emlib/src/em_emu.c ****  *   before completing the interrupt function(s) waking up the core!
+ 181:../emlib/src/em_emu.c ****  *
+ 182:../emlib/src/em_emu.c ****  * @note
+ 183:../emlib/src/em_emu.c ****  *   If restoring core clock to use the HFXO oscillator, which has been
+ 184:../emlib/src/em_emu.c ****  *   disabled during EM2 mode, this function will stall until the oscillator
+ 185:../emlib/src/em_emu.c ****  *   has stabilized. Stalling time can be reduced by adding interrupt
+ 186:../emlib/src/em_emu.c ****  *   support detecting stable oscillator, and an asynchronous switch to the
+ 187:../emlib/src/em_emu.c ****  *   original oscillator. See CMU documentation. Such a feature is however
+ 188:../emlib/src/em_emu.c ****  *   outside the scope of the implementation in this function.
+ARM GAS  /tmp/ccbsZeEa.s 			page 24
+
+
+ 189:../emlib/src/em_emu.c ****  * @par
+ 190:../emlib/src/em_emu.c ****  *   If HFXO is re-enabled by this function, and NOT used to clock the core,
+ 191:../emlib/src/em_emu.c ****  *   this function will not wait for HFXO to stabilize. This must be considered
+ 192:../emlib/src/em_emu.c ****  *   by the application if trying to use features relying on that oscillator
+ 193:../emlib/src/em_emu.c ****  *   upon return.
+ 194:../emlib/src/em_emu.c ****  * @par
+ 195:../emlib/src/em_emu.c ****  *   If a debugger is attached, the AUXHFRCO will not be disabled if enabled
+ 196:../emlib/src/em_emu.c ****  *   upon entering EM2. It will thus remain enabled when returning to EM0
+ 197:../emlib/src/em_emu.c ****  *   regardless of the @p restore parameter.
+ 198:../emlib/src/em_emu.c ****  *
+ 199:../emlib/src/em_emu.c ****  * @param[in] restore
+ 200:../emlib/src/em_emu.c ****  *   @li true - restore oscillators and clocks, see function details.
+ 201:../emlib/src/em_emu.c ****  *   @li false - do not restore oscillators and clocks, see function details.
+ 202:../emlib/src/em_emu.c ****  * @par
+ 203:../emlib/src/em_emu.c ****  *   The @p restore option should only be used if all clock control is done
+ 204:../emlib/src/em_emu.c ****  *   via the CMU API.
+ 205:../emlib/src/em_emu.c ****  ******************************************************************************/
+ 206:../emlib/src/em_emu.c **** void EMU_EnterEM2(bool restore)
+ 207:../emlib/src/em_emu.c **** {
+ 227              		.loc 3 207 0
+ 228              		.cfi_startproc
+ 229              		@ args = 0, pretend = 0, frame = 8
+ 230              		@ frame_needed = 0, uses_anonymous_args = 0
+ 231 0000 00B5     		push	{lr}
+ 232              		.cfi_def_cfa_offset 4
+ 233              		.cfi_offset 14, -4
+ 234 0002 83B0     		sub	sp, sp, #12
+ 235              		.cfi_def_cfa_offset 16
+ 236 0004 0346     		mov	r3, r0
+ 237 0006 8DF80730 		strb	r3, [sp, #7]
+ 208:../emlib/src/em_emu.c ****   /* Auto-update CMU status just in case before entering energy mode. */
+ 209:../emlib/src/em_emu.c ****   /* This variable is normally kept up-to-date by the CMU API. */
+ 210:../emlib/src/em_emu.c ****   cmuStatus = (uint16_t)(CMU->STATUS);
+ 238              		.loc 3 210 0
+ 239 000a 0F4B     		ldr	r3, .L27
+ 240 000c DB6A     		ldr	r3, [r3, #44]
+ 241 000e 9AB2     		uxth	r2, r3
+ 242 0010 0E4B     		ldr	r3, .L27+4
+ 243 0012 1A80     		strh	r2, [r3]	@ movhi
+ 211:../emlib/src/em_emu.c **** 
+ 212:../emlib/src/em_emu.c ****   /* Enter Cortex-M3 deep sleep mode */
+ 213:../emlib/src/em_emu.c ****   SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+ 244              		.loc 3 213 0
+ 245 0014 0E4B     		ldr	r3, .L27+8
+ 246 0016 0E4A     		ldr	r2, .L27+8
+ 247 0018 1269     		ldr	r2, [r2, #16]
+ 248 001a 42F00402 		orr	r2, r2, #4
+ 249 001e 1A61     		str	r2, [r3, #16]
+ 250              	.LBB6:
+ 251              	.LBB7:
+ 252              		.file 4 "../CMSIS/Include/core_cmInstr.h"
+   1:../CMSIS/Include/core_cmInstr.h **** /**************************************************************************//**
+   2:../CMSIS/Include/core_cmInstr.h ****  * @file     core_cmInstr.h
+   3:../CMSIS/Include/core_cmInstr.h ****  * @brief    CMSIS Cortex-M Core Instruction Access Header File
+   4:../CMSIS/Include/core_cmInstr.h ****  * @version  V3.20
+   5:../CMSIS/Include/core_cmInstr.h ****  * @date     05. March 2013
+   6:../CMSIS/Include/core_cmInstr.h ****  *
+ARM GAS  /tmp/ccbsZeEa.s 			page 25
+
+
+   7:../CMSIS/Include/core_cmInstr.h ****  * @note
+   8:../CMSIS/Include/core_cmInstr.h ****  *
+   9:../CMSIS/Include/core_cmInstr.h ****  ******************************************************************************/
+  10:../CMSIS/Include/core_cmInstr.h **** /* Copyright (c) 2009 - 2013 ARM LIMITED
+  11:../CMSIS/Include/core_cmInstr.h **** 
+  12:../CMSIS/Include/core_cmInstr.h ****    All rights reserved.
+  13:../CMSIS/Include/core_cmInstr.h ****    Redistribution and use in source and binary forms, with or without
+  14:../CMSIS/Include/core_cmInstr.h ****    modification, are permitted provided that the following conditions are met:
+  15:../CMSIS/Include/core_cmInstr.h ****    - Redistributions of source code must retain the above copyright
+  16:../CMSIS/Include/core_cmInstr.h ****      notice, this list of conditions and the following disclaimer.
+  17:../CMSIS/Include/core_cmInstr.h ****    - Redistributions in binary form must reproduce the above copyright
+  18:../CMSIS/Include/core_cmInstr.h ****      notice, this list of conditions and the following disclaimer in the
+  19:../CMSIS/Include/core_cmInstr.h ****      documentation and/or other materials provided with the distribution.
+  20:../CMSIS/Include/core_cmInstr.h ****    - Neither the name of ARM nor the names of its contributors may be used
+  21:../CMSIS/Include/core_cmInstr.h ****      to endorse or promote products derived from this software without
+  22:../CMSIS/Include/core_cmInstr.h ****      specific prior written permission.
+  23:../CMSIS/Include/core_cmInstr.h ****    *
+  24:../CMSIS/Include/core_cmInstr.h ****    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  25:../CMSIS/Include/core_cmInstr.h ****    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  26:../CMSIS/Include/core_cmInstr.h ****    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  27:../CMSIS/Include/core_cmInstr.h ****    ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
+  28:../CMSIS/Include/core_cmInstr.h ****    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  29:../CMSIS/Include/core_cmInstr.h ****    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  30:../CMSIS/Include/core_cmInstr.h ****    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  31:../CMSIS/Include/core_cmInstr.h ****    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  32:../CMSIS/Include/core_cmInstr.h ****    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  33:../CMSIS/Include/core_cmInstr.h ****    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  34:../CMSIS/Include/core_cmInstr.h ****    POSSIBILITY OF SUCH DAMAGE.
+  35:../CMSIS/Include/core_cmInstr.h ****    ---------------------------------------------------------------------------*/
+  36:../CMSIS/Include/core_cmInstr.h **** 
+  37:../CMSIS/Include/core_cmInstr.h **** 
+  38:../CMSIS/Include/core_cmInstr.h **** #ifndef __CORE_CMINSTR_H
+  39:../CMSIS/Include/core_cmInstr.h **** #define __CORE_CMINSTR_H
+  40:../CMSIS/Include/core_cmInstr.h **** 
+  41:../CMSIS/Include/core_cmInstr.h **** 
+  42:../CMSIS/Include/core_cmInstr.h **** /* ##########################  Core Instruction Access  ######################### */
+  43:../CMSIS/Include/core_cmInstr.h **** /** \defgroup CMSIS_Core_InstructionInterface CMSIS Core Instruction Interface
+  44:../CMSIS/Include/core_cmInstr.h ****   Access to dedicated instructions
+  45:../CMSIS/Include/core_cmInstr.h ****   @{
+  46:../CMSIS/Include/core_cmInstr.h **** */
+  47:../CMSIS/Include/core_cmInstr.h **** 
+  48:../CMSIS/Include/core_cmInstr.h **** #if   defined ( __CC_ARM ) /*------------------RealView Compiler -----------------*/
+  49:../CMSIS/Include/core_cmInstr.h **** /* ARM armcc specific functions */
+  50:../CMSIS/Include/core_cmInstr.h **** 
+  51:../CMSIS/Include/core_cmInstr.h **** #if (__ARMCC_VERSION < 400677)
+  52:../CMSIS/Include/core_cmInstr.h ****   #error "Please use ARM Compiler Toolchain V4.0.677 or later!"
+  53:../CMSIS/Include/core_cmInstr.h **** #endif
+  54:../CMSIS/Include/core_cmInstr.h **** 
+  55:../CMSIS/Include/core_cmInstr.h **** 
+  56:../CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+  57:../CMSIS/Include/core_cmInstr.h **** 
+  58:../CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+  59:../CMSIS/Include/core_cmInstr.h ****  */
+  60:../CMSIS/Include/core_cmInstr.h **** #define __NOP                             __nop
+  61:../CMSIS/Include/core_cmInstr.h **** 
+  62:../CMSIS/Include/core_cmInstr.h **** 
+  63:../CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+ARM GAS  /tmp/ccbsZeEa.s 			page 26
+
+
+  64:../CMSIS/Include/core_cmInstr.h **** 
+  65:../CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+  66:../CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+  67:../CMSIS/Include/core_cmInstr.h ****  */
+  68:../CMSIS/Include/core_cmInstr.h **** #define __WFI                             __wfi
+  69:../CMSIS/Include/core_cmInstr.h **** 
+  70:../CMSIS/Include/core_cmInstr.h **** 
+  71:../CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Event
+  72:../CMSIS/Include/core_cmInstr.h **** 
+  73:../CMSIS/Include/core_cmInstr.h ****     Wait For Event is a hint instruction that permits the processor to enter
+  74:../CMSIS/Include/core_cmInstr.h ****     a low-power state until one of a number of events occurs.
+  75:../CMSIS/Include/core_cmInstr.h ****  */
+  76:../CMSIS/Include/core_cmInstr.h **** #define __WFE                             __wfe
+  77:../CMSIS/Include/core_cmInstr.h **** 
+  78:../CMSIS/Include/core_cmInstr.h **** 
+  79:../CMSIS/Include/core_cmInstr.h **** /** \brief  Send Event
+  80:../CMSIS/Include/core_cmInstr.h **** 
+  81:../CMSIS/Include/core_cmInstr.h ****     Send Event is a hint instruction. It causes an event to be signaled to the CPU.
+  82:../CMSIS/Include/core_cmInstr.h ****  */
+  83:../CMSIS/Include/core_cmInstr.h **** #define __SEV                             __sev
+  84:../CMSIS/Include/core_cmInstr.h **** 
+  85:../CMSIS/Include/core_cmInstr.h **** 
+  86:../CMSIS/Include/core_cmInstr.h **** /** \brief  Instruction Synchronization Barrier
+  87:../CMSIS/Include/core_cmInstr.h **** 
+  88:../CMSIS/Include/core_cmInstr.h ****     Instruction Synchronization Barrier flushes the pipeline in the processor,
+  89:../CMSIS/Include/core_cmInstr.h ****     so that all instructions following the ISB are fetched from cache or
+  90:../CMSIS/Include/core_cmInstr.h ****     memory, after the instruction has been completed.
+  91:../CMSIS/Include/core_cmInstr.h ****  */
+  92:../CMSIS/Include/core_cmInstr.h **** #define __ISB()                           __isb(0xF)
+  93:../CMSIS/Include/core_cmInstr.h **** 
+  94:../CMSIS/Include/core_cmInstr.h **** 
+  95:../CMSIS/Include/core_cmInstr.h **** /** \brief  Data Synchronization Barrier
+  96:../CMSIS/Include/core_cmInstr.h **** 
+  97:../CMSIS/Include/core_cmInstr.h ****     This function acts as a special kind of Data Memory Barrier.
+  98:../CMSIS/Include/core_cmInstr.h ****     It completes when all explicit memory accesses before this instruction complete.
+  99:../CMSIS/Include/core_cmInstr.h ****  */
+ 100:../CMSIS/Include/core_cmInstr.h **** #define __DSB()                           __dsb(0xF)
+ 101:../CMSIS/Include/core_cmInstr.h **** 
+ 102:../CMSIS/Include/core_cmInstr.h **** 
+ 103:../CMSIS/Include/core_cmInstr.h **** /** \brief  Data Memory Barrier
+ 104:../CMSIS/Include/core_cmInstr.h **** 
+ 105:../CMSIS/Include/core_cmInstr.h ****     This function ensures the apparent order of the explicit memory operations before
+ 106:../CMSIS/Include/core_cmInstr.h ****     and after the instruction, without ensuring their completion.
+ 107:../CMSIS/Include/core_cmInstr.h ****  */
+ 108:../CMSIS/Include/core_cmInstr.h **** #define __DMB()                           __dmb(0xF)
+ 109:../CMSIS/Include/core_cmInstr.h **** 
+ 110:../CMSIS/Include/core_cmInstr.h **** 
+ 111:../CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (32 bit)
+ 112:../CMSIS/Include/core_cmInstr.h **** 
+ 113:../CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in integer value.
+ 114:../CMSIS/Include/core_cmInstr.h **** 
+ 115:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 116:../CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 117:../CMSIS/Include/core_cmInstr.h ****  */
+ 118:../CMSIS/Include/core_cmInstr.h **** #define __REV                             __rev
+ 119:../CMSIS/Include/core_cmInstr.h **** 
+ 120:../CMSIS/Include/core_cmInstr.h **** 
+ARM GAS  /tmp/ccbsZeEa.s 			page 27
+
+
+ 121:../CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order (16 bit)
+ 122:../CMSIS/Include/core_cmInstr.h **** 
+ 123:../CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in two unsigned short values.
+ 124:../CMSIS/Include/core_cmInstr.h **** 
+ 125:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 126:../CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 127:../CMSIS/Include/core_cmInstr.h ****  */
+ 128:../CMSIS/Include/core_cmInstr.h **** #ifndef __NO_EMBEDDED_ASM
+ 129:../CMSIS/Include/core_cmInstr.h **** __attribute__((section(".rev16_text"))) __STATIC_INLINE __ASM uint32_t __REV16(uint32_t value)
+ 130:../CMSIS/Include/core_cmInstr.h **** {
+ 131:../CMSIS/Include/core_cmInstr.h ****   rev16 r0, r0
+ 132:../CMSIS/Include/core_cmInstr.h ****   bx lr
+ 133:../CMSIS/Include/core_cmInstr.h **** }
+ 134:../CMSIS/Include/core_cmInstr.h **** #endif
+ 135:../CMSIS/Include/core_cmInstr.h **** 
+ 136:../CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse byte order in signed short value
+ 137:../CMSIS/Include/core_cmInstr.h **** 
+ 138:../CMSIS/Include/core_cmInstr.h ****     This function reverses the byte order in a signed short value with sign extension to integer.
+ 139:../CMSIS/Include/core_cmInstr.h **** 
+ 140:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 141:../CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 142:../CMSIS/Include/core_cmInstr.h ****  */
+ 143:../CMSIS/Include/core_cmInstr.h **** #ifndef __NO_EMBEDDED_ASM
+ 144:../CMSIS/Include/core_cmInstr.h **** __attribute__((section(".revsh_text"))) __STATIC_INLINE __ASM int32_t __REVSH(int32_t value)
+ 145:../CMSIS/Include/core_cmInstr.h **** {
+ 146:../CMSIS/Include/core_cmInstr.h ****   revsh r0, r0
+ 147:../CMSIS/Include/core_cmInstr.h ****   bx lr
+ 148:../CMSIS/Include/core_cmInstr.h **** }
+ 149:../CMSIS/Include/core_cmInstr.h **** #endif
+ 150:../CMSIS/Include/core_cmInstr.h **** 
+ 151:../CMSIS/Include/core_cmInstr.h **** 
+ 152:../CMSIS/Include/core_cmInstr.h **** /** \brief  Rotate Right in unsigned value (32 bit)
+ 153:../CMSIS/Include/core_cmInstr.h **** 
+ 154:../CMSIS/Include/core_cmInstr.h ****     This function Rotate Right (immediate) provides the value of the contents of a register rotated
+ 155:../CMSIS/Include/core_cmInstr.h **** 
+ 156:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to rotate
+ 157:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Number of Bits to rotate
+ 158:../CMSIS/Include/core_cmInstr.h ****     \return               Rotated value
+ 159:../CMSIS/Include/core_cmInstr.h ****  */
+ 160:../CMSIS/Include/core_cmInstr.h **** #define __ROR                             __ror
+ 161:../CMSIS/Include/core_cmInstr.h **** 
+ 162:../CMSIS/Include/core_cmInstr.h **** 
+ 163:../CMSIS/Include/core_cmInstr.h **** /** \brief  Breakpoint
+ 164:../CMSIS/Include/core_cmInstr.h **** 
+ 165:../CMSIS/Include/core_cmInstr.h ****     This function causes the processor to enter Debug state.
+ 166:../CMSIS/Include/core_cmInstr.h ****     Debug tools can use this to investigate system state when the instruction at a particular addre
+ 167:../CMSIS/Include/core_cmInstr.h **** 
+ 168:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  is ignored by the processor.
+ 169:../CMSIS/Include/core_cmInstr.h ****                    If required, a debugger can use it to store additional information about the bre
+ 170:../CMSIS/Include/core_cmInstr.h ****  */
+ 171:../CMSIS/Include/core_cmInstr.h **** #define __BKPT(value)                       __breakpoint(value)
+ 172:../CMSIS/Include/core_cmInstr.h **** 
+ 173:../CMSIS/Include/core_cmInstr.h **** 
+ 174:../CMSIS/Include/core_cmInstr.h **** #if       (__CORTEX_M >= 0x03)
+ 175:../CMSIS/Include/core_cmInstr.h **** 
+ 176:../CMSIS/Include/core_cmInstr.h **** /** \brief  Reverse bit order of value
+ 177:../CMSIS/Include/core_cmInstr.h **** 
+ARM GAS  /tmp/ccbsZeEa.s 			page 28
+
+
+ 178:../CMSIS/Include/core_cmInstr.h ****     This function reverses the bit order of the given value.
+ 179:../CMSIS/Include/core_cmInstr.h **** 
+ 180:../CMSIS/Include/core_cmInstr.h ****     \param [in]    value  Value to reverse
+ 181:../CMSIS/Include/core_cmInstr.h ****     \return               Reversed value
+ 182:../CMSIS/Include/core_cmInstr.h ****  */
+ 183:../CMSIS/Include/core_cmInstr.h **** #define __RBIT                            __rbit
+ 184:../CMSIS/Include/core_cmInstr.h **** 
+ 185:../CMSIS/Include/core_cmInstr.h **** 
+ 186:../CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (8 bit)
+ 187:../CMSIS/Include/core_cmInstr.h **** 
+ 188:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 8 bit value.
+ 189:../CMSIS/Include/core_cmInstr.h **** 
+ 190:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 191:../CMSIS/Include/core_cmInstr.h ****     \return             value of type uint8_t at (*ptr)
+ 192:../CMSIS/Include/core_cmInstr.h ****  */
+ 193:../CMSIS/Include/core_cmInstr.h **** #define __LDREXB(ptr)                     ((uint8_t ) __ldrex(ptr))
+ 194:../CMSIS/Include/core_cmInstr.h **** 
+ 195:../CMSIS/Include/core_cmInstr.h **** 
+ 196:../CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (16 bit)
+ 197:../CMSIS/Include/core_cmInstr.h **** 
+ 198:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 16 bit values.
+ 199:../CMSIS/Include/core_cmInstr.h **** 
+ 200:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 201:../CMSIS/Include/core_cmInstr.h ****     \return        value of type uint16_t at (*ptr)
+ 202:../CMSIS/Include/core_cmInstr.h ****  */
+ 203:../CMSIS/Include/core_cmInstr.h **** #define __LDREXH(ptr)                     ((uint16_t) __ldrex(ptr))
+ 204:../CMSIS/Include/core_cmInstr.h **** 
+ 205:../CMSIS/Include/core_cmInstr.h **** 
+ 206:../CMSIS/Include/core_cmInstr.h **** /** \brief  LDR Exclusive (32 bit)
+ 207:../CMSIS/Include/core_cmInstr.h **** 
+ 208:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive LDR command for 32 bit values.
+ 209:../CMSIS/Include/core_cmInstr.h **** 
+ 210:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to data
+ 211:../CMSIS/Include/core_cmInstr.h ****     \return        value of type uint32_t at (*ptr)
+ 212:../CMSIS/Include/core_cmInstr.h ****  */
+ 213:../CMSIS/Include/core_cmInstr.h **** #define __LDREXW(ptr)                     ((uint32_t ) __ldrex(ptr))
+ 214:../CMSIS/Include/core_cmInstr.h **** 
+ 215:../CMSIS/Include/core_cmInstr.h **** 
+ 216:../CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (8 bit)
+ 217:../CMSIS/Include/core_cmInstr.h **** 
+ 218:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 8 bit values.
+ 219:../CMSIS/Include/core_cmInstr.h **** 
+ 220:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 221:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 222:../CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 223:../CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 224:../CMSIS/Include/core_cmInstr.h ****  */
+ 225:../CMSIS/Include/core_cmInstr.h **** #define __STREXB(value, ptr)              __strex(value, ptr)
+ 226:../CMSIS/Include/core_cmInstr.h **** 
+ 227:../CMSIS/Include/core_cmInstr.h **** 
+ 228:../CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (16 bit)
+ 229:../CMSIS/Include/core_cmInstr.h **** 
+ 230:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 16 bit values.
+ 231:../CMSIS/Include/core_cmInstr.h **** 
+ 232:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 233:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 234:../CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ARM GAS  /tmp/ccbsZeEa.s 			page 29
+
+
+ 235:../CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 236:../CMSIS/Include/core_cmInstr.h ****  */
+ 237:../CMSIS/Include/core_cmInstr.h **** #define __STREXH(value, ptr)              __strex(value, ptr)
+ 238:../CMSIS/Include/core_cmInstr.h **** 
+ 239:../CMSIS/Include/core_cmInstr.h **** 
+ 240:../CMSIS/Include/core_cmInstr.h **** /** \brief  STR Exclusive (32 bit)
+ 241:../CMSIS/Include/core_cmInstr.h **** 
+ 242:../CMSIS/Include/core_cmInstr.h ****     This function performs a exclusive STR command for 32 bit values.
+ 243:../CMSIS/Include/core_cmInstr.h **** 
+ 244:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to store
+ 245:../CMSIS/Include/core_cmInstr.h ****     \param [in]    ptr  Pointer to location
+ 246:../CMSIS/Include/core_cmInstr.h ****     \return          0  Function succeeded
+ 247:../CMSIS/Include/core_cmInstr.h ****     \return          1  Function failed
+ 248:../CMSIS/Include/core_cmInstr.h ****  */
+ 249:../CMSIS/Include/core_cmInstr.h **** #define __STREXW(value, ptr)              __strex(value, ptr)
+ 250:../CMSIS/Include/core_cmInstr.h **** 
+ 251:../CMSIS/Include/core_cmInstr.h **** 
+ 252:../CMSIS/Include/core_cmInstr.h **** /** \brief  Remove the exclusive lock
+ 253:../CMSIS/Include/core_cmInstr.h **** 
+ 254:../CMSIS/Include/core_cmInstr.h ****     This function removes the exclusive lock which is created by LDREX.
+ 255:../CMSIS/Include/core_cmInstr.h **** 
+ 256:../CMSIS/Include/core_cmInstr.h ****  */
+ 257:../CMSIS/Include/core_cmInstr.h **** #define __CLREX                           __clrex
+ 258:../CMSIS/Include/core_cmInstr.h **** 
+ 259:../CMSIS/Include/core_cmInstr.h **** 
+ 260:../CMSIS/Include/core_cmInstr.h **** /** \brief  Signed Saturate
+ 261:../CMSIS/Include/core_cmInstr.h **** 
+ 262:../CMSIS/Include/core_cmInstr.h ****     This function saturates a signed value.
+ 263:../CMSIS/Include/core_cmInstr.h **** 
+ 264:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 265:../CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (1..32)
+ 266:../CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 267:../CMSIS/Include/core_cmInstr.h ****  */
+ 268:../CMSIS/Include/core_cmInstr.h **** #define __SSAT                            __ssat
+ 269:../CMSIS/Include/core_cmInstr.h **** 
+ 270:../CMSIS/Include/core_cmInstr.h **** 
+ 271:../CMSIS/Include/core_cmInstr.h **** /** \brief  Unsigned Saturate
+ 272:../CMSIS/Include/core_cmInstr.h **** 
+ 273:../CMSIS/Include/core_cmInstr.h ****     This function saturates an unsigned value.
+ 274:../CMSIS/Include/core_cmInstr.h **** 
+ 275:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to be saturated
+ 276:../CMSIS/Include/core_cmInstr.h ****     \param [in]    sat  Bit position to saturate to (0..31)
+ 277:../CMSIS/Include/core_cmInstr.h ****     \return             Saturated value
+ 278:../CMSIS/Include/core_cmInstr.h ****  */
+ 279:../CMSIS/Include/core_cmInstr.h **** #define __USAT                            __usat
+ 280:../CMSIS/Include/core_cmInstr.h **** 
+ 281:../CMSIS/Include/core_cmInstr.h **** 
+ 282:../CMSIS/Include/core_cmInstr.h **** /** \brief  Count leading zeros
+ 283:../CMSIS/Include/core_cmInstr.h **** 
+ 284:../CMSIS/Include/core_cmInstr.h ****     This function counts the number of leading zeros of a data value.
+ 285:../CMSIS/Include/core_cmInstr.h **** 
+ 286:../CMSIS/Include/core_cmInstr.h ****     \param [in]  value  Value to count the leading zeros
+ 287:../CMSIS/Include/core_cmInstr.h ****     \return             number of leading zeros in value
+ 288:../CMSIS/Include/core_cmInstr.h ****  */
+ 289:../CMSIS/Include/core_cmInstr.h **** #define __CLZ                             __clz
+ 290:../CMSIS/Include/core_cmInstr.h **** 
+ 291:../CMSIS/Include/core_cmInstr.h **** #endif /* (__CORTEX_M >= 0x03) */
+ARM GAS  /tmp/ccbsZeEa.s 			page 30
+
+
+ 292:../CMSIS/Include/core_cmInstr.h **** 
+ 293:../CMSIS/Include/core_cmInstr.h **** 
+ 294:../CMSIS/Include/core_cmInstr.h **** 
+ 295:../CMSIS/Include/core_cmInstr.h **** #elif defined ( __ICCARM__ ) /*------------------ ICC Compiler -------------------*/
+ 296:../CMSIS/Include/core_cmInstr.h **** /* IAR iccarm specific functions */
+ 297:../CMSIS/Include/core_cmInstr.h **** 
+ 298:../CMSIS/Include/core_cmInstr.h **** #include <cmsis_iar.h>
+ 299:../CMSIS/Include/core_cmInstr.h **** 
+ 300:../CMSIS/Include/core_cmInstr.h **** 
+ 301:../CMSIS/Include/core_cmInstr.h **** #elif defined ( __TMS470__ ) /*---------------- TI CCS Compiler ------------------*/
+ 302:../CMSIS/Include/core_cmInstr.h **** /* TI CCS specific functions */
+ 303:../CMSIS/Include/core_cmInstr.h **** 
+ 304:../CMSIS/Include/core_cmInstr.h **** #include <cmsis_ccs.h>
+ 305:../CMSIS/Include/core_cmInstr.h **** 
+ 306:../CMSIS/Include/core_cmInstr.h **** 
+ 307:../CMSIS/Include/core_cmInstr.h **** #elif defined ( __GNUC__ ) /*------------------ GNU Compiler ---------------------*/
+ 308:../CMSIS/Include/core_cmInstr.h **** /* GNU gcc specific functions */
+ 309:../CMSIS/Include/core_cmInstr.h **** 
+ 310:../CMSIS/Include/core_cmInstr.h **** /* Define macros for porting to both thumb1 and thumb2.
+ 311:../CMSIS/Include/core_cmInstr.h ****  * For thumb1, use low register (r0-r7), specified by constrant "l"
+ 312:../CMSIS/Include/core_cmInstr.h ****  * Otherwise, use general registers, specified by constrant "r" */
+ 313:../CMSIS/Include/core_cmInstr.h **** #if defined (__thumb__) && !defined (__thumb2__)
+ 314:../CMSIS/Include/core_cmInstr.h **** #define __CMSIS_GCC_OUT_REG(r) "=l" (r)
+ 315:../CMSIS/Include/core_cmInstr.h **** #define __CMSIS_GCC_USE_REG(r) "l" (r)
+ 316:../CMSIS/Include/core_cmInstr.h **** #else
+ 317:../CMSIS/Include/core_cmInstr.h **** #define __CMSIS_GCC_OUT_REG(r) "=r" (r)
+ 318:../CMSIS/Include/core_cmInstr.h **** #define __CMSIS_GCC_USE_REG(r) "r" (r)
+ 319:../CMSIS/Include/core_cmInstr.h **** #endif
+ 320:../CMSIS/Include/core_cmInstr.h **** 
+ 321:../CMSIS/Include/core_cmInstr.h **** /** \brief  No Operation
+ 322:../CMSIS/Include/core_cmInstr.h **** 
+ 323:../CMSIS/Include/core_cmInstr.h ****     No Operation does nothing. This instruction can be used for code alignment purposes.
+ 324:../CMSIS/Include/core_cmInstr.h ****  */
+ 325:../CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) __STATIC_INLINE void __NOP(void)
+ 326:../CMSIS/Include/core_cmInstr.h **** {
+ 327:../CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("nop");
+ 328:../CMSIS/Include/core_cmInstr.h **** }
+ 329:../CMSIS/Include/core_cmInstr.h **** 
+ 330:../CMSIS/Include/core_cmInstr.h **** 
+ 331:../CMSIS/Include/core_cmInstr.h **** /** \brief  Wait For Interrupt
+ 332:../CMSIS/Include/core_cmInstr.h **** 
+ 333:../CMSIS/Include/core_cmInstr.h ****     Wait For Interrupt is a hint instruction that suspends execution
+ 334:../CMSIS/Include/core_cmInstr.h ****     until one of a number of events occurs.
+ 335:../CMSIS/Include/core_cmInstr.h ****  */
+ 336:../CMSIS/Include/core_cmInstr.h **** __attribute__( ( always_inline ) ) __STATIC_INLINE void __WFI(void)
+ 337:../CMSIS/Include/core_cmInstr.h **** {
+ 338:../CMSIS/Include/core_cmInstr.h ****   __ASM volatile ("wfi");
+ 253              		.loc 4 338 0
+ 254              	@ 338 "../CMSIS/Include/core_cmInstr.h" 1
+ 255 0020 30BF     		wfi
+ 256              	@ 0 "" 2
+ 257              		.thumb
+ 258              	.LBE7:
+ 259              	.LBE6:
+ 214:../emlib/src/em_emu.c ****   __WFI();
+ 215:../emlib/src/em_emu.c **** 
+ 216:../emlib/src/em_emu.c ****   /* Restore oscillators/clocks if specified */
+ARM GAS  /tmp/ccbsZeEa.s 			page 31
+
+
+ 217:../emlib/src/em_emu.c ****   if (restore)
+ 260              		.loc 3 217 0
+ 261 0022 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 262 0026 002B     		cmp	r3, #0
+ 263 0028 02D0     		beq	.L25
+ 218:../emlib/src/em_emu.c ****   {
+ 219:../emlib/src/em_emu.c ****     EMU_Restore();
+ 264              		.loc 3 219 0
+ 265 002a FFF7FEFF 		bl	EMU_Restore
+ 266 002e 07E0     		b	.L24
+ 267              	.L25:
+ 220:../emlib/src/em_emu.c ****   }
+ 221:../emlib/src/em_emu.c ****   /* If not restoring, and original clock was not HFRCO, we have to */
+ 222:../emlib/src/em_emu.c ****   /* update CMSIS core clock variable since core clock has changed */
+ 223:../emlib/src/em_emu.c ****   /* to using HFRCO. */
+ 224:../emlib/src/em_emu.c ****   else if (!(cmuStatus & CMU_STATUS_HFRCOSEL))
+ 268              		.loc 3 224 0
+ 269 0030 064B     		ldr	r3, .L27+4
+ 270 0032 1B88     		ldrh	r3, [r3]
+ 271 0034 03F48063 		and	r3, r3, #1024
+ 272 0038 002B     		cmp	r3, #0
+ 273 003a 01D1     		bne	.L24
+ 225:../emlib/src/em_emu.c ****   {
+ 226:../emlib/src/em_emu.c ****     SystemCoreClockUpdate();
+ 274              		.loc 3 226 0
+ 275 003c FFF7FEFF 		bl	SystemCoreClockUpdate
+ 276              	.L24:
+ 227:../emlib/src/em_emu.c ****   }
+ 228:../emlib/src/em_emu.c **** }
+ 277              		.loc 3 228 0
+ 278 0040 03B0     		add	sp, sp, #12
+ 279              		@ sp needed
+ 280 0042 5DF804FB 		ldr	pc, [sp], #4
+ 281              	.L28:
+ 282 0046 00BF     		.align	2
+ 283              	.L27:
+ 284 0048 00800C40 		.word	1074561024
+ 285 004c 00000000 		.word	cmuStatus
+ 286 0050 00ED00E0 		.word	-536810240
+ 287              		.cfi_endproc
+ 288              	.LFE77:
+ 290              		.section	.text.EMU_EnterEM3,"ax",%progbits
+ 291              		.align	2
+ 292              		.global	EMU_EnterEM3
+ 293              		.thumb
+ 294              		.thumb_func
+ 296              	EMU_EnterEM3:
+ 297              	.LFB78:
+ 229:../emlib/src/em_emu.c **** 
+ 230:../emlib/src/em_emu.c **** 
+ 231:../emlib/src/em_emu.c **** /***************************************************************************//**
+ 232:../emlib/src/em_emu.c ****  * @brief
+ 233:../emlib/src/em_emu.c ****  *   Enter energy mode 3 (EM3).
+ 234:../emlib/src/em_emu.c ****  *
+ 235:../emlib/src/em_emu.c ****  * @details
+ 236:../emlib/src/em_emu.c ****  *   When entering EM3, the high frequency clocks are disabled by HW, ie HFXO,
+ 237:../emlib/src/em_emu.c ****  *   HFRCO and AUXHFRCO (for AUXHFRCO, see exception note below). In addition,
+ARM GAS  /tmp/ccbsZeEa.s 			page 32
+
+
+ 238:../emlib/src/em_emu.c ****  *   the low frequency clocks, ie LFXO and LFRCO are disabled by SW. When
+ 239:../emlib/src/em_emu.c ****  *   re-entering EM0, HFRCO is re-enabled and the core will be clocked by the
+ 240:../emlib/src/em_emu.c ****  *   configured HFRCO band. This ensures a quick wakeup from EM3.
+ 241:../emlib/src/em_emu.c ****  *
+ 242:../emlib/src/em_emu.c ****  *   However, prior to entering EM3, the core may have been using another
+ 243:../emlib/src/em_emu.c ****  *   oscillator than HFRCO. The @p restore parameter gives the user the option
+ 244:../emlib/src/em_emu.c ****  *   to restore all HF/LF oscillators according to state prior to entering EM3,
+ 245:../emlib/src/em_emu.c ****  *   as well as the clock used to clock the core. This restore procedure is
+ 246:../emlib/src/em_emu.c ****  *   handled by SW. However, since handled by SW, it will not be restored
+ 247:../emlib/src/em_emu.c ****  *   before completing the interrupt function(s) waking up the core!
+ 248:../emlib/src/em_emu.c ****  *
+ 249:../emlib/src/em_emu.c ****  * @note
+ 250:../emlib/src/em_emu.c ****  *   If restoring core clock to use an oscillator other than HFRCO, this
+ 251:../emlib/src/em_emu.c ****  *   function will stall until the oscillator has stabilized. Stalling time
+ 252:../emlib/src/em_emu.c ****  *   can be reduced by adding interrupt support detecting stable oscillator,
+ 253:../emlib/src/em_emu.c ****  *   and an asynchronous switch to the original oscillator. See CMU
+ 254:../emlib/src/em_emu.c ****  *   documentation. Such a feature is however outside the scope of the
+ 255:../emlib/src/em_emu.c ****  *   implementation in this function.
+ 256:../emlib/src/em_emu.c ****  * @par
+ 257:../emlib/src/em_emu.c ****  *   If HFXO/LFXO/LFRCO are re-enabled by this function, and NOT used to clock
+ 258:../emlib/src/em_emu.c ****  *   the core, this function will not wait for those oscillators to stabilize.
+ 259:../emlib/src/em_emu.c ****  *   This must be considered by the application if trying to use features
+ 260:../emlib/src/em_emu.c ****  *   relying on those oscillators upon return.
+ 261:../emlib/src/em_emu.c ****  * @par
+ 262:../emlib/src/em_emu.c ****  *   If a debugger is attached, the AUXHFRCO will not be disabled if enabled
+ 263:../emlib/src/em_emu.c ****  *   upon entering EM3. It will thus remain enabled when returning to EM0
+ 264:../emlib/src/em_emu.c ****  *   regardless of the @p restore parameter.
+ 265:../emlib/src/em_emu.c ****  *
+ 266:../emlib/src/em_emu.c ****  * @param[in] restore
+ 267:../emlib/src/em_emu.c ****  *   @li true - restore oscillators and clocks, see function details.
+ 268:../emlib/src/em_emu.c ****  *   @li false - do not restore oscillators and clocks, see function details.
+ 269:../emlib/src/em_emu.c ****  * @par
+ 270:../emlib/src/em_emu.c ****  *   The @p restore option should only be used if all clock control is done
+ 271:../emlib/src/em_emu.c ****  *   via the CMU API.
+ 272:../emlib/src/em_emu.c ****  ******************************************************************************/
+ 273:../emlib/src/em_emu.c **** void EMU_EnterEM3(bool restore)
+ 274:../emlib/src/em_emu.c **** {
+ 298              		.loc 3 274 0
+ 299              		.cfi_startproc
+ 300              		@ args = 0, pretend = 0, frame = 16
+ 301              		@ frame_needed = 0, uses_anonymous_args = 0
+ 302 0000 00B5     		push	{lr}
+ 303              		.cfi_def_cfa_offset 4
+ 304              		.cfi_offset 14, -4
+ 305 0002 85B0     		sub	sp, sp, #20
+ 306              		.cfi_def_cfa_offset 24
+ 307 0004 0346     		mov	r3, r0
+ 308 0006 8DF80730 		strb	r3, [sp, #7]
+ 275:../emlib/src/em_emu.c ****   uint32_t cmuLocked;
+ 276:../emlib/src/em_emu.c **** 
+ 277:../emlib/src/em_emu.c ****   /* Auto-update CMU status just in case before entering energy mode. */
+ 278:../emlib/src/em_emu.c ****   /* This variable is normally kept up-to-date by the CMU API. */
+ 279:../emlib/src/em_emu.c ****   cmuStatus = (uint16_t)(CMU->STATUS);
+ 309              		.loc 3 279 0
+ 310 000a 174B     		ldr	r3, .L33
+ 311 000c DB6A     		ldr	r3, [r3, #44]
+ 312 000e 9AB2     		uxth	r2, r3
+ARM GAS  /tmp/ccbsZeEa.s 			page 33
+
+
+ 313 0010 164B     		ldr	r3, .L33+4
+ 314 0012 1A80     		strh	r2, [r3]	@ movhi
+ 280:../emlib/src/em_emu.c **** 
+ 281:../emlib/src/em_emu.c ****   /* CMU registers may be locked */
+ 282:../emlib/src/em_emu.c ****   cmuLocked = CMU->LOCK & CMU_LOCK_LOCKKEY_LOCKED;
+ 315              		.loc 3 282 0
+ 316 0014 144B     		ldr	r3, .L33
+ 317 0016 D3F88430 		ldr	r3, [r3, #132]
+ 318 001a 03F00103 		and	r3, r3, #1
+ 319 001e 0393     		str	r3, [sp, #12]
+ 283:../emlib/src/em_emu.c ****   CMU_Unlock();
+ 320              		.loc 3 283 0
+ 321 0020 FFF7FEFF 		bl	CMU_Unlock
+ 284:../emlib/src/em_emu.c **** 
+ 285:../emlib/src/em_emu.c ****   /* Disable LF oscillators */
+ 286:../emlib/src/em_emu.c ****   CMU->OSCENCMD = CMU_OSCENCMD_LFXODIS | CMU_OSCENCMD_LFRCODIS;
+ 322              		.loc 3 286 0
+ 323 0024 104B     		ldr	r3, .L33
+ 324 0026 4FF42072 		mov	r2, #640
+ 325 002a 1A62     		str	r2, [r3, #32]
+ 287:../emlib/src/em_emu.c **** 
+ 288:../emlib/src/em_emu.c ****   /* Restore CMU register locking */
+ 289:../emlib/src/em_emu.c ****   if (cmuLocked)
+ 326              		.loc 3 289 0
+ 327 002c 039B     		ldr	r3, [sp, #12]
+ 328 002e 002B     		cmp	r3, #0
+ 329 0030 01D0     		beq	.L30
+ 290:../emlib/src/em_emu.c ****   {
+ 291:../emlib/src/em_emu.c ****     CMU_Lock();
+ 330              		.loc 3 291 0
+ 331 0032 FFF7FEFF 		bl	CMU_Lock
+ 332              	.L30:
+ 292:../emlib/src/em_emu.c ****   }
+ 293:../emlib/src/em_emu.c **** 
+ 294:../emlib/src/em_emu.c ****   /* Enter Cortex-M3 deep sleep mode */
+ 295:../emlib/src/em_emu.c ****   SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+ 333              		.loc 3 295 0
+ 334 0036 0E4B     		ldr	r3, .L33+8
+ 335 0038 0D4A     		ldr	r2, .L33+8
+ 336 003a 1269     		ldr	r2, [r2, #16]
+ 337 003c 42F00402 		orr	r2, r2, #4
+ 338 0040 1A61     		str	r2, [r3, #16]
+ 339              	.LBB8:
+ 340              	.LBB9:
+ 341              		.loc 4 338 0
+ 342              	@ 338 "../CMSIS/Include/core_cmInstr.h" 1
+ 343 0042 30BF     		wfi
+ 344              	@ 0 "" 2
+ 345              		.thumb
+ 346              	.LBE9:
+ 347              	.LBE8:
+ 296:../emlib/src/em_emu.c ****   __WFI();
+ 297:../emlib/src/em_emu.c **** 
+ 298:../emlib/src/em_emu.c ****   /* Restore oscillators/clocks if specified */
+ 299:../emlib/src/em_emu.c ****   if (restore)
+ 348              		.loc 3 299 0
+ 349 0044 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ARM GAS  /tmp/ccbsZeEa.s 			page 34
+
+
+ 350 0048 002B     		cmp	r3, #0
+ 351 004a 02D0     		beq	.L31
+ 300:../emlib/src/em_emu.c ****   {
+ 301:../emlib/src/em_emu.c ****     EMU_Restore();
+ 352              		.loc 3 301 0
+ 353 004c FFF7FEFF 		bl	EMU_Restore
+ 354 0050 07E0     		b	.L29
+ 355              	.L31:
+ 302:../emlib/src/em_emu.c ****   }
+ 303:../emlib/src/em_emu.c ****   /* If not restoring, and original clock was not HFRCO, we have to */
+ 304:../emlib/src/em_emu.c ****   /* update CMSIS core clock variable since core clock has changed */
+ 305:../emlib/src/em_emu.c ****   /* to using HFRCO. */
+ 306:../emlib/src/em_emu.c ****   else if (!(cmuStatus & CMU_STATUS_HFRCOSEL))
+ 356              		.loc 3 306 0
+ 357 0052 064B     		ldr	r3, .L33+4
+ 358 0054 1B88     		ldrh	r3, [r3]
+ 359 0056 03F48063 		and	r3, r3, #1024
+ 360 005a 002B     		cmp	r3, #0
+ 361 005c 01D1     		bne	.L29
+ 307:../emlib/src/em_emu.c ****   {
+ 308:../emlib/src/em_emu.c ****     SystemCoreClockUpdate();
+ 362              		.loc 3 308 0
+ 363 005e FFF7FEFF 		bl	SystemCoreClockUpdate
+ 364              	.L29:
+ 309:../emlib/src/em_emu.c ****   }
+ 310:../emlib/src/em_emu.c **** }
+ 365              		.loc 3 310 0
+ 366 0062 05B0     		add	sp, sp, #20
+ 367              		@ sp needed
+ 368 0064 5DF804FB 		ldr	pc, [sp], #4
+ 369              	.L34:
+ 370              		.align	2
+ 371              	.L33:
+ 372 0068 00800C40 		.word	1074561024
+ 373 006c 00000000 		.word	cmuStatus
+ 374 0070 00ED00E0 		.word	-536810240
+ 375              		.cfi_endproc
+ 376              	.LFE78:
+ 378              		.section	.text.EMU_EnterEM4,"ax",%progbits
+ 379              		.align	2
+ 380              		.global	EMU_EnterEM4
+ 381              		.thumb
+ 382              		.thumb_func
+ 384              	EMU_EnterEM4:
+ 385              	.LFB79:
+ 311:../emlib/src/em_emu.c **** 
+ 312:../emlib/src/em_emu.c **** 
+ 313:../emlib/src/em_emu.c **** /***************************************************************************//**
+ 314:../emlib/src/em_emu.c ****  * @brief
+ 315:../emlib/src/em_emu.c ****  *   Enter energy mode 4 (EM4).
+ 316:../emlib/src/em_emu.c ****  *
+ 317:../emlib/src/em_emu.c ****  * @note
+ 318:../emlib/src/em_emu.c ****  *   Only a power on reset or external reset pin can wake the device from EM4.
+ 319:../emlib/src/em_emu.c ****  ******************************************************************************/
+ 320:../emlib/src/em_emu.c **** void EMU_EnterEM4(void)
+ 321:../emlib/src/em_emu.c **** {
+ 386              		.loc 3 321 0
+ARM GAS  /tmp/ccbsZeEa.s 			page 35
+
+
+ 387              		.cfi_startproc
+ 388              		@ args = 0, pretend = 0, frame = 8
+ 389              		@ frame_needed = 0, uses_anonymous_args = 0
+ 390              		@ link register save eliminated.
+ 391 0000 82B0     		sub	sp, sp, #8
+ 392              		.cfi_def_cfa_offset 8
+ 322:../emlib/src/em_emu.c ****   int i;
+ 323:../emlib/src/em_emu.c **** 
+ 324:../emlib/src/em_emu.c ****   /* Make sure register write lock is disabled */
+ 325:../emlib/src/em_emu.c ****   EMU->LOCK = EMU_LOCK_LOCKKEY_UNLOCK;
+ 393              		.loc 3 325 0
+ 394 0002 0C4B     		ldr	r3, .L38
+ 395 0004 4AF6E852 		movw	r2, #44520
+ 396 0008 9A60     		str	r2, [r3, #8]
+ 326:../emlib/src/em_emu.c **** 
+ 327:../emlib/src/em_emu.c ****   for (i = 0; i < 4; i++)
+ 397              		.loc 3 327 0
+ 398 000a 0023     		movs	r3, #0
+ 399 000c 0193     		str	r3, [sp, #4]
+ 400 000e 08E0     		b	.L36
+ 401              	.L37:
+ 328:../emlib/src/em_emu.c ****   {
+ 329:../emlib/src/em_emu.c ****     EMU->CTRL = (2 << _EMU_CTRL_EM4CTRL_SHIFT);
+ 402              		.loc 3 329 0 discriminator 2
+ 403 0010 084B     		ldr	r3, .L38
+ 404 0012 0822     		movs	r2, #8
+ 405 0014 1A60     		str	r2, [r3]
+ 330:../emlib/src/em_emu.c ****     EMU->CTRL = (3 << _EMU_CTRL_EM4CTRL_SHIFT);
+ 406              		.loc 3 330 0 discriminator 2
+ 407 0016 074B     		ldr	r3, .L38
+ 408 0018 0C22     		movs	r2, #12
+ 409 001a 1A60     		str	r2, [r3]
+ 327:../emlib/src/em_emu.c ****   for (i = 0; i < 4; i++)
+ 410              		.loc 3 327 0 discriminator 2
+ 411 001c 019B     		ldr	r3, [sp, #4]
+ 412 001e 0133     		adds	r3, r3, #1
+ 413 0020 0193     		str	r3, [sp, #4]
+ 414              	.L36:
+ 327:../emlib/src/em_emu.c ****   for (i = 0; i < 4; i++)
+ 415              		.loc 3 327 0 is_stmt 0 discriminator 1
+ 416 0022 019B     		ldr	r3, [sp, #4]
+ 417 0024 032B     		cmp	r3, #3
+ 418 0026 F3DD     		ble	.L37
+ 331:../emlib/src/em_emu.c ****   }
+ 332:../emlib/src/em_emu.c ****   EMU->CTRL = (2 << _EMU_CTRL_EM4CTRL_SHIFT);
+ 419              		.loc 3 332 0 is_stmt 1
+ 420 0028 024B     		ldr	r3, .L38
+ 421 002a 0822     		movs	r2, #8
+ 422 002c 1A60     		str	r2, [r3]
+ 333:../emlib/src/em_emu.c **** }
+ 423              		.loc 3 333 0
+ 424 002e 02B0     		add	sp, sp, #8
+ 425              		@ sp needed
+ 426 0030 7047     		bx	lr
+ 427              	.L39:
+ 428 0032 00BF     		.align	2
+ 429              	.L38:
+ARM GAS  /tmp/ccbsZeEa.s 			page 36
+
+
+ 430 0034 00600C40 		.word	1074552832
+ 431              		.cfi_endproc
+ 432              	.LFE79:
+ 434              		.section	.rodata
+ 435              		.align	2
+ 436              	.LC0:
+ 437 0000 2E2E2F65 		.ascii	"../emlib/src/em_emu.c\000"
+ 437      6D6C6962 
+ 437      2F737263 
+ 437      2F656D5F 
+ 437      656D752E 
+ 438 0016 0000     		.section	.text.EMU_MemPwrDown,"ax",%progbits
+ 439              		.align	2
+ 440              		.global	EMU_MemPwrDown
+ 441              		.thumb
+ 442              		.thumb_func
+ 444              	EMU_MemPwrDown:
+ 445              	.LFB80:
+ 334:../emlib/src/em_emu.c **** 
+ 335:../emlib/src/em_emu.c **** 
+ 336:../emlib/src/em_emu.c **** /***************************************************************************//**
+ 337:../emlib/src/em_emu.c ****  * @brief
+ 338:../emlib/src/em_emu.c ****  *   Power down memory block.
+ 339:../emlib/src/em_emu.c ****  *
+ 340:../emlib/src/em_emu.c ****  * @param[in] blocks
+ 341:../emlib/src/em_emu.c ****  *   Specifies a logical OR of bits indicating memory blocks to power down.
+ 342:../emlib/src/em_emu.c ****  *   Bit 0 selects block 1, bit 1 selects block 2, etc. Memory block 0 cannot
+ 343:../emlib/src/em_emu.c ****  *   be disabled. Please refer to the EFM32 reference manual for available
+ 344:../emlib/src/em_emu.c ****  *   memory blocks for a device.
+ 345:../emlib/src/em_emu.c ****  *
+ 346:../emlib/src/em_emu.c ****  * @note
+ 347:../emlib/src/em_emu.c ****  *   Only a reset can make the specified memory block(s) available for use
+ 348:../emlib/src/em_emu.c ****  *   after having been powered down. Function will be void for devices not
+ 349:../emlib/src/em_emu.c ****  *   supporting this feature.
+ 350:../emlib/src/em_emu.c ****  ******************************************************************************/
+ 351:../emlib/src/em_emu.c **** void EMU_MemPwrDown(uint32_t blocks)
+ 352:../emlib/src/em_emu.c **** {
+ 446              		.loc 3 352 0
+ 447              		.cfi_startproc
+ 448              		@ args = 0, pretend = 0, frame = 8
+ 449              		@ frame_needed = 0, uses_anonymous_args = 0
+ 450 0000 00B5     		push	{lr}
+ 451              		.cfi_def_cfa_offset 4
+ 452              		.cfi_offset 14, -4
+ 453 0002 83B0     		sub	sp, sp, #12
+ 454              		.cfi_def_cfa_offset 16
+ 455 0004 0190     		str	r0, [sp, #4]
+ 353:../emlib/src/em_emu.c **** #if defined(_EMU_MEMCTRL_RESETVALUE)
+ 354:../emlib/src/em_emu.c ****   EFM_ASSERT(blocks <= _EMU_MEMCTRL_MASK);
+ 456              		.loc 3 354 0
+ 457 0006 019B     		ldr	r3, [sp, #4]
+ 458 0008 072B     		cmp	r3, #7
+ 459 000a 04D9     		bls	.L41
+ 460              		.loc 3 354 0 is_stmt 0 discriminator 1
+ 461 000c 0548     		ldr	r0, .L42
+ 462 000e 4FF4B171 		mov	r1, #354
+ 463 0012 FFF7FEFF 		bl	assertEFM
+ARM GAS  /tmp/ccbsZeEa.s 			page 37
+
+
+ 464              	.L41:
+ 355:../emlib/src/em_emu.c **** 
+ 356:../emlib/src/em_emu.c ****   EMU->MEMCTRL = blocks;
+ 465              		.loc 3 356 0 is_stmt 1
+ 466 0016 044B     		ldr	r3, .L42+4
+ 467 0018 019A     		ldr	r2, [sp, #4]
+ 468 001a 5A60     		str	r2, [r3, #4]
+ 357:../emlib/src/em_emu.c **** #else
+ 358:../emlib/src/em_emu.c ****   (void)blocks;
+ 359:../emlib/src/em_emu.c **** #endif
+ 360:../emlib/src/em_emu.c **** }
+ 469              		.loc 3 360 0
+ 470 001c 03B0     		add	sp, sp, #12
+ 471              		@ sp needed
+ 472 001e 5DF804FB 		ldr	pc, [sp], #4
+ 473              	.L43:
+ 474 0022 00BF     		.align	2
+ 475              	.L42:
+ 476 0024 00000000 		.word	.LC0
+ 477 0028 00600C40 		.word	1074552832
+ 478              		.cfi_endproc
+ 479              	.LFE80:
+ 481              		.section	.text.EMU_UpdateOscConfig,"ax",%progbits
+ 482              		.align	2
+ 483              		.global	EMU_UpdateOscConfig
+ 484              		.thumb
+ 485              		.thumb_func
+ 487              	EMU_UpdateOscConfig:
+ 488              	.LFB81:
+ 361:../emlib/src/em_emu.c **** 
+ 362:../emlib/src/em_emu.c **** 
+ 363:../emlib/src/em_emu.c **** /***************************************************************************//**
+ 364:../emlib/src/em_emu.c ****  * @brief
+ 365:../emlib/src/em_emu.c ****  *   Update EMU module with CMU oscillator selection/enable status.
+ 366:../emlib/src/em_emu.c ****  *
+ 367:../emlib/src/em_emu.c ****  * @details
+ 368:../emlib/src/em_emu.c ****  *   When entering EM2 and EM3, the HW may change the core clock oscillator
+ 369:../emlib/src/em_emu.c ****  *   used, as well as disabling some oscillators. The user may optionally select
+ 370:../emlib/src/em_emu.c ****  *   to restore the oscillators after waking up from EM2 and EM3 through the
+ 371:../emlib/src/em_emu.c ****  *   SW API.
+ 372:../emlib/src/em_emu.c ****  *
+ 373:../emlib/src/em_emu.c ****  *   However, in order to support this in a safe way, the EMU module must
+ 374:../emlib/src/em_emu.c ****  *   be kept up-to-date on the actual selected configuration. The CMU
+ 375:../emlib/src/em_emu.c ****  *   module must keep the EMU module up-to-date.
+ 376:../emlib/src/em_emu.c ****  *
+ 377:../emlib/src/em_emu.c ****  *   This function is mainly intended for internal use by the CMU module,
+ 378:../emlib/src/em_emu.c ****  *   but if the applications changes oscillator configurations without
+ 379:../emlib/src/em_emu.c ****  *   using the CMU API, this function can be used to keep the EMU module
+ 380:../emlib/src/em_emu.c ****  *   up-to-date.
+ 381:../emlib/src/em_emu.c ****  ******************************************************************************/
+ 382:../emlib/src/em_emu.c **** void EMU_UpdateOscConfig(void)
+ 383:../emlib/src/em_emu.c **** {
+ 489              		.loc 3 383 0
+ 490              		.cfi_startproc
+ 491              		@ args = 0, pretend = 0, frame = 0
+ 492              		@ frame_needed = 0, uses_anonymous_args = 0
+ 493              		@ link register save eliminated.
+ARM GAS  /tmp/ccbsZeEa.s 			page 38
+
+
+ 384:../emlib/src/em_emu.c ****   /* Fetch current configuration */
+ 385:../emlib/src/em_emu.c ****   cmuStatus = (uint16_t)(CMU->STATUS);
+ 494              		.loc 3 385 0
+ 495 0000 024B     		ldr	r3, .L45
+ 496 0002 DB6A     		ldr	r3, [r3, #44]
+ 497 0004 9AB2     		uxth	r2, r3
+ 498 0006 024B     		ldr	r3, .L45+4
+ 499 0008 1A80     		strh	r2, [r3]	@ movhi
+ 386:../emlib/src/em_emu.c **** }
+ 500              		.loc 3 386 0
+ 501 000a 7047     		bx	lr
+ 502              	.L46:
+ 503              		.align	2
+ 504              	.L45:
+ 505 000c 00800C40 		.word	1074561024
+ 506 0010 00000000 		.word	cmuStatus
+ 507              		.cfi_endproc
+ 508              	.LFE81:
+ 510              		.text
+ 511              	.Letext0:
+ 512              		.file 5 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 513              		.file 6 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 514              		.file 7 "../CMSIS/Include/core_cm3.h"
+ 515              		.file 8 "../Device/EnergyMicro/EFM32G/Include/efm32g_emu.h"
+ 516              		.file 9 "../Device/EnergyMicro/EFM32G/Include/efm32g230f128.h"

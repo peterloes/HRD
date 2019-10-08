@@ -1,0 +1,622 @@
+ARM GAS  /tmp/ccSfYAXc.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"Keys.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.section	.bss.l_pKeyInit,"aw",%nobits
+  19              		.align	2
+  22              	l_pKeyInit:
+  23 0000 00000000 		.space	4
+  24              		.section	.bss.l_KeyState,"aw",%nobits
+  27              	l_KeyState:
+  28 0000 00       		.space	1
+  29              		.section	.bss.l_KeyCode,"aw",%nobits
+  32              	l_KeyCode:
+  33 0000 00       		.space	1
+  34              		.section	.rodata
+  35              		.align	2
+  36              	.LC0:
+  37 0000 2E2E2F64 		.ascii	"../drivers/Keys.c\000"
+  37      72697665 
+  37      72732F4B 
+  37      6579732E 
+  37      6300
+  38 0012 0000     		.section	.text.KeyInit,"ax",%progbits
+  39              		.align	2
+  40              		.global	KeyInit
+  41              		.thumb
+  42              		.thumb_func
+  44              	KeyInit:
+  45              	.LFB100:
+  46              		.file 1 "../drivers/Keys.c"
+   1:../drivers/Keys.c **** /***************************************************************************//**
+   2:../drivers/Keys.c ****  * @file
+   3:../drivers/Keys.c ****  * @brief	Handling of Keys (push buttons)
+   4:../drivers/Keys.c ****  * @author	Ralf Gerhauser
+   5:../drivers/Keys.c ****  * @version	2016-11-22
+   6:../drivers/Keys.c ****  *
+   7:../drivers/Keys.c ****  * This module provides all the functionality to receive key events and
+   8:../drivers/Keys.c ****  * translate them into key codes.
+   9:../drivers/Keys.c ****  * In detail, this includes:
+  10:../drivers/Keys.c ****  * - Initialization of the hardware (GPIOs that are connected to keys).
+  11:../drivers/Keys.c ****  * - Receive key events and and translate them into key codes.
+  12:../drivers/Keys.c ****  * - Call an external function for each translated key code.
+  13:../drivers/Keys.c ****  *
+  14:../drivers/Keys.c ****  ****************************************************************************//*
+ARM GAS  /tmp/ccSfYAXc.s 			page 2
+
+
+  15:../drivers/Keys.c **** Revision History:
+  16:../drivers/Keys.c **** 2016-11-22,rage	Added support for Power-Key.
+  17:../drivers/Keys.c **** 2015-06-22,rage	Derived from project "AlarmClock".
+  18:../drivers/Keys.c **** */
+  19:../drivers/Keys.c **** 
+  20:../drivers/Keys.c **** /*=============================== Header Files ===============================*/
+  21:../drivers/Keys.c **** 
+  22:../drivers/Keys.c **** #include <stdio.h>
+  23:../drivers/Keys.c **** #include "em_device.h"
+  24:../drivers/Keys.c **** #include "em_assert.h"
+  25:../drivers/Keys.c **** #include "em_cmu.h"
+  26:../drivers/Keys.c **** #include "Keys.h"
+  27:../drivers/Keys.c **** #include "AlarmClock.h"
+  28:../drivers/Keys.c **** 
+  29:../drivers/Keys.c **** /*=============================== Definitions ================================*/
+  30:../drivers/Keys.c **** 
+  31:../drivers/Keys.c **** 
+  32:../drivers/Keys.c **** /*=========================== Typedefs and Structs ===========================*/
+  33:../drivers/Keys.c **** 
+  34:../drivers/Keys.c **** /*! Internal states for key handling */
+  35:../drivers/Keys.c **** typedef enum
+  36:../drivers/Keys.c **** {
+  37:../drivers/Keys.c ****     KEY_IDLE,		//!< IDLE state - no key active
+  38:../drivers/Keys.c ****     KEY_POWER,		//!< the POWER Key is active
+  39:../drivers/Keys.c ****     KEY_NEXT,		//!< the NEXT Key is active
+  40:../drivers/Keys.c ****     KEY_PREV,		//!< the PREV Key is active
+  41:../drivers/Keys.c ****     KEY_CNT		//!< total number of key states.
+  42:../drivers/Keys.c **** } KEY_STATE;
+  43:../drivers/Keys.c **** 
+  44:../drivers/Keys.c **** /*======================== External Data and Routines ========================*/
+  45:../drivers/Keys.c **** 
+  46:../drivers/Keys.c **** 
+  47:../drivers/Keys.c **** /*========================= Global Data and Routines =========================*/
+  48:../drivers/Keys.c **** 
+  49:../drivers/Keys.c **** 
+  50:../drivers/Keys.c **** /*================================ Local Data ================================*/
+  51:../drivers/Keys.c **** 
+  52:../drivers/Keys.c ****     /*! Pointer to module configuration */
+  53:../drivers/Keys.c **** static const KEY_INIT *l_pKeyInit;
+  54:../drivers/Keys.c **** 
+  55:../drivers/Keys.c ****     /*! Variable to keep current key state */
+  56:../drivers/Keys.c **** static KEY_STATE     l_KeyState = KEY_IDLE;
+  57:../drivers/Keys.c **** 
+  58:../drivers/Keys.c ****     /*! Variable to keep autorepeat key code */
+  59:../drivers/Keys.c **** static KEYCODE	     l_KeyCode;
+  60:../drivers/Keys.c **** 
+  61:../drivers/Keys.c **** /*=========================== Forward Declarations ===========================*/
+  62:../drivers/Keys.c **** 
+  63:../drivers/Keys.c **** #if KEY_AUTOREPEAT
+  64:../drivers/Keys.c **** static void  KeyTimerFct (void);
+  65:../drivers/Keys.c **** #endif
+  66:../drivers/Keys.c **** 
+  67:../drivers/Keys.c **** 
+  68:../drivers/Keys.c **** /***************************************************************************//**
+  69:../drivers/Keys.c ****  *
+  70:../drivers/Keys.c ****  * @brief	Initialize key hardware
+  71:../drivers/Keys.c ****  *
+ARM GAS  /tmp/ccSfYAXc.s 			page 3
+
+
+  72:../drivers/Keys.c ****  * This routine initializes the board-specific hardware for the key (push
+  73:../drivers/Keys.c ****  * button) functionality.  This is restricted to the GPIO set up, NVIC
+  74:../drivers/Keys.c ****  * interrupts will be configured later by calling function ExtIntInit().
+  75:../drivers/Keys.c ****  *
+  76:../drivers/Keys.c ****  * There are 2 keys and states supported:
+  77:../drivers/Keys.c ****  * - NEXT (S5) selects the next item to display
+  78:../drivers/Keys.c ****  * - PREV (S4) moves back to the previous item
+  79:../drivers/Keys.c ****  *
+  80:../drivers/Keys.c ****  * Each key generates an <b>asserted</b> code when the key is hit once,
+  81:../drivers/Keys.c ****  * one or more <b>repeat</b> codes as long as it is still pressed, and a
+  82:../drivers/Keys.c ****  * <b>released</b> code when it is released again.
+  83:../drivers/Keys.c ****  *
+  84:../drivers/Keys.c ****  * The GPIO ports and pins have been defined in the header file.
+  85:../drivers/Keys.c ****  *
+  86:../drivers/Keys.c ****  * @param[in] pInitStruct
+  87:../drivers/Keys.c ****  *	Address of an initialization structure of type KEY_INIT that defines
+  88:../drivers/Keys.c ****  *	the timings for the autorepeat threshold and rate, and a function to
+  89:../drivers/Keys.c ****  *	be called for each translated key.
+  90:../drivers/Keys.c ****  *
+  91:../drivers/Keys.c ****  * @note
+  92:../drivers/Keys.c ****  *	Parameter <b>pInitStruct</b> must point to a persistent data structure,
+  93:../drivers/Keys.c ****  *	i.e. this must be valid over the whole life time of the program.
+  94:../drivers/Keys.c ****  *
+  95:../drivers/Keys.c ****  ******************************************************************************/
+  96:../drivers/Keys.c **** void	KeyInit (const KEY_INIT *pInitStruct)
+  97:../drivers/Keys.c **** {
+  47              		.loc 1 97 0
+  48              		.cfi_startproc
+  49              		@ args = 0, pretend = 0, frame = 8
+  50              		@ frame_needed = 0, uses_anonymous_args = 0
+  51 0000 00B5     		push	{lr}
+  52              		.cfi_def_cfa_offset 4
+  53              		.cfi_offset 14, -4
+  54 0002 85B0     		sub	sp, sp, #20
+  55              		.cfi_def_cfa_offset 24
+  56 0004 0390     		str	r0, [sp, #12]
+  98:../drivers/Keys.c ****     /* Parameter check */
+  99:../drivers/Keys.c ****     EFM_ASSERT(pInitStruct != NULL);
+  57              		.loc 1 99 0
+  58 0006 039B     		ldr	r3, [sp, #12]
+  59 0008 002B     		cmp	r3, #0
+  60 000a 03D1     		bne	.L2
+  61              		.loc 1 99 0 is_stmt 0 discriminator 1
+  62 000c 2148     		ldr	r0, .L4
+  63 000e 6321     		movs	r1, #99
+  64 0010 FFF7FEFF 		bl	assertEFM
+  65              	.L2:
+ 100:../drivers/Keys.c ****     EFM_ASSERT(pInitStruct->KeyFct != NULL);
+  66              		.loc 1 100 0 is_stmt 1
+  67 0014 039B     		ldr	r3, [sp, #12]
+  68 0016 5B68     		ldr	r3, [r3, #4]
+  69 0018 002B     		cmp	r3, #0
+  70 001a 03D1     		bne	.L3
+  71              		.loc 1 100 0 is_stmt 0 discriminator 1
+  72 001c 1D48     		ldr	r0, .L4
+  73 001e 6421     		movs	r1, #100
+  74 0020 FFF7FEFF 		bl	assertEFM
+ARM GAS  /tmp/ccSfYAXc.s 			page 4
+
+
+  75              	.L3:
+ 101:../drivers/Keys.c **** 
+ 102:../drivers/Keys.c ****     /* Save configuration */
+ 103:../drivers/Keys.c ****     l_pKeyInit = pInitStruct;
+  76              		.loc 1 103 0 is_stmt 1
+  77 0024 1C4B     		ldr	r3, .L4+4
+  78 0026 039A     		ldr	r2, [sp, #12]
+  79 0028 1A60     		str	r2, [r3]
+ 104:../drivers/Keys.c **** 
+ 105:../drivers/Keys.c ****     /* Be sure to enable clock to GPIO (should already be done) */
+ 106:../drivers/Keys.c ****     CMU_ClockEnable (cmuClock_GPIO, true);
+  80              		.loc 1 106 0
+  81 002a 1C48     		ldr	r0, .L4+8
+  82 002c 0121     		movs	r1, #1
+  83 002e FFF7FEFF 		bl	CMU_ClockEnable
+ 107:../drivers/Keys.c **** 
+ 108:../drivers/Keys.c ****     /*
+ 109:../drivers/Keys.c ****      * Initialize GPIOs for all keys.  The port pins must be configured for
+ 110:../drivers/Keys.c ****      * input, and connected to the external interrupt (EXTI) facility.  At
+ 111:../drivers/Keys.c ****      * this stage, the interrupts are not enabled, this is done later by
+ 112:../drivers/Keys.c ****      * calling ExtIntInit().
+ 113:../drivers/Keys.c ****      */
+ 114:../drivers/Keys.c ****     GPIO_PinModeSet (KEY_POWER_PORT, KEY_POWER_PIN, gpioModeInput, 0);
+  84              		.loc 1 114 0
+  85 0032 0020     		movs	r0, #0
+  86 0034 0521     		movs	r1, #5
+  87 0036 0122     		movs	r2, #1
+  88 0038 0023     		movs	r3, #0
+  89 003a FFF7FEFF 		bl	GPIO_PinModeSet
+ 115:../drivers/Keys.c ****     GPIO_IntConfig  (KEY_POWER_PORT, KEY_POWER_PIN, false, false, false);
+  90              		.loc 1 115 0
+  91 003e 0023     		movs	r3, #0
+  92 0040 0093     		str	r3, [sp]
+  93 0042 0020     		movs	r0, #0
+  94 0044 0521     		movs	r1, #5
+  95 0046 0022     		movs	r2, #0
+  96 0048 0023     		movs	r3, #0
+  97 004a FFF7FEFF 		bl	GPIO_IntConfig
+ 116:../drivers/Keys.c **** 
+ 117:../drivers/Keys.c ****     GPIO_PinModeSet (KEY_NEXT_PORT, KEY_NEXT_PIN, gpioModeInput, 0);
+  98              		.loc 1 117 0
+  99 004e 0020     		movs	r0, #0
+ 100 0050 0421     		movs	r1, #4
+ 101 0052 0122     		movs	r2, #1
+ 102 0054 0023     		movs	r3, #0
+ 103 0056 FFF7FEFF 		bl	GPIO_PinModeSet
+ 118:../drivers/Keys.c ****     GPIO_IntConfig  (KEY_NEXT_PORT, KEY_NEXT_PIN, false, false, false);
+ 104              		.loc 1 118 0
+ 105 005a 0023     		movs	r3, #0
+ 106 005c 0093     		str	r3, [sp]
+ 107 005e 0020     		movs	r0, #0
+ 108 0060 0421     		movs	r1, #4
+ 109 0062 0022     		movs	r2, #0
+ 110 0064 0023     		movs	r3, #0
+ 111 0066 FFF7FEFF 		bl	GPIO_IntConfig
+ 119:../drivers/Keys.c **** 
+ 120:../drivers/Keys.c ****     GPIO_PinModeSet (KEY_PREV_PORT, KEY_PREV_PIN, gpioModeInput, 0);
+ARM GAS  /tmp/ccSfYAXc.s 			page 5
+
+
+ 112              		.loc 1 120 0
+ 113 006a 0020     		movs	r0, #0
+ 114 006c 0321     		movs	r1, #3
+ 115 006e 0122     		movs	r2, #1
+ 116 0070 0023     		movs	r3, #0
+ 117 0072 FFF7FEFF 		bl	GPIO_PinModeSet
+ 121:../drivers/Keys.c ****     GPIO_IntConfig  (KEY_PREV_PORT, KEY_PREV_PIN, false, false, false);
+ 118              		.loc 1 121 0
+ 119 0076 0023     		movs	r3, #0
+ 120 0078 0093     		str	r3, [sp]
+ 121 007a 0020     		movs	r0, #0
+ 122 007c 0321     		movs	r1, #3
+ 123 007e 0022     		movs	r2, #0
+ 124 0080 0023     		movs	r3, #0
+ 125 0082 FFF7FEFF 		bl	GPIO_IntConfig
+ 122:../drivers/Keys.c **** 
+ 123:../drivers/Keys.c **** #if KEY_AUTOREPEAT
+ 124:../drivers/Keys.c ****     /* Install high-resolution timer routine for autorepeat */
+ 125:../drivers/Keys.c ****     msTimerAction (KeyTimerFct);
+ 126              		.loc 1 125 0
+ 127 0086 0648     		ldr	r0, .L4+12
+ 128 0088 FFF7FEFF 		bl	msTimerAction
+ 126:../drivers/Keys.c **** #endif
+ 127:../drivers/Keys.c **** }
+ 129              		.loc 1 127 0
+ 130 008c 05B0     		add	sp, sp, #20
+ 131              		@ sp needed
+ 132 008e 5DF804FB 		ldr	pc, [sp], #4
+ 133              	.L5:
+ 134 0092 00BF     		.align	2
+ 135              	.L4:
+ 136 0094 00000000 		.word	.LC0
+ 137 0098 00000000 		.word	l_pKeyInit
+ 138 009c 00C20200 		.word	180736
+ 139 00a0 00000000 		.word	KeyTimerFct
+ 140              		.cfi_endproc
+ 141              	.LFE100:
+ 143              		.section	.text.KeyHandler,"ax",%progbits
+ 144              		.align	2
+ 145              		.global	KeyHandler
+ 146              		.thumb
+ 147              		.thumb_func
+ 149              	KeyHandler:
+ 150              	.LFB101:
+ 128:../drivers/Keys.c **** 
+ 129:../drivers/Keys.c **** /***************************************************************************//**
+ 130:../drivers/Keys.c ****  *
+ 131:../drivers/Keys.c ****  * @brief	Key handler
+ 132:../drivers/Keys.c ****  *
+ 133:../drivers/Keys.c ****  * This handler is called by the EXTI interrupt service routine for each
+ 134:../drivers/Keys.c ****  * key which is asserted or released.  Together with the autorepeat feature
+ 135:../drivers/Keys.c ****  * via a high-resolution timer and KeyTimerFct(), it translates the interrupt
+ 136:../drivers/Keys.c ****  * number into a @ref KEYCODE.  This is then passed to the @ref KEY_FCT
+ 137:../drivers/Keys.c ****  * defined as part of the @ref KEY_INIT structure.
+ 138:../drivers/Keys.c ****  *
+ 139:../drivers/Keys.c ****  * @param[in] extiNum
+ 140:../drivers/Keys.c ****  *	EXTernal Interrupt number of a key.  This is identical with the pin
+ARM GAS  /tmp/ccSfYAXc.s 			page 6
+
+
+ 141:../drivers/Keys.c ****  *	number, e.g. @ref KEY_NEXT_PIN.
+ 142:../drivers/Keys.c ****  *
+ 143:../drivers/Keys.c ****  * @param[in] extiLvl
+ 144:../drivers/Keys.c ****  *	EXTernal Interrupt level: 0 means falling edge, logic level is now 0,
+ 145:../drivers/Keys.c ****  *	1 means rising edge, logic level is now 1.  Since the keys are
+ 146:../drivers/Keys.c ****  *	connected to ground, we have a negative logic, i.e. 0 means asserted!
+ 147:../drivers/Keys.c ****  *
+ 148:../drivers/Keys.c ****  * @param[in] timeStamp
+ 149:../drivers/Keys.c ****  *	Time stamp when the key event has been received.  This may be used
+ 150:../drivers/Keys.c ****  *	to distinguish between short and long time asserted keys.
+ 151:../drivers/Keys.c ****  *
+ 152:../drivers/Keys.c ****  * @note
+ 153:../drivers/Keys.c ****  * The time stamp is read from the Real Time Counter (RTC), so its resolution
+ 154:../drivers/Keys.c ****  * depends on the RTC.  Use the define @ref RTC_COUNTS_PER_SEC to convert the
+ 155:../drivers/Keys.c ****  * RTC value into a duration.
+ 156:../drivers/Keys.c ****  *
+ 157:../drivers/Keys.c ****  ******************************************************************************/
+ 158:../drivers/Keys.c **** void	KeyHandler (int extiNum, bool extiLvl, uint32_t timeStamp)
+ 159:../drivers/Keys.c **** {
+ 151              		.loc 1 159 0
+ 152              		.cfi_startproc
+ 153              		@ args = 0, pretend = 0, frame = 24
+ 154              		@ frame_needed = 0, uses_anonymous_args = 0
+ 155 0000 00B5     		push	{lr}
+ 156              		.cfi_def_cfa_offset 4
+ 157              		.cfi_offset 14, -4
+ 158 0002 87B0     		sub	sp, sp, #28
+ 159              		.cfi_def_cfa_offset 32
+ 160 0004 0390     		str	r0, [sp, #12]
+ 161 0006 0B46     		mov	r3, r1
+ 162 0008 0192     		str	r2, [sp, #4]
+ 163 000a 8DF80B30 		strb	r3, [sp, #11]
+ 160:../drivers/Keys.c **** KEY_STATE  keyState;		// new key state
+ 161:../drivers/Keys.c **** KEYCODE	   keyCode;		// translated key code
+ 162:../drivers/Keys.c **** 
+ 163:../drivers/Keys.c **** 
+ 164:../drivers/Keys.c ****     (void) timeStamp;		// suppress compiler warning "unused parameter"
+ 165:../drivers/Keys.c **** 
+ 166:../drivers/Keys.c ****     /* map the EXTI (pin) number to a key ID */
+ 167:../drivers/Keys.c ****     switch (extiNum)
+ 164              		.loc 1 167 0
+ 165 000e 039B     		ldr	r3, [sp, #12]
+ 166 0010 042B     		cmp	r3, #4
+ 167 0012 1DD0     		beq	.L8
+ 168 0014 052B     		cmp	r3, #5
+ 169 0016 02D0     		beq	.L9
+ 170 0018 032B     		cmp	r3, #3
+ 171 001a 20D0     		beq	.L10
+ 168:../drivers/Keys.c ****     {
+ 169:../drivers/Keys.c **** 	case KEY_POWER_PIN:	// POWER is high-active button!
+ 170:../drivers/Keys.c **** 	    keyState = KEY_POWER;
+ 171:../drivers/Keys.c **** 	    keyCode  = KEYCODE_POWER_ASSERT;
+ 172:../drivers/Keys.c **** 	    extiLvl = !extiLvl;	// convert from high to low-active
+ 173:../drivers/Keys.c **** 	    break;
+ 174:../drivers/Keys.c **** 
+ 175:../drivers/Keys.c **** 	case KEY_NEXT_PIN:	// NEXT
+ 176:../drivers/Keys.c **** 	    keyState = KEY_NEXT;
+ARM GAS  /tmp/ccSfYAXc.s 			page 7
+
+
+ 177:../drivers/Keys.c **** 	    keyCode  = KEYCODE_NEXT_ASSERT;
+ 178:../drivers/Keys.c **** 	    break;
+ 179:../drivers/Keys.c **** 
+ 180:../drivers/Keys.c **** 	case KEY_PREV_PIN:	// PREV
+ 181:../drivers/Keys.c **** 	    keyState = KEY_PREV;
+ 182:../drivers/Keys.c **** 	    keyCode  = KEYCODE_PREV_ASSERT;
+ 183:../drivers/Keys.c **** 	    break;
+ 184:../drivers/Keys.c **** 
+ 185:../drivers/Keys.c **** 	default:		// unknown pin number - ignore
+ 186:../drivers/Keys.c **** 	    return;
+ 172              		.loc 1 186 0
+ 173 001c 58E0     		b	.L6
+ 174              	.L9:
+ 170:../drivers/Keys.c **** 	    keyState = KEY_POWER;
+ 175              		.loc 1 170 0
+ 176 001e 0123     		movs	r3, #1
+ 177 0020 8DF81730 		strb	r3, [sp, #23]
+ 171:../drivers/Keys.c **** 	    keyCode  = KEYCODE_POWER_ASSERT;
+ 178              		.loc 1 171 0
+ 179 0024 0123     		movs	r3, #1
+ 180 0026 8DF81630 		strb	r3, [sp, #22]
+ 172:../drivers/Keys.c **** 	    extiLvl = !extiLvl;	// convert from high to low-active
+ 181              		.loc 1 172 0
+ 182 002a 9DF80B30 		ldrb	r3, [sp, #11]	@ zero_extendqisi2
+ 183 002e 002B     		cmp	r3, #0
+ 184 0030 0CBF     		ite	eq
+ 185 0032 0023     		moveq	r3, #0
+ 186 0034 0123     		movne	r3, #1
+ 187 0036 DBB2     		uxtb	r3, r3
+ 188 0038 83F00103 		eor	r3, r3, #1
+ 189 003c DBB2     		uxtb	r3, r3
+ 190 003e 8DF80B30 		strb	r3, [sp, #11]
+ 191 0042 9DF80B30 		ldrb	r3, [sp, #11]
+ 192 0046 03F00103 		and	r3, r3, #1
+ 193 004a 8DF80B30 		strb	r3, [sp, #11]
+ 173:../drivers/Keys.c **** 	    break;
+ 194              		.loc 1 173 0
+ 195 004e 0DE0     		b	.L11
+ 196              	.L8:
+ 176:../drivers/Keys.c **** 	    keyState = KEY_NEXT;
+ 197              		.loc 1 176 0
+ 198 0050 0223     		movs	r3, #2
+ 199 0052 8DF81730 		strb	r3, [sp, #23]
+ 177:../drivers/Keys.c **** 	    keyCode  = KEYCODE_NEXT_ASSERT;
+ 200              		.loc 1 177 0
+ 201 0056 0423     		movs	r3, #4
+ 202 0058 8DF81630 		strb	r3, [sp, #22]
+ 178:../drivers/Keys.c **** 	    break;
+ 203              		.loc 1 178 0
+ 204 005c 06E0     		b	.L11
+ 205              	.L10:
+ 181:../drivers/Keys.c **** 	    keyState = KEY_PREV;
+ 206              		.loc 1 181 0
+ 207 005e 0323     		movs	r3, #3
+ 208 0060 8DF81730 		strb	r3, [sp, #23]
+ 182:../drivers/Keys.c **** 	    keyCode  = KEYCODE_PREV_ASSERT;
+ 209              		.loc 1 182 0
+ARM GAS  /tmp/ccSfYAXc.s 			page 8
+
+
+ 210 0064 0723     		movs	r3, #7
+ 211 0066 8DF81630 		strb	r3, [sp, #22]
+ 183:../drivers/Keys.c **** 	    break;
+ 212              		.loc 1 183 0
+ 213 006a 00BF     		nop
+ 214              	.L11:
+ 187:../drivers/Keys.c ****     }
+ 188:../drivers/Keys.c **** 
+ 189:../drivers/Keys.c ****     /*
+ 190:../drivers/Keys.c ****      * Check if a key has been asserted or released.  Since the keys are
+ 191:../drivers/Keys.c ****      * connected to ground, we have a negative logic, i.e. 0 means asserted!
+ 192:../drivers/Keys.c ****      * An exception is the power button which is high-active.  Therefore the
+ 193:../drivers/Keys.c ****      * level has been inverted by the logic above.
+ 194:../drivers/Keys.c ****      */
+ 195:../drivers/Keys.c ****     if (extiLvl)
+ 215              		.loc 1 195 0
+ 216 006c 9DF80B30 		ldrb	r3, [sp, #11]	@ zero_extendqisi2
+ 217 0070 002B     		cmp	r3, #0
+ 218 0072 11D0     		beq	.L13
+ 196:../drivers/Keys.c ****     {
+ 197:../drivers/Keys.c **** 	/* Level is 1, key has been RELEASED */
+ 198:../drivers/Keys.c **** 
+ 199:../drivers/Keys.c **** 	if (keyState != l_KeyState)
+ 219              		.loc 1 199 0
+ 220 0074 184B     		ldr	r3, .L17
+ 221 0076 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 222 0078 9DF81720 		ldrb	r2, [sp, #23]	@ zero_extendqisi2
+ 223 007c 9A42     		cmp	r2, r3
+ 224 007e 00D0     		beq	.L14
+ 200:../drivers/Keys.c **** 	    return;	// only release active key - ignore all others
+ 225              		.loc 1 200 0
+ 226 0080 26E0     		b	.L6
+ 227              	.L14:
+ 201:../drivers/Keys.c **** 
+ 202:../drivers/Keys.c **** #if KEY_AUTOREPEAT
+ 203:../drivers/Keys.c **** 	/* be sure to cancel a running timer */
+ 204:../drivers/Keys.c **** 	msTimerCancel();
+ 228              		.loc 1 204 0
+ 229 0082 FFF7FEFF 		bl	msTimerCancel
+ 205:../drivers/Keys.c **** #endif
+ 206:../drivers/Keys.c **** 
+ 207:../drivers/Keys.c **** 	/* pass a KEYCODE_XXX_RELEASE code to the KEY_FCT */
+ 208:../drivers/Keys.c **** 	keyCode += KEYOFFS_RELEASE;
+ 230              		.loc 1 208 0
+ 231 0086 9DF81630 		ldrb	r3, [sp, #22]
+ 232 008a 0233     		adds	r3, r3, #2
+ 233 008c 8DF81630 		strb	r3, [sp, #22]
+ 209:../drivers/Keys.c **** 
+ 210:../drivers/Keys.c **** 	/* set key state to IDLE again */
+ 211:../drivers/Keys.c **** 	l_KeyState = KEY_IDLE;
+ 234              		.loc 1 211 0
+ 235 0090 114B     		ldr	r3, .L17
+ 236 0092 0022     		movs	r2, #0
+ 237 0094 1A70     		strb	r2, [r3]
+ 238 0096 14E0     		b	.L15
+ 239              	.L13:
+ 212:../drivers/Keys.c ****     }
+ARM GAS  /tmp/ccSfYAXc.s 			page 9
+
+
+ 213:../drivers/Keys.c ****     else
+ 214:../drivers/Keys.c ****     {
+ 215:../drivers/Keys.c **** 	/* Level is 0, key has been ASSERTED */
+ 216:../drivers/Keys.c **** 
+ 217:../drivers/Keys.c **** 	if (l_KeyState != KEY_IDLE)
+ 240              		.loc 1 217 0
+ 241 0098 0F4B     		ldr	r3, .L17
+ 242 009a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 243 009c 002B     		cmp	r3, #0
+ 244 009e 00D0     		beq	.L16
+ 218:../drivers/Keys.c **** 	    return;	// a key is already asserted - ignore all further keys
+ 245              		.loc 1 218 0
+ 246 00a0 16E0     		b	.L6
+ 247              	.L16:
+ 219:../drivers/Keys.c **** 
+ 220:../drivers/Keys.c **** 	/* set new key state and code */
+ 221:../drivers/Keys.c **** 	l_KeyState = keyState;
+ 248              		.loc 1 221 0
+ 249 00a2 0D4B     		ldr	r3, .L17
+ 250 00a4 9DF81720 		ldrb	r2, [sp, #23]
+ 251 00a8 1A70     		strb	r2, [r3]
+ 222:../drivers/Keys.c **** 	l_KeyCode  = (KEYCODE)(keyCode + KEYOFFS_REPEAT);
+ 252              		.loc 1 222 0
+ 253 00aa 9DF81630 		ldrb	r3, [sp, #22]
+ 254 00ae 0133     		adds	r3, r3, #1
+ 255 00b0 DAB2     		uxtb	r2, r3
+ 256 00b2 0A4B     		ldr	r3, .L17+4
+ 257 00b4 1A70     		strb	r2, [r3]
+ 223:../drivers/Keys.c **** 
+ 224:../drivers/Keys.c **** #if KEY_AUTOREPEAT
+ 225:../drivers/Keys.c **** 	/* start timer with autorepeat threshold */
+ 226:../drivers/Keys.c **** 	msTimerStart (l_pKeyInit->AR_Threshold);
+ 258              		.loc 1 226 0
+ 259 00b6 0A4B     		ldr	r3, .L17+8
+ 260 00b8 1B68     		ldr	r3, [r3]
+ 261 00ba 1B88     		ldrh	r3, [r3]
+ 262 00bc 1846     		mov	r0, r3
+ 263 00be FFF7FEFF 		bl	msTimerStart
+ 264              	.L15:
+ 227:../drivers/Keys.c **** #endif
+ 228:../drivers/Keys.c ****     }
+ 229:../drivers/Keys.c **** 
+ 230:../drivers/Keys.c ****     /* call the specified KEY_FCT */
+ 231:../drivers/Keys.c ****     l_pKeyInit->KeyFct (keyCode);
+ 265              		.loc 1 231 0
+ 266 00c2 074B     		ldr	r3, .L17+8
+ 267 00c4 1B68     		ldr	r3, [r3]
+ 268 00c6 5B68     		ldr	r3, [r3, #4]
+ 269 00c8 9DF81620 		ldrb	r2, [sp, #22]	@ zero_extendqisi2
+ 270 00cc 1046     		mov	r0, r2
+ 271 00ce 9847     		blx	r3
+ 272              	.L6:
+ 232:../drivers/Keys.c **** }
+ 273              		.loc 1 232 0
+ 274 00d0 07B0     		add	sp, sp, #28
+ 275              		@ sp needed
+ 276 00d2 5DF804FB 		ldr	pc, [sp], #4
+ARM GAS  /tmp/ccSfYAXc.s 			page 10
+
+
+ 277              	.L18:
+ 278 00d6 00BF     		.align	2
+ 279              	.L17:
+ 280 00d8 00000000 		.word	l_KeyState
+ 281 00dc 00000000 		.word	l_KeyCode
+ 282 00e0 00000000 		.word	l_pKeyInit
+ 283              		.cfi_endproc
+ 284              	.LFE101:
+ 286              		.section	.text.KeyTimerFct,"ax",%progbits
+ 287              		.align	2
+ 288              		.thumb
+ 289              		.thumb_func
+ 291              	KeyTimerFct:
+ 292              	.LFB102:
+ 233:../drivers/Keys.c **** 
+ 234:../drivers/Keys.c **** #if KEY_AUTOREPEAT
+ 235:../drivers/Keys.c **** /***************************************************************************//**
+ 236:../drivers/Keys.c ****  *
+ 237:../drivers/Keys.c ****  * @brief	Key Timer Function
+ 238:../drivers/Keys.c ****  *
+ 239:../drivers/Keys.c ****  * This callback function is called whenever the high-resolution millisecond
+ 240:../drivers/Keys.c ****  * timer expires.  Depending on the state of the key handler, this means:
+ 241:../drivers/Keys.c ****  *
+ 242:../drivers/Keys.c ****  * - The autorepeat threshold time is over, i.e. a key is asserted long enough
+ 243:../drivers/Keys.c ****  *   to start the autorepeat function.
+ 244:../drivers/Keys.c ****  * - When the autorepeat function is already active, the timer generates the
+ 245:../drivers/Keys.c ****  *   key rate, i.e. the currently asserted key has to be repeated.
+ 246:../drivers/Keys.c ****  *
+ 247:../drivers/Keys.c ****  ******************************************************************************/
+ 248:../drivers/Keys.c **** static void  KeyTimerFct (void)
+ 249:../drivers/Keys.c **** {
+ 293              		.loc 1 249 0
+ 294              		.cfi_startproc
+ 295              		@ args = 0, pretend = 0, frame = 0
+ 296              		@ frame_needed = 0, uses_anonymous_args = 0
+ 297 0000 08B5     		push	{r3, lr}
+ 298              		.cfi_def_cfa_offset 8
+ 299              		.cfi_offset 3, -8
+ 300              		.cfi_offset 14, -4
+ 250:../drivers/Keys.c ****     /* re-start timer with autorepeat rate */
+ 251:../drivers/Keys.c ****     msTimerStart (l_pKeyInit->AR_Rate);
+ 301              		.loc 1 251 0
+ 302 0002 074B     		ldr	r3, .L20
+ 303 0004 1B68     		ldr	r3, [r3]
+ 304 0006 5B88     		ldrh	r3, [r3, #2]
+ 305 0008 1846     		mov	r0, r3
+ 306 000a FFF7FEFF 		bl	msTimerStart
+ 252:../drivers/Keys.c **** 
+ 253:../drivers/Keys.c ****     /* call the specified KEY_FCT with the REPEAT code */
+ 254:../drivers/Keys.c ****     l_pKeyInit->KeyFct (l_KeyCode);
+ 307              		.loc 1 254 0
+ 308 000e 044B     		ldr	r3, .L20
+ 309 0010 1B68     		ldr	r3, [r3]
+ 310 0012 5B68     		ldr	r3, [r3, #4]
+ 311 0014 034A     		ldr	r2, .L20+4
+ 312 0016 1278     		ldrb	r2, [r2]	@ zero_extendqisi2
+ 313 0018 1046     		mov	r0, r2
+ARM GAS  /tmp/ccSfYAXc.s 			page 11
+
+
+ 314 001a 9847     		blx	r3
+ 255:../drivers/Keys.c **** }
+ 315              		.loc 1 255 0
+ 316 001c 08BD     		pop	{r3, pc}
+ 317              	.L21:
+ 318 001e 00BF     		.align	2
+ 319              	.L20:
+ 320 0020 00000000 		.word	l_pKeyInit
+ 321 0024 00000000 		.word	l_KeyCode
+ 322              		.cfi_endproc
+ 323              	.LFE102:
+ 325              		.text
+ 326              	.Letext0:
+ 327              		.file 2 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/machine/_default_types.h"
+ 328              		.file 3 "/opt/cross/gcc-arm-none-eabi-4_8-2014q3/arm-none-eabi/include/stdint.h"
+ 329              		.file 4 "../emlib/inc/em_cmu.h"
+ 330              		.file 5 "../emlib/inc/em_gpio.h"
+ 331              		.file 6 "../drivers/Keys.h"
+ 332              		.file 7 "../CMSIS/Include/core_cm3.h"

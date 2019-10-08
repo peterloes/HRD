@@ -1,0 +1,42 @@
+ARM GAS  /tmp/cc9BvwHj.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"version.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.global	prjVersion
+  19              		.section	.rodata.prjVersion,"a",%progbits
+  20              		.align	2
+  23              	prjVersion:
+  24 0000 312E3200 		.ascii	"1.2\000"
+  25              		.global	prjDate
+  26              		.section	.rodata.prjDate,"a",%progbits
+  27              		.align	2
+  30              	prjDate:
+  31 0000 53657020 		.ascii	"Sep 19 2019\000"
+  31      31392032 
+  31      30313900 
+  32              		.global	prjTime
+  33              		.section	.rodata.prjTime,"a",%progbits
+  34              		.align	2
+  37              	prjTime:
+  38 0000 31323A33 		.ascii	"12:30:19\000"
+  38      303A3139 
+  38      00
+  39 0009 000000   		.text
+  40              	.Letext0:
+  41              		.file 1 "../version.c"
