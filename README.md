@@ -7,7 +7,7 @@ documentation of battery quality.
 Supported:
 
 -	ATMEL ATmega32HVB 
-- (Available in February) TEXAS INSTRUMENTS bq40z50
+- (available in February) TEXAS INSTRUMENTS bq40z50
 
 ![My image](https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/2_Electronic_board.jpg)
 
@@ -32,7 +32,7 @@ burden for the environment. Unfortunately, common BMSs do not display the stored
 
 ![My image](https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/2_Mechanik_HRD.JPG)
 
-(Available in February)
+(available in February)
 
 Battery controller probing requests. 0x0A=Atmel, 0x16=TI. 
 Actual Current is signed. 
