@@ -34,10 +34,10 @@ burden for the environment. Unfortunately, common BMSs do not display the stored
 
 (Soon available here in February)
 
-Battery controller probing requests. 0x0A=Atmel, 0x16=TI
-Actual Current is signed.
-Power management for the LC-Display.
-Display will be scrolled (11 digits).
+Battery controller probing requests. 0x0A=Atmel, 0x16=TI. 
+Actual Current is signed. 
+Power management for the LC-Display. 
+Display will be scrolled (11 digits). 
 
 The standalone HRD features EFM32 ...the world´s most energy friendly microcontrollers
 
