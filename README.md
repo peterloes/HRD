@@ -7,6 +7,7 @@ documentation of battery quality.
 Supported:
 
 -	ATMEL ATmega32HVB 
+- (Soon available here) TEXAS INSTRUMENTS bq40z50
 
 ![My image](https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/2_Electronic_board.jpg)
 
