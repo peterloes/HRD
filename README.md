@@ -1,5 +1,5 @@
 ﻿# A Handheld Readout Device(HRD) for Battery Management Systems
-Monitoring Battery Quality
+Monitoring Battery Quality and reduce waste
 
 A standalone HRD to enable long-term diagnostic observations and 
 documentation of battery quality.
