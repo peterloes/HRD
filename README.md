@@ -6,8 +6,8 @@ documentation of battery quality.
 
 Supported:
 
--	ATMEL ATmega32HVB 
-- (available in February) TEXAS INSTRUMENTS bq40z50
+- TEXAS INSTRUMENTS bq40z50 
+- ATMEL ATmega32HVB
 
 ![My image](https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/2_Electronic_board.jpg)
 
@@ -32,11 +32,13 @@ burden for the environment. Unfortunately, common BMSs do not display the stored
 
 ![My image](https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/2_Mechanik_HRD.JPG)
 
-(available in February) 
-Battery controller probing requests. 0x0A=Atmel, 0x16=TI. 
-Actual Current is signed. 
-Power management for the LC-Display. 
-Display will be scrolled (11 digits). 
+Battery controller probing requests. 0x0A=Atmel, 0x16=TI.
+
+Actual Current is signed.
+
+Power management for the LC-Display.
+
+Display will be scrolled (11 digits).
 
 The standalone HRD features EFM32 ...the world´s most energy friendly microcontrollers
 
