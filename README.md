@@ -32,7 +32,7 @@ burden for the environment. Unfortunately, common BMSs do not display the stored
 
 ![My image](https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/2_Mechanik_HRD.JPG)
 
-Battery controller probing requests. 0x0A=Atmel, 0x16=TI.
+Battery controller probing requests. 0x0A=Atmel, 0x16=TI
 
 Actual Current is signed.
 
