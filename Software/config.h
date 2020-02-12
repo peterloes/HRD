@@ -2,13 +2,14 @@
  * @file
  * @brief	Project configuration file
  * @author	Ralf Gerhauser
- * @version	2016-11-22
+ * @version	2020-01-13
  *
  * This file allows to set miscellaneous configuration parameters.  It must be
  * included by all modules.
  *
  ****************************************************************************//*
 Revision History:
+2020-01-13,rage	Added prototype for ConsolePrintf().
 2016-11-22,rage	Added DMA Channel Assignment for LEUART support.
 2014-10-12,rage	Removed LED definitions.
 2014-11-11,rage	Derived from project "AlarmClock".
@@ -145,6 +146,8 @@ typedef enum
 
 extern volatile bool	 g_flgIRQ;		// Flag: Interrupt occured
 extern volatile uint16_t g_EM1_ModuleMask;	// Modules that require EM1
+
+void ConsolePrintf (const char *frmt, ...);
 
 
 #endif /* __INC_config_h */

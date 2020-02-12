@@ -1,8 +1,8 @@
 /***************************************************************************//**
  * @file
- * @brief	Akku LCD
- * @author	Ralf Gerhauser
- * @version	2016-11-22
+ * @brief	HRD
+ * @author	Peter Loës
+ * @version	2020-01-13
  *
  * This application consists of the following modules:
  * - ExtInt.c - External interrupt handler.
@@ -49,6 +49,9 @@
  *
  ****************************************************************************//*
 Revision History:
+2020-01-13,rage	Merged with version from Peter Loës, updated documentation.
+		Calculate the LCD contrast depending on the CR2032 voltage.
+		ConsolePrintf() allows formated output to the serial console.
 2016-11-22,rage	Added DMA Channel Assignment for LEUART support.
 		Changed l_ExtIntCfg for new version of ExtInt module.
 		Initialize LEUART.
@@ -61,8 +64,8 @@ Revision History:
 /*!
  * @mainpage
  * <b>Description</b><br>
- * Akku_LCD is an application to display actual values of a battery pack.
- * For that purpose the Akku_LCD board must be connected to the battery
+ * HRD (Handheld Readout Device) is an application to display actual values of a
+ * battery pack. For that purpose the HRD board must be connected to the battery
  * controller via its SMBus.
  *
  * The system consists of the following components:
@@ -78,11 +81,16 @@ Revision History:
  * <b>Keys (Push Buttons)</b><br>
  * There exist 3 push buttons on the board (description of the keys is left to
  * right).  When asserted, the following action will be taken:
- * - SW1 is the POWER button.  It is used to switch on the device and
- *   additionally selects the first item, i.e. the firmware version and date.
- * - SW3 is the NEXT key.  It leads to the next menu item.
+ * - <b>POWER</b> button.  It is used to switch the device on or off (for
+ *   switching it off keep the button asserted until the text message
+ *   <b>POWER OFF</b> is displayed).
+ *   When pressed for a short time, it shows the firmware version and date, and
+ *   probes for the battery controller again.  This is useful after a different
+ *   battery pack has been connected to the HRD.
+ * - <b>NEXT</b> key.  It leads to the next menu item that is applicable for
+ *   the connected battery controller.
  *   This key has a auto-repeat functionality when kept asserted.
- * - SW2 is the PREV key.  It returns to the previous menu item.
+ * - <b>PREV</b> key.  It returns to the previous menu item.
  *   This key has a auto-repeat functionality when kept asserted.
  *
  * The duration how long the respective information is displayed before
@@ -92,7 +100,7 @@ Revision History:
  * Another timeout define is the @ref POWER_OFF_TIMEOUT.  It specifies the
  * number of seconds after which the whole device is powered off if no
  * key assertion is detected.  @ref POWER_OFF_TIMEOUT should be greater
- * or eqal @ref LCD_POWER_OFF_TIMEOUT.
+ * or equal @ref LCD_POWER_OFF_TIMEOUT.
  *
  * <b>LC-Display</b><br>
  * The display provides 2 lines á 16 characters.  It is connected to the
@@ -105,9 +113,9 @@ Revision History:
  *
  * <b>Battery Monitor</b><br>
  * The battery pack has its own controller.  It is connected to the EFM32
- * microcontroller via I2C-bus.  The battery monitor routines  allow to request
- * status information from the battery pack.  This module additionally provides
- * function ReadVdd() to read the voltage of the local supply battery.
+ * microcontroller via I²C-bus (SMBus).  The battery monitor routines  allow to
+ * request status information from the battery pack.  This module additionally
+ * provides function ReadVdd() to read the voltage of the local supply battery.
  *
  * <b>Firmware</b><br>
  * The firmware consists of an initialization part and a main loop, also called
@@ -121,9 +129,13 @@ Revision History:
  * -# Further hardware initialization (Keys, Interrupts, Alarm Clock)
  * -# The LC-Display is activated and the firmware version is shown
  * -# The Battery Monitor is initialized
+ * -# If a Battery Pack is connected via SMBus, the controller type is probed
+ *    and displayed
  *
  * The program then enters the Service Execution Loop which takes care of:
- * - Power managemnet for the LC-Display
+ * - Power management for the LC-Display
+ * - Manual or timed Power-Off
+ * - Battery controller probing requests via POWER button
  * - Battery monitoring
  * - Entering the right energy mode
  */
@@ -147,7 +159,6 @@ Revision History:
 
 extern char const prjVersion[];
 extern char const prjDate[];
-extern char const prjTime[];
 
 
 /*! @brief Global DMA Control Block.
@@ -275,43 +286,45 @@ static const LCD_FIELD l_LCD_Field[LCD_FIELD_ID_CNT] =
 static const ITEM l_Item[] =
 {  // [1234567890123456]    Cmd				Frmt
     { ">>> HRDevice <<<",   SBS_NONE,			FRMT_FW_VERSION	},
-    { "Supply Battery",	    SBS_NONE,			FRMT_CR2032_BAT	},
-    { "Manufacturer",	    SBS_ManufacturerName,	FRMT_STRING	},
-    { "Device Name",	    SBS_DeviceName,		FRMT_STRING	},
-    { "Device Type",	    SBS_DeviceChemistry,	FRMT_STRING	},
-    { "Serial Number",	    SBS_SerialNumber,		FRMT_SERNUM	},
+    { "Battery at SMBus",   SBS_NONE,			FRMT_BAT_CTRL	},
+    { "Supply Battery",     SBS_NONE,			FRMT_CR2032_BAT	},
+    { "Manufacturer",       SBS_ManufacturerName,	FRMT_STRING	},
+    { "Device Name",        SBS_DeviceName,		FRMT_STRING	},
+    { "Device Type",        SBS_DeviceChemistry,	FRMT_STRING	},
+    { "Serial Number",      SBS_SerialNumber,		FRMT_HEX	},
     { "Production Date",    SBS_ManufactureDate,	FRMT_DATE	},
     { "Manufact. Data",	    SBS_ManufacturerData,	FRMT_STRING	},
-    { "Manufact. Access",   SBS_ManufacturerAccess,	FRMT_HEX	},
+    { "Manufact. Data",	    SBS_ManufacturerDataTI,	FRMT_HEXDUMP	},
     { "Specificat. Info",   SBS_SpecificationInfo,	FRMT_HEX	},
-    { "Battery Mode",	    SBS_BatteryMode,		FRMT_HEX	},
-    { "Battery Status",	    SBS_BatteryStatus,		FRMT_HEX	},
-    { "Core Temperature",   SBS_CoreTemperature,	FRMT_TEMP	},
-    { "Actual Voltage",	    SBS_Voltage,		FRMT_MILLIVOLT	},
-    { "Actual Current",	    SBS_BatteryCurrent,		FRMT_MILLIAMP	},
-    { "Average Current",    SBS_BatteryAverageCurrent,	FRMT_MILLIAMP	},
+    { "Design Capacity",    SBS_DesignCapacity,		FRMT_MILLIAMPH	},
+    { "Design Voltage",     SBS_DesignVoltage,		FRMT_MILLIVOLT	},
+    { "Battery Mode",       SBS_BatteryMode,		FRMT_HEX	},
+    { "Battery Status",     SBS_BatteryStatus,		FRMT_HEX	},
+    { "Core Temperature",   SBS_Temperature,		FRMT_TEMP	},
+    { "Actual Voltage",     SBS_Voltage,		FRMT_MILLIVOLT	},
+    { "Actual Current",     SBS_Current,		FRMT_MILLIAMP	},
+    { "Average Current",    SBS_AverageCurrent, 	FRMT_MILLIAMP	},
     { "Rel.Charge State",   SBS_RelativeStateOfCharge,	FRMT_PERCENT	},
     { "Abs.Charge State",   SBS_AbsoluteStateOfCharge,	FRMT_PERCENT	},
     { "Remain. Capacity",   SBS_RemainingCapacity,	FRMT_MILLIAMPH	},
     { "Remain.Cap.Alarm",   SBS_RemainingCapacityAlarm,	FRMT_MILLIAMPH	},
+    { "Remain.TimeAlarm",   SBS_RemainingTimeAlarm,	FRMT_DURATION	},
     { "Full Charge Cap.",   SBS_FullChargeCapacity,	FRMT_MILLIAMPH	},
     { "Runtime to Empty",   SBS_RunTimeToEmpty,		FRMT_DURATION	},
-    { "Remain.TimeAlarm",   SBS_RemainingTimeAlarm,	FRMT_DURATION	},
-    { "AvrTime to Empty",   SBS_AverageTimeToEmpty,	FRMT_DURATION	},
+    { "Av.Time to Empty",   SBS_AverageTimeToEmpty,	FRMT_DURATION	},
     { "Avr.Time to Full",   SBS_AverageTimeToFull,	FRMT_DURATION	},
     { "Charging Current",   SBS_ChargingCurrent,	FRMT_MILLIAMP	},
     { "Charging Voltage",   SBS_ChargingVoltage,	FRMT_MILLIVOLT	},
-    { "Charge Cycle Cnt",   SBS_ChargerCycleCount,	FRMT_INTEGER	},
-    { "Design Capacity",    SBS_DesignCapacity,		FRMT_MILLIAMPH	},
-    { "Design Voltage",	    SBS_DesignVoltage,		FRMT_MILLIVOLT	},
+    { "Charge Cycle Cnt",   SBS_CycleCount,		FRMT_INTEGER	},
+	/* ATMEL Controller */
     { "Shunt Resistance",   SBS_ShuntResistance,	FRMT_MICROOHM	},
-    { "Cells in series",    SBS_CellsInSeries,		FRMT_INTEGER	},
     { "Overcurr. React.",   SBS_OverCurrentReactionTime,FRMT_OC_REATIME },
     { "Overcurr. Charge",   SBS_OverCurrentCharge,	FRMT_MILLIAMP	},
     { "Overcurr.Dischar",   SBS_OverCurrentDischarge,	FRMT_MILLIAMP	},
     { "Highcurr. React.",   SBS_HighCurrentReactionTime,FRMT_HC_REATIME },
     { "Highcurr. Charge",   SBS_HighCurrentCharge,	FRMT_MILLIAMP	},
     { "Highcurr.Dischar",   SBS_HighCurrentDischarge,	FRMT_MILLIAMP	},
+    { "Cells in series",    SBS_CellsInSeries,		FRMT_INTEGER	},
     { "Cell #1 Voltage",    SBS_VoltageCell1,		FRMT_MILLIVOLT	},
     { "Cell #2 Voltage",    SBS_VoltageCell2,		FRMT_MILLIVOLT	},
     { "Cell #3 Voltage",    SBS_VoltageCell3,		FRMT_MILLIVOLT	},
@@ -319,8 +332,13 @@ static const ITEM l_Item[] =
     { "Cell Min Voltage",   SBS_CellMinVoltage,		FRMT_MILLIVOLT	},
     { "Cell Max Voltage",   SBS_CellMaxVoltage,		FRMT_MILLIVOLT	},
     { "Cell PwrOff Volt",   SBS_CellPowerOffVoltage,	FRMT_MILLIVOLT	},
+	/* TI Controller */
+    { "Cell #1 Voltage",    SBS_CellVoltage1,		FRMT_MILLIVOLT	},
+    { "Cell #2 Voltage",    SBS_CellVoltage2,		FRMT_MILLIVOLT	},
+    { "Cell #3 Voltage",    SBS_CellVoltage3,		FRMT_MILLIVOLT	},
+    { "Cell #4 Voltage",    SBS_CellVoltage4,		FRMT_MILLIVOLT	},
+    { "State-of-Health",    SBS_StateOfHealth,		FRMT_PERCENT	},
 };
-
 #define ITEM_CNT	ELEM_CNT(l_Item)
 
 /*=========================== Forward Declarations ===========================*/
@@ -338,6 +356,9 @@ int main( void )
 
     /* Set up clocks */
     cmuSetup();
+
+    /* Enable FET to power the device independent from the Power Button */
+    PowerUp();
 
     /* Init Low Energy UART with 9600bd (this is the maximum) */
     drvLEUART_Init (9600);
@@ -372,6 +393,13 @@ int main( void )
 
     /* Verify element count */
     EFM_ASSERT(ELEM_CNT(l_LCD_Field) == LCD_FIELD_ID_CNT);
+
+    /*
+     * Set Contrast of LC-Display.  This depends on the CR2032 Battery Voltage:
+     * 2.9V -> 30, 2.6V -> 45, i.e. 5 digits per 100mV, 1 digit per 20mV
+     * Contrast calculation must be done before initializing the LCD!
+     */
+    LCD_SetContrast((3500 - ReadVdd()) / 20);
 
     /* Initialize display - show firmware version */
     DisplayInit (l_LCD_Field, l_Item, ITEM_CNT);
@@ -452,4 +480,29 @@ static void cmuSetup(void)
 
     /* Enable clock to GPIO */
     CMU_ClockEnable(cmuClock_GPIO, true);
+}
+
+
+/***************************************************************************//**
+ *
+ * @brief	Print string to serial console
+ *
+ * This routine is used to print text to the serial console, i.e. LEUART.
+ *
+ * @param[in] frmt
+ *	Format string of the text to print - same as for printf().
+ *
+ * @see		drvLEUART_puts()
+ *
+ ******************************************************************************/
+void ConsolePrintf (const char *frmt, ...)
+{
+char	 buffer[120];
+va_list	 args;
+
+
+    va_start (args, frmt);
+    vsprintf (buffer, frmt, args);
+    drvLEUART_puts (buffer);
+    va_end (args);
 }
