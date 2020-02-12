@@ -4,7 +4,7 @@ Lithium Ionen Akkupack Art.Nr. 60.16294 Panasonic NCR 18650GA 4S2P
 DYNAMIS Batterien GmbH
 Josef Pfeil
 
-Br¸hlstraﬂe 15  D- 78465 Dettingen / Konstanz
+Br√ºhlstra√üe 15  D- 78465 Dettingen / Konstanz
 Tel. +49 (0) 75 33/93 669-15
 mailto:josef.pfeil@dynamis-batterien.de
 www.dynamis-batterien.de
@@ -22,3 +22,6 @@ Tel.: +49-89-60668047
 Fax: +49-89-60668049
 mailto: info@top-print.eu
 www.top-print.eu
+
+FTDI Chip cable (3.5mm Audio Jack to USB)
+TTL-232R-3V3-AJ
