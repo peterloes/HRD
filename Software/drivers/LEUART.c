@@ -93,7 +93,7 @@ volatile bool	g_flgLEUART_LF2CRLF = true;
 volatile bool	g_flgCmdLine;
 
 /*!@brief Command line buffer */
-uint8_t	 g_CmdLine[CMD_LINE_SIZE];
+char	 g_CmdLine[CMD_LINE_SIZE];
 #endif
 
 /*================================ Local Data ================================*/
@@ -108,7 +108,7 @@ static LEUART_Init_TypeDef leuartInit =
 #endif
   .refFreq  = 0,		// Get clock frequency from LEUART clock source
   .baudrate = 9600,		// Baudrate - overwritten by LEUART_Init()
-  .databits = leuartDatabits8,	// Each LEUART frame containes 8 databits
+  .databits = leuartDatabits8,	// Each LEUART frame contains 8 databits
   .parity   = leuartNoParity,	// No parity bits in use
   .stopbits = leuartStopbits2,	// Number of stop bits in a frame
 };
@@ -124,7 +124,7 @@ static DMA_Init_TypeDef dmaInit =
 static DMA_CfgChannel_TypeDef chnlCfgTx =
 {
     .highPri   = false,			// Normal priority
-    .enableInt = false,			// No interupt for callback function
+    .enableInt = false,			// No interrupt for callback function
     .select    = DMAREQ_LEUART_TXBL,	// DMA Req. is LEUARTx TX buffer empty
     .cb = &(g_DMA_Callback[DMA_CHAN_LEUART_TX]), // Callback for DMA TX done
 };
@@ -135,7 +135,7 @@ DMA_CfgDescr_TypeDef descrCfgTx =
     .dstInc  = dmaDataIncNone,		// Do not increment destination address
     .srcInc  = dmaDataInc1,		// Increment source address by one byte
     .size    = dmaDataSize1,		// Data size is one byte
-    .arbRate = dmaArbitrate1,		// Rearbitrate for each byte recieved
+    .arbRate = dmaArbitrate1,		// Rearbitrate for each byte received
     .hprot   = 0,			// No read/write source protection
 };
 
@@ -144,7 +144,7 @@ DMA_CfgDescr_TypeDef descrCfgTx =
 static DMA_CfgChannel_TypeDef chnlCfgRx =
 {
     .highPri   = false,			// Normal priority
-    .enableInt = false,			// No interupt for callback function
+    .enableInt = false,			// No interrupt for callback function
     .select    = DMAREQ_LEUART_RXDATAV,	// DMA Req. is LEUARTx RX data available
     .cb        = NULL,			// No callback function
 };
@@ -155,7 +155,7 @@ DMA_CfgDescr_TypeDef descrCfgRx =
     .dstInc  = dmaDataInc1,		// Increment destination address by one
     .srcInc  = dmaDataIncNone,		// o not increment source address
     .size    = dmaDataSize1,		// Data size is one byte
-    .arbRate = dmaArbitrate1,		// Rearbitrate for each byte recieved
+    .arbRate = dmaArbitrate1,		// Rearbitrate for each byte received
     .hprot   = 0,			// No read/write source protection
 };
 #endif
@@ -208,7 +208,13 @@ int16_t		cnt;		// number of bytes to send
     {
 	/* Limit DMA transfer to end of FIFO buffer */
 	idxPut = sizeof(txFIFO);
-	cnt = idxPut - txIdxGet;
+	cnt = idxPut - txIdxGet;	// calculate number of bytes
+    }
+    else if (cnt > 1024)
+    {
+	/* DMA can maximum handle 1024 bytes per transfer - limit it */
+	cnt = 1024;
+	idxPut = txIdxGet + cnt;	// calculate source end address
     }
 
     /* Calculate next value of the Get Index */
@@ -289,7 +295,7 @@ static void setupLeuartDma(void)
     NVIC_EnableIRQ(DMA_IRQn);
 
 #if ENABLE_LEUART_RECEIVER
-    /* Initializing DMA, channel and desriptor */
+    /* Initializing DMA, channel and descriptor */
     DMA_CfgChannel(DMA_CHAN_LEUART_RX, &chnlCfgRx);
     DMA_CfgDescr(DMA_CHAN_LEUART_RX, true, &descrCfgRx);
 
@@ -378,7 +384,7 @@ void LEUART_IRQHandler(void)
 {
 uint32_t leuartif, len;
 
-    /* Store and reset pending interupts */
+    /* Store and reset pending interrupts */
     leuartif = LEUART_IntGet(LEUART);
     LEUART_IntClear(LEUART, leuartif);
 
@@ -415,7 +421,7 @@ uint32_t leuartif, len;
  * FIFO, characters will be discarded.
  *
  * @param[in] pStr
- *	Adress pointer of the string to write into the FIFO.
+ *	Address pointer of the string to write into the FIFO.
  *
  ******************************************************************************/
 void	 drvLEUART_puts (const char *pStr)

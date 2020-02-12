@@ -2,9 +2,11 @@
  * @file
  * @brief	Header file of module Display.c
  * @author	Ralf Gerhauser
- * @version	2016-11-22
+ * @version	2020-01-13
  ****************************************************************************//*
 Revision History:
+2020-01-13,rage	Added enums FRMT_BAT_CTRL and FRMT_HEXDUMP, and prototypes for
+		PowerUp() and DisplaySelectItem().
 2016-11-22,rage	Defined separate format types for Overcurrent and Highcurrent
 		Reaction Times.
 2015-10-12,rage	Added defines for power-off logic.
@@ -27,12 +29,12 @@ Revision History:
 
     /*!@brief Time in [s] after which the LCD is powered-off. */
 #ifndef LCD_POWER_OFF_TIMEOUT
-    #define LCD_POWER_OFF_TIMEOUT	60
+    #define LCD_POWER_OFF_TIMEOUT	120
 #endif
 
     /*!@brief Time in [s] after which the whole device is powered-off. */
 #ifndef POWER_OFF_TIMEOUT
-    #define POWER_OFF_TIMEOUT		120
+    #define POWER_OFF_TIMEOUT		240
 #endif
 
 /*
@@ -112,21 +114,23 @@ typedef void	(* DISP_NEXT_FCT)(int userParm);
 typedef enum
 {
     FRMT_FW_VERSION,	//!<  0: Special ID to show firmware version and date
-    FRMT_CR2032_BAT,	//!<  1: Voltage of local CR2032 supply battery
-    FRMT_STRING,	//!<  2: 0-terminated string
-    FRMT_HEX,		//!<  3: Hexadecimal data representation
-    FRMT_INTEGER,	//!<  4: Integer value
-    FRMT_SERNUM,	//!<  5: Serial Number
-    FRMT_PERCENT,	//!<  6: Amount in percent
-    FRMT_DURATION,	//!<  7: Duration in [min]
-    FRMT_OC_REATIME,	//!<  8: Overcurrent Reaction Time in 1/2[ms] units
-    FRMT_HC_REATIME,	//!<  9: Highcurrent Reaction Time in 2[ms] units
-    FRMT_MILLIVOLT,	//!< 10: Voltage in [mV]
-    FRMT_MILLIAMP,	//!< 11: Current in [mA]
-    FRMT_MILLIAMPH,	//!< 12: Capacity in [mAh]
-    FRMT_MICROOHM,	//!< 13: Resistance in [uOhm]
-    FRMT_DATE,		//!< 14: Date (unknown format, TODO: get info)
-    FRMT_TEMP,		//!< 15: Temperature (unknown format, TODO: get info)
+    FRMT_BAT_CTRL,	//!<  1: Battery controller SMBus address and type
+    FRMT_CR2032_BAT,	//!<  2: Voltage of local CR2032 supply battery
+    FRMT_STRING,	//!<  3: 0-terminated string
+    FRMT_HEX,		//!<  4: H1,2,3,4 Hexadecimal data representation
+    FRMT_HEXDUMP,	//!<  5: Show Hexdump for more than 4 bytes
+    FRMT_INTEGER,	//!<  6: Integer value
+    FRMT_SERNUM,	//!<  7: Serial Number
+    FRMT_PERCENT,	//!<  8: U1 Amount in percent [%]
+    FRMT_DURATION,	//!<  9: U2 Duration in [min]
+    FRMT_OC_REATIME,	//!< 10: Overcurrent Reaction Time in 1/2[ms] units
+    FRMT_HC_REATIME,	//!< 11: Highcurrent Reaction Time in 2[ms] units
+    FRMT_MILLIVOLT,	//!< 12: U2 Voltage in [mV]
+    FRMT_MILLIAMP,	//!< 13: I2 Current in [±mA], +:charging, -:discharging
+    FRMT_MILLIAMPH,	//!< 14: U2 Capacity in [mAh]
+    FRMT_MICROOHM,	//!< 15: Resistance in [uOhm]
+    FRMT_DATE,		//!< 16: Date [15:9=Year|8:5=Month|4:0=Day]
+    FRMT_TEMP,		//!< 17: U2 Temperature [0.1°K]
     FRMT_TYPE_CNT	//!< Format Type Count
 } FRMT_TYPE;
 
@@ -143,8 +147,10 @@ typedef struct
 
 /*================================ Prototypes ================================*/
 
+void	PowerUp (void);
 void	DisplayInit(const LCD_FIELD *pField, const ITEM *pItemList, int itemCnt);
 void	DisplayKeyHandler (KEYCODE keycode);
+void	DisplaySelectItem (int index);
 void	DisplayUpdateCheck (void);
 void	DisplayUpdateTrigger (LCD_FIELD_ID fieldID);
 void	DisplayText (int lineNum, const char *frmt, ...);

@@ -2,7 +2,7 @@
  * @file
  * @brief	Routines for LCD Module EA DOGM162
  * @author	Ralf Gerhauser
- * @version	2016-11-22
+ * @version	2020-01-13
  *
  * This module contains the low-level, i.e. the DOGM162 specific part of the
  * display routine.  They are used by module Display.c, but should never be
@@ -10,6 +10,9 @@
  *
  ****************************************************************************//*
 Revision History:
+2020-02-13,rage	Use LCD_SetContrast() to set contrast before calling LCD_Init().
+		LCD_vPrintf: Increased buffer sizes, wrap output on LCD if data
+		string ist longer than the field width.
 2016-11-22,rage	Implemented additional output to LEUART.
 2016-04-05,rage	Made local variable <l_flgLCD_IsOn> of type "volatile".
 2015-07-09,rage	IAR Compiler: Use vsprintf() instead vsiprintf().
@@ -133,8 +136,8 @@ Revision History:
     /*!@brief Pointer to module configuration. */
 static const LCD_FIELD *l_pField;
 
-    /*!@brief LCD Contrast value (0 to 63). */
-static volatile int l_Contrast = 35;
+    /*!@brief LCD Contrast value (0 to 63), see LCD_SetContrast(). */
+static volatile int l_Contrast = 30;
 
     /*!@brief Flag if LCD is on. */
 static volatile bool l_flgLCD_IsOn;
@@ -174,6 +177,25 @@ void LCD_Init (const LCD_FIELD *pField)
 
     /* Power the LCD Module On and initialize it */
     LCD_PowerOn();
+}
+
+
+/***************************************************************************//**
+ *
+ * @brief	Set LCD Contrast
+ *
+ * Store the contrast value in the local variable @ref l_Contrast.  This must
+ * happen before initializing the LCD!
+ *
+ ******************************************************************************/
+void LCD_SetContrast (int contrast)
+{
+    if (contrast < 20)
+	contrast = 20;
+    else if (contrast > 63)
+	contrast = 63;
+
+    l_Contrast = contrast;
 }
 
 
@@ -275,7 +297,8 @@ void LCD_PowerOff (void)
  * in a memory buffer and updated synchronously to the LCD.  This buffer will
  * be written to the LEUART after dedicated fields have been updated (i.e.
  * LCD_ITEM_DATA and LCD_LINE2_TEXT), and, the content of the buffer has
- * changed.
+ * changed.  As a special feature, if the length of LCD_LINE2_TEXT field is
+ * longer than the LCD line, it will be output to the LEUART in complete length.
  *
  * @param[in] id
  *	Identifier of type @ref LCD_FIELD_ID to select a field on the LCD.
@@ -318,10 +341,12 @@ va_list	 args;
  ******************************************************************************/
 void LCD_vPrintf (LCD_FIELD_ID id, const char *frmt, va_list args)
 {
-static char currSerBuf[40] = "                                     ";
-static char prevSerBuf[40];
-char	 buffer[40];
+static int  strStart;
+static char currSerBuf[130] = "                                ";
+static char prevSerBuf[130];
+char	 buffer[120];		// must be smaller than currSerBuf/prevSerBuf!
 int	 len, fieldWidth;
+char	*pField;
 
 
     /* Immediately return if LCD is OFF */
@@ -331,12 +356,12 @@ int	 len, fieldWidth;
     /* Parameter check */
     if (id >= LCD_FIELD_ID_CNT)
     {
-	EFM_ASSERT(0);
+	ConsolePrintf("ERROR in LCD_vPrintf(%d): Invalid ID!\n", id);
 	return;
     }
     if (strlen(frmt) > (sizeof(buffer) - 10))
     {
-	EFM_ASSERT(0);
+	ConsolePrintf("ERROR in LCD_vPrintf(%d): frmt is too long!\n", id);
 	return;
     }
 
@@ -349,29 +374,74 @@ int	 len, fieldWidth;
     fieldWidth = l_pField[id].Width;
     len = strlen (buffer);
 
-    /* If string is too long, truncate it */
-    if (len > fieldWidth)
-	buffer[fieldWidth] = EOS;
+    if (len > (int)(sizeof(buffer) - 2))
+    {
+	ConsolePrintf("ERROR in LCD_vPrintf(%d): buffer Overflow!\n", id);
+	return;
+    }
+
+    /* If description is too long, truncate it and show error */
+    if (l_pField[id].X == 0  &&  len > fieldWidth)
+    {
+	len = fieldWidth;		// limit to the maximum
+	strcpy(buffer+fieldWidth-7, "!ERROR!");
+    }
 
     /* If string is shorter than field width, add spaces */
     while (len < fieldWidth)
 	buffer[len++] = ' ';
 
-    buffer[fieldWidth] = EOS;
+    /* First update the respective part of the serial output string */
+    pField = currSerBuf+(l_pField[id].Y * (LCD_DIMENSION_X+1) + l_pField[id].X);
+    strncpy(pField, buffer, len);
 
-    /* Update the respective part of the serial output string */
-    strncpy(currSerBuf+(l_pField[id].Y * (LCD_DIMENSION_X+1) + l_pField[id].X),
-	    buffer, len);
+    /* Be sure to put a space between the two line fields */
+    currSerBuf[LCD_DIMENSION_X] = ' ';
 
     /* At the end of the update sequence write string to LEUART */
-    if ((id == LCD_ITEM_DATA  ||  id == LCD_LINE2_TEXT)
-    &&  strcmp(currSerBuf, prevSerBuf) != 0)
+    if (id == LCD_ITEM_DATA  ||  id == LCD_LINE2_TEXT)
     {
-	strcpy(prevSerBuf, currSerBuf);
+	/* Terminate data string for serial console output */
+	pField[len] = EOS;
 
-	drvLEUART_puts(currSerBuf);
-	drvLEUART_puts("\n");
+	/* Has output changed? */
+	if (strcmp(currSerBuf, prevSerBuf) != 0)
+	{
+	    /* Yes, update serial buffer and write it to the LEUART */
+	    strcpy(prevSerBuf, currSerBuf);
+
+	    drvLEUART_puts(currSerBuf);
+	    drvLEUART_puts("\n");
+
+	    strStart = 0;
+	}
+	else
+	{
+	    /* No, data has NOT changed, wrap output on LCD if required */
+	    if (len > fieldWidth)
+	    {
+		len -= strStart;
+		strncpy(buffer, buffer+strStart, len);
+
+		/* Update string start offset for the next call */
+		if (len < fieldWidth - 3)
+		    strStart = 0;	// re-start at beginning of the string
+		else
+		    strStart++;		// move offset one character further
+
+		/* If string is shorter than field width, add spaces */
+		while (len < fieldWidth)
+		    buffer[len++] = ' ';
+	    }
+	}
     }
+
+    /* If string is too long, truncate it */
+    if (len > fieldWidth)
+	len = fieldWidth;		// limit to the maximum
+
+    /* Terminate string according to the field width on the LCD */
+    buffer[len] = EOS;
 
     /* Write string to LCD */
     LCD_Puts (buffer);

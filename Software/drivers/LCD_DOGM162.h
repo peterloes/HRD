@@ -2,12 +2,13 @@
  * @file
  * @brief	Header file for LCD_DOGM162.c
  * @author	Ralf Gerhauser
- * @version	2014-11-19
+ * @version	2020-02-13
  *
  * This is the header file of module "LCD_DOGM162.c"
  *
  ****************************************************************************//*
 Revision History:
+2020-02-13,rage	Added prototype for LCD_SetContrast().
 2014-11-19,rage	Initial version.
 */
 #ifndef __INC_LCD_DOGM162_h
@@ -34,6 +35,7 @@ extern "C" {
 
     /* Regular functions */
 void LCD_Init (const LCD_FIELD *pField);
+void LCD_SetContrast (int contrast);
 void LCD_PowerOn(void);
 void LCD_PowerOff(void);
 void LCD_Printf (LCD_FIELD_ID id, const char *frmt, ...);

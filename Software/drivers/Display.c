@@ -2,21 +2,31 @@
  * @file
  * @brief	Display Manager
  * @author	Ralf Gerhauser
- * @version	2016-11-22
+ * @version	2020-01-13
  *
  * This is the Display Manager module.  It controls all the information on
- * the LC-Display.  The keys S5 and S4 are used to select the next or previous
- * item respectively:
- * - When <b>S5</b> <b>NEXT</b> is asserted, the display moves to the next
+ * the LC-Display.  The keys <b>NEXT</b> and <b>PREV</b> are used to select the
+ * next or previous item respectively:
+ * - When <b>NEXT</b> is asserted, the display moves to the next
  *   information.
- * - When <b>S4</b> <b>PREV</b> is asserted, the display moves to the previous
+ * - When <b>PREV</b> is asserted, the display moves to the previous
  *   information.
- * - When none of the keys is asserted, the LCD is powered-off after 30 seconds.
+ * - When none of the keys is asserted, the LCD is powered-off after 2 minutes.
  *
  * The low-level display routines can be found in LCD_DOGM162.c.
  *
  ****************************************************************************//*
 Revision History:
+2020-01-13,rage PowerUp() must be called to set Port Pin D0 and enable FET T1.
+		Added flags to initiate power-off and probing of the battery
+		controller type.
+		DisplayKeyHandler: Check if next/previous item is applicable
+		for the currently connected battery controller.
+		DisplaySelectItem() directly selects the specified item to be
+		displayed.  It is used to show the battery controller type.
+		ItemDataString: Increased buffer sizes, implemented new format
+		types FRMT_BAT_CTRL and FRMT_HEXDUMP.  FRMT_MILLIAMP outputs a
+		signed value now.  FRMT_HEX supports 8, 16, 24 and 32bit values.
 2016-11-22,rage	Asserting Power-Key returns to the first item to be displayed.
 		Calculate temperature and manufacturing date from raw values.
 2015-10-12,rage	Added functionality to automatically power-off the device
@@ -47,7 +57,6 @@ Revision History:
 
 extern char const prjVersion[];
 extern char const prjDate[];
-extern char const prjTime[];
 
 /*================================ Local Data ================================*/
 
@@ -71,6 +80,13 @@ static TIM_HDL		 l_hdlDispNext = NONE;
 
     /*!@brief Flag if Display is currently powered on. */
 static volatile bool	 l_flgDisplayIsOn;
+
+    /*!@brief Flag to trigger Battery Controller Probing. */
+static volatile bool	 l_flgBatteryCtrlProbe = true;
+
+    /*!@brief Flag to trigger Power Off. */
+static volatile bool	 l_flgPowerOff;
+
 
     /*!@brief Bit mask variable specifies which fields must be updated, each
      * bit refers to another field, see @ref LCD_FIELD_ID.
@@ -108,6 +124,20 @@ static void  DispNextTrigger(TIM_HDL hdl);
 
 /***************************************************************************//**
  *
+ * @brief	Power Up the Device
+ *
+ * This routine initializes and sets Port Pin D0 to enable FET T1.
+ *
+ ******************************************************************************/
+void  PowerUp (void)
+{
+    /* Configure PD0 to hold power, set FET input to HIGH */
+    GPIO_PinModeSet (HOLD_POWER_PORT, HOLD_POWER_PIN, gpioModePushPull, 1);
+}
+
+
+/***************************************************************************//**
+ *
  * @brief	Initialize the Display
  *
  * This routine initializes the LC-Display and all the required functionality
@@ -123,9 +153,6 @@ void  DisplayInit (const LCD_FIELD *pField, const ITEM *pItemList, int itemCnt)
     /* Save configuration */
     l_pItemList = pItemList;
     l_ItemCnt   = itemCnt;
-
-    /* Configure PD0 to hold power, set FET input to HIGH */
-    GPIO_PinModeSet (HOLD_POWER_PORT, HOLD_POWER_PIN, gpioModePushPull, 1);
 
     /* Get a timer handle to switch the display off after a time */
     if (l_hdlLCD_Off == NONE)
@@ -165,7 +192,9 @@ void  DisplayInit (const LCD_FIELD *pField, const ITEM *pItemList, int itemCnt)
  * be displayed on the LCD.
  *
  * The following keys are recognized:
- * - <b>POWER</b> returns to the first item to be displayed.
+ * - <b>POWER</b> returns to the first item to be displayed and probes the
+ *   battery controller type on the SMBus.  Keep asserted to switch off the
+ *   device.
  * - <b>NEXT</b> moves to the next item to be displayed.
  * - <b>PREV</b> moves to the previous item.
  * If the keys are released, the LCD Power-Off timer is started.  The value
@@ -180,16 +209,34 @@ void  DisplayInit (const LCD_FIELD *pField, const ITEM *pItemList, int itemCnt)
  ******************************************************************************/
 void	DisplayKeyHandler (KEYCODE keycode)
 {
+int	bitMaskCtrlType;
+
+    /*
+     * Build bit mask to detect items which are applicable for the current
+     * controller type:
+     * 0x08000 - BCT_UNKNOWN (0x00)
+     * 0x10000 - BCT_ATMEL   (0x01)
+     * 0x20000 - BCT_TI      (0x02)
+     *
+     * Note: Items with Cmd set to SBS_NONE (-1, i.e. all bits set!) will be
+     *       displayed in any case.
+     * See also BC_TYPE and SBS_CMD.
+     */
+    bitMaskCtrlType = (0x8000 << g_BatteryCtrlType);
+    EFM_ASSERT(bitMaskCtrlType != 0);
+
     switch (keycode)
     {
 	case KEYCODE_POWER_ASSERT:	// POWER was asserted
 	    if (! l_flgDisplayIsOn)
 		break;			// just use as wake-up if LCD is OFF
 
-	    /* no break */
+	    l_ItemIdx = 0;		// select item number 0, display version
+	    l_flgBatteryCtrlProbe = true;	// first assertion, probe now
+	    break;
 
 	case KEYCODE_POWER_REPEAT:	// repeated POWER was asserted
-	    l_ItemIdx = 0;		// select item number 0
+	    /* Note: l_flgPowerOff is set below */
 	    break;
 
 	case KEYCODE_NEXT_ASSERT:	// NEXT was asserted
@@ -199,8 +246,12 @@ void	DisplayKeyHandler (KEYCODE keycode)
 	    /* no break */
 
 	case KEYCODE_NEXT_REPEAT:	// repeated NEXT was asserted
-	    if (++l_ItemIdx >= l_ItemCnt)
-		l_ItemIdx = 0;		// wrap around
+	    /* find next item to be displayed for the current controller */
+	    do
+	    {
+		if (++l_ItemIdx >= l_ItemCnt)
+		    l_ItemIdx = 0;	// wrap around
+	    } while ((l_pItemList[l_ItemIdx].Cmd & bitMaskCtrlType) == 0);
 
 	    break;
 
@@ -211,8 +262,12 @@ void	DisplayKeyHandler (KEYCODE keycode)
 	    /* no break */
 
 	case KEYCODE_PREV_REPEAT:	// repeated PREV was asserted
-	    if (--l_ItemIdx < 0)
-		l_ItemIdx = l_ItemCnt-1; // wrap around
+	    /* find previous item to be displayed for the current controller */
+	    do
+	    {
+		if (--l_ItemIdx < 0)
+		    l_ItemIdx = l_ItemCnt-1; // wrap around
+	    } while ((l_pItemList[l_ItemIdx].Cmd & bitMaskCtrlType) == 0);
 
 	    break;
 
@@ -232,6 +287,13 @@ void	DisplayKeyHandler (KEYCODE keycode)
 	    return;
     }
 
+    /* POWER_REPEAT should switch the device off (when button is released) */
+    l_flgPowerOff = (keycode == KEYCODE_POWER_REPEAT ? true : false);
+
+    /* Limit the displayable range if no battery pack is connected */
+    if (g_BatteryCtrlAddr == 0x00  &&  l_ItemIdx > 2)
+	l_ItemIdx = 0;
+
     /* Common part of KEYCODE_Sx_ASSERT */
     l_bitMaskFieldActive = LCD_FIELD_ID_MASK_ITEM;  // activate item
 
@@ -248,10 +310,33 @@ void	DisplayKeyHandler (KEYCODE keycode)
 
 /***************************************************************************//**
  *
+ * @brief	Select Item to be displayed
+ *
+ * This function selects a dedicated item from the @ref l_Item list by
+ * specifying its index.
+ *
+ ******************************************************************************/
+void	DisplaySelectItem (int index)
+{
+    if (index < 0  ||  index >= l_ItemCnt)
+    {
+	ConsolePrintf("DisplaySelectItem(%d): <index> out of range\n", index);
+	return;
+    }
+
+    l_ItemIdx = index;
+
+    l_bitMaskFieldUpd = l_bitMaskFieldActive = LCD_FIELD_ID_MASK_ITEM;
+}
+
+
+/***************************************************************************//**
+ *
  * @brief	Display Update Check
  *
  * This function checks if the information on the LC-Display needs to be
  * updated, or if the LCD is currently not used and can be switched off.
+ * It also handles power-off and battery controller probing requests.
  *
  * @note
  * 	This function may be called from standard program, usually the loop
@@ -262,8 +347,47 @@ void	DisplayKeyHandler (KEYCODE keycode)
  ******************************************************************************/
 void	DisplayUpdateCheck (void)
 {
-static int prevSeconds;
+static int  prevSeconds;
+static bool flgPowerOffActive;
 
+
+    /*
+     * Check if HRD should be powered off.
+     */
+    if (l_flgPowerOff)
+    {
+	if (! flgPowerOffActive)
+	{
+	    flgPowerOffActive = true;
+
+	    DisplayText (1, "P O W E R  O F F");
+	    DisplayText (2, "");
+
+	    ConsolePrintf ("HRDevice is switched OFF now\n\n");
+	    SET_POWER_PIN(0);		// set FET input to LOW
+	}
+	return;		// INHIBIT ALL OTHER ACTIONS
+    }
+#ifdef DEBUG	/* Only in debugging environment required: re-power device */
+    else
+    {
+	if (flgPowerOffActive)
+	{
+	    flgPowerOffActive = false;
+	    SET_POWER_PIN(1);	// set FET input to HIGH
+	    l_flgDisplayIsOn = false;
+	}
+    }
+#endif
+
+    /*
+     * Check if the Battery Controller Probe routine should be called (again).
+     */
+    if (l_flgBatteryCtrlProbe)
+    {
+	l_flgBatteryCtrlProbe = false;
+	BatteryCtrlProbe();
+    }
 
     /* If one second is over, we need to update measurements */
     if (prevSeconds != g_CurrDateTime.tm_sec)
@@ -362,7 +486,7 @@ const char	*pStr;
 		break;
 
 	    case LCD_ITEM_DESC:		// display item description
-		LCD_Printf (id, "%s", l_pItemList[l_ItemIdx]);
+		LCD_Printf (id, "%s", l_pItemList[l_ItemIdx].pDesc);
 		break;
 
 	    case LCD_ITEM_ADDR:		// display item register address
@@ -382,7 +506,6 @@ const char	*pStr;
 		else
 		{
 		    LCD_Printf (id, "READ ERROR");
-		    //TODO: flash LED to indicate ERROR ???
 		}
 		break;
 
@@ -426,10 +549,12 @@ const char	*pStr;
  ******************************************************************************/
 static char	*ItemDataString (const ITEM *pItem)
 {
-static char	 strBuf[20];	// static buffer to return string into
-uint8_t		 dataBuf[20];	// buffer for I2C data, read from the controller
-int		 data = NONE;	// generic data variable
-SBS_CMD		 regAddr;	// command, i.e. the register address to read
+static char	 strBuf[120];	// static buffer to return string into
+uint8_t		 dataBuf[40];	// buffer for I2C data, read from the controller
+uint32_t	 value;		// unsigned data variable
+int		 data = 0;	// generic signed integer data variable
+SBS_CMD		 cmd;		// command, i.e. the register address to read
+int		 d, h, m;	// FRMT_DURATION: days, hours, minutes
 
 
     /* Parameter check */
@@ -437,37 +562,31 @@ SBS_CMD		 regAddr;	// command, i.e. the register address to read
     if (pItem == NULL)
 	return NULL;		// error
 
+    /* Prepare check for string buffer overflow */
+    strBuf[sizeof(strBuf)-1] = 0x11;
+
     /* Check if item needs any data (that should be the standard) */
-    regAddr = pItem->Cmd;
-    if (regAddr != SBS_NONE)
+    cmd = pItem->Cmd;
+
+    if (cmd != SBS_NONE)
     {
 	/* See how many bytes we need to read */
-	data = SBS_CMD_SIZE(regAddr);	// get object size
-	if (data != 0)
+	data = SBS_CMD_SIZE(cmd);	// get object size
+	if (data > 4)
 	{
-	    /* More than one byte - must be a block, i.e. a string */
+	    /* More than 32 bits - must be a block, e.g. a string */
 	    EFM_ASSERT(data < (int)sizeof(dataBuf));
 
-	    if (BatteryRegReadBlock (regAddr, dataBuf, sizeof(dataBuf)) < 0)
+	    if (BatteryRegReadBlock (cmd, dataBuf, data) < 0)
 		return NULL;	// READ ERROR
-
-	    /*
-	     * The buggy battery controller firmware delivers strings with
-	     * leading spaces.  We check for this and remove them.
-	     */
-	    data = 0;		// used as index
-	    while (isspace((int)dataBuf[data])  &&  data < (int)sizeof(dataBuf))
-		data++;
-
-	    /* copy string */
-	    return strcpy (strBuf, (char *)dataBuf+data);
 	}
 	else
 	{
-	    /* Just one byte to read */
-	    data = BatteryRegReadWord (regAddr);
-	    if (data < 0)
+	    /* Read data word - may be 1, 2, 3, or 4 bytes long */
+	    if (BatteryRegReadValue (cmd, &value) < 0)
 		return NULL;	// READ ERROR
+
+	    data = (int)value;
 	}
     }
 
@@ -478,13 +597,59 @@ SBS_CMD		 regAddr;	// command, i.e. the register address to read
 	    sprintf (strBuf, "V%s %s", prjVersion, prjDate);
 	    break;
 
+	case FRMT_BAT_CTRL:	// Battery controller SMBus address and type
+	    if (g_BatteryCtrlAddr == 0)
+		strcpy (strBuf, "N O T  F O U N D");
+	    else
+		sprintf (strBuf, "0x%02X: %s", g_BatteryCtrlAddr,
+			 g_BatteryCtrlName);
+	    break;
+
 	case FRMT_CR2032_BAT:	// Voltage of local CR2032 supply battery
 	    data = ReadVdd();
 	    sprintf (strBuf, "CR2032: %d.%03dV", data / 1000, data % 1000);
 	    break;
 
-	case FRMT_HEX:		// HEX Digits
-	    sprintf (strBuf, "0x%04X", data);
+	case FRMT_STRING:	// return string to be displayed
+	    /*
+	     * The first byte contains the number of ASCII characters WITHOUT
+	     * a trailing 0 as EndOfString marker.  However, in some cases the
+	     * specified byte count is larger than the string - then an EOS
+	     * marker exists in the data read from the controller.
+	     */
+	    data = dataBuf[0];
+	    EFM_ASSERT(data < (int)(sizeof(strBuf)-1));
+	    strncpy (strBuf, (char *)dataBuf+1, data);
+	    strBuf[data] = EOS;		// terminate string
+	    break;
+
+	case FRMT_HEXDUMP:	// prepare data as hexdump
+	    data = dataBuf[0];
+	    for (d = 0;  d < data;  d++)	// data = number of bytes
+		sprintf (strBuf + 3*d, "%02X ", dataBuf[d+1]);
+	    strBuf[3*d - 1] = EOS;
+	    break;
+
+	case FRMT_HEX:		// HEX Digits (8, 16, 24, or 32bit)
+	    switch (SBS_CMD_SIZE(pItem->Cmd))
+	    {
+		case 1:
+		    sprintf (strBuf, "0x%02X", data);
+		    break;
+
+		case 2:
+		    sprintf (strBuf, "0x%04X", data);
+		    break;
+
+		case 3:
+		    sprintf (strBuf, "0x%06X", data);
+		    break;
+
+		case 4:
+		default:
+		    sprintf (strBuf, "0x%08lX", value);
+		    break;
+	    }
 	    break;
 
 	case FRMT_INTEGER:	// Integer Value
@@ -500,7 +665,19 @@ SBS_CMD		 regAddr;	// command, i.e. the register address to read
 	    break;
 
 	case FRMT_DURATION:	// Duration in [min]
-	    sprintf (strBuf, "%5dmin", data);
+	    if (data > 65534)		// > 45d
+	    {
+		strcpy (strBuf, "> 45 days");
+	    }
+	    else
+	    {
+		d = data / 60 / 24;
+		data -= (d * 60 * 24);
+		h = data / 60;
+		data -= (h * 60);
+		m = data;
+		sprintf (strBuf, "%2dd %2dh %2dm", d, h, m);
+	    }
 	    break;
 
 	case FRMT_OC_REATIME:	// Overcurrent Reaction Time in 1/2[ms] units
@@ -515,8 +692,8 @@ SBS_CMD		 regAddr;	// command, i.e. the register address to read
 	    sprintf (strBuf, "%5dmV", data);
 	    break;
 
-	case FRMT_MILLIAMP:	// Current in [mA]
-	    sprintf (strBuf, "%5dmA", data);
+	case FRMT_MILLIAMP:	// Current in [±mA], +:charging, -:discharging
+	    sprintf (strBuf, "%5dmA", (int16_t)data);
 	    break;
 
 	case FRMT_MILLIAMPH:	// Capacity in [mAh]
@@ -544,6 +721,14 @@ SBS_CMD		 regAddr;	// command, i.e. the register address to read
 	    return NULL;
 
     }	// switch (pItem->Frmt)
+
+    /* Perform check for string buffer overflow */
+    if (strBuf[sizeof(strBuf)-1] != 0x11)
+    {
+	ConsolePrintf("ERROR in ItemDataString(%s): strBuf Overflow!\n",
+		      pItem->pDesc);
+	return NULL;		// handle similar as read error
+    }
 
     return strBuf;
 }
@@ -715,7 +900,7 @@ void DisplayUpdateTrigger (LCD_FIELD_ID fieldID)
  * @brief	Switch LCD Off
  *
  * This routine is called from the RTC interrupt handler to trigger the
- * power-off of the LC-Display, after @ref LCD_POWER_OFF_TIME seconds have
+ * power-off of the LC-Display, after @ref LCD_POWER_OFF_TIMEOUT seconds have
  * elapsed.
  *
  ******************************************************************************/
@@ -736,14 +921,15 @@ static void SwitchLCD_Off(TIM_HDL hdl)
  *
  * This routine is called from the RTC interrupt handler to trigger the
  * power-off of the whole device, after @ref POWER_OFF_TIMEOUT seconds are
- * over without any keq assertion.
+ * over without any key assertion.
  *
  ******************************************************************************/
 static void SwitchDeviceOff(TIM_HDL hdl)
 {
     (void) hdl;		// suppress compiler warning "unused parameter"
 
-    SET_POWER_PIN(0);	// set FET input to LOW
+    /* Set flag to initiate power-off */
+    l_flgPowerOff = true;
 }
 
 
