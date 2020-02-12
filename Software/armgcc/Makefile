@@ -1,10 +1,5 @@
 ####################################################################
 # Makefile                                                         #
-#                                                                  #
-# Set WINDOWSCS or LINUXCS to match your environment, e.g.         #
-# export LINUXCS=/opt/cross/gcc-arm-none-eabi-4_8-2014q3           #
-# export PATH=${PATH}:${LINUXCS}/bin                               #
-#                                                                  #
 ####################################################################
 
 .SUFFIXES:				# ignore builtin rules
@@ -15,7 +10,7 @@
 ####################################################################
 
 DEVICE = EFM32G230F128
-PROJECTNAME = Akku_LCD
+PROJECTNAME = HRD
 
 OBJ_DIR = build
 EXE_DIR = exe
@@ -184,7 +179,7 @@ release:  CFLAGS += -DNDEBUG -Os
 release:  $(EXE_DIR)/$(PROJECTNAME).bin
 
 # rule when to update version file
-$(OBJ_DIR)/version.o: $(C_OBJS) $(S_OBJS) $(s_OBJS)
+$(OBJ_DIR)/version.o: $(C_OBJS) $(S_OBJS) $(s_OBJS) ../version.c
 
 # Create objects from C SRC files
 $(OBJ_DIR)/%.o: %.c
@@ -222,3 +217,7 @@ endif
 ifneq (clean,$(findstring clean, $(MAKECMDGOALS)))
 -include $(C_DEPS)
 endif
+
+doc:
+	cd ..;			\
+	doxygen
