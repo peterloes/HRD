@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief	HRD
- * @author	Peter Loës
+ * @author	Peter Loes
  * @version	2020-01-13
  *
  * This application consists of the following modules:
@@ -49,7 +49,7 @@
  *
  ****************************************************************************//*
 Revision History:
-2020-01-13,rage	Merged with version from Peter Loës, updated documentation.
+2020-01-13,rage	Merged with version from Peter Loes, updated documentation.
 		Calculate the LCD contrast depending on the CR2032 voltage.
 		ConsolePrintf() allows formated output to the serial console.
 2016-11-22,rage	Added DMA Channel Assignment for LEUART support.
@@ -294,7 +294,7 @@ static const ITEM l_Item[] =
     { "Serial Number",      SBS_SerialNumber,		FRMT_HEX	},
     { "Production Date",    SBS_ManufactureDate,	FRMT_DATE	},
     { "Manufact. Data",	    SBS_ManufacturerData,	FRMT_STRING	},
-    { "Manufact. Data",	    SBS_ManufacturerDataTI,	FRMT_HEXDUMP	},
+    { "Manufact. Data",	    SBS_ManufacturerDataTI,	FRMT_STRING	},
     { "Specificat. Info",   SBS_SpecificationInfo,	FRMT_HEX	},
     { "Design Capacity",    SBS_DesignCapacity,		FRMT_MILLIAMPH	},
     { "Design Voltage",     SBS_DesignVoltage,		FRMT_MILLIVOLT	},
