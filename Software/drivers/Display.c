@@ -710,12 +710,14 @@ int		 d, h, m;	// FRMT_DURATION: days, hours, minutes
 	    break;
 
 	case FRMT_TEMP:		// Temperature in 1/10[K], convert to [°C]
-	    data -= 2732;	// subtract base of 273.16K
+            {
+            data -= 2732;	// subtract base of 273.16K
 	    int degC = data / 10;
 	    if (data < 0)
 		data = -data;
 	    sprintf (strBuf, "%d.%d C", degC, data % 10);
-	    break;
+	    }
+          break;
 
 	default:		// unsupported format
 	    return NULL;
