@@ -1,4 +1,4 @@
-﻿# MaxPlanckSienceLicense MPSL
+﻿# MaxPlanckScienceLicense MPSL
 # End User License Agreement
 
 Scope of this Software License Agreement:
