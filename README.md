@@ -40,12 +40,12 @@ Power management for the LC-Display.
 
 Display will be scrolled (11 digits).
 
-The standalone HRD features EFM32 ...the world´s most energy friendly microcontrollers
-
-ARM Cortex-M3 EFM32G230F128
-
 https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/1_poster_overview.pdf
 
 Supplier:
 
 https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/3_Supplier.txt
+
+The standalone HRD features EFM32 ...the world´s most energy friendly microcontrollers
+
+ARM Cortex-M3 EFM32G230F128
