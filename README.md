@@ -45,3 +45,7 @@ The standalone HRD features EFM32 ...the world´s most energy friendly microcont
 ARM Cortex-M3 EFM32G230F128
 
 https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/1_poster_overview.pdf
+
+Supplier:
+
+https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/3_Supplier.txt
