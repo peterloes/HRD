@@ -42,7 +42,7 @@ Display will be scrolled (11 digits).
 
 https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/1_poster_overview.pdf
 
-Supplier:
+Manufacture:
 
 https://github.com/peterloes/HRD/blob/master/Getting_Started_Tutorial/3_Supplier.txt
 
