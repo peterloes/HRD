@@ -16,7 +16,7 @@ For further discription of the software are provided as source code (via downloa
 Software is made available for download from the https://github.com/peterloes/ , https://github.com/mpio-be .
 
 Intellectual Property:
-All software are copyright Max-Planck-Society e.V. (Max Planck Institute for Ornithology, Mr Loës) unless otherwise stated. Copyright law protects this software and any associated material. Max-Planck-Society e.V. retains title to and ownership in the copyright of the software program and the associated materials. This software is not provided as public domain software.
+All software are copyright Max-Planck-Society e.V. (Max Planck Institute for Biological Intelligence, Mr Loës) unless otherwise stated. Copyright law protects this software and any associated material. Max-Planck-Society e.V. retains title to and ownership in the copyright of the software program and the associated materials. This software is not provided as public domain software.
 
 Science Software License Rights:
 The Software is licensed for lawful non-commercial academic and academic-research purposes only (e.g. research, teaching or education). The license is a non-exclusive, single-use, non-transferable and non-sublicensable license for use on one single computer location by one user. It is explicitly prohibited to use the software or parts of it, whether modified or not, for commercial purposes or operational use.
