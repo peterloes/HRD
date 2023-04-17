@@ -1,16 +1,3 @@
-Lithium Ionen rechargeable battery pack Art.Nr. 60.16294 Panasonic NCR 18650GA 4S2P
-14,4Volt 6900mAh inklusive SMBus Kabel je. 150mm 
-
-DYNAMIS Batterien GmbH
-Josef Pfeil
-
-Brühlstraße 15  D- 78465 Dettingen / Konstanz
-Tel. +49 (0) 75 33/93 669-15
-mailto:josef.pfeil@dynamis-batterien.de
-www.dynamis-batterien.de
-
-
-
 Supplier of all Electronic Boards
 
 Top-Print Electronic GmbH
@@ -25,10 +12,12 @@ mailto: info@top-print.eu
 https://www.leiterplatten-muenchen.de/
 
 
-
-FTDI Chip cable (3.5mm Audio Jack to USB)
-TTL-232R-3V3-AJ
-
+1 	× 	Housing TEKO Mod.10008
+3 	× 	5GSH935+1SS09-12.0 (Button)
+24 	× 	Pin Header, vertical to increase display height. manufacturer number: MK01/50 Z.
+1 	× 	Phoenix Contact MC 1.5/ 3-G-3.81 manufacturer number: 1803280
+1 	× 	PTR Socket housing-cable AK(Z)1550 manufacturer number: 51550030025F
+1 	× 	FTDI Chip cable (3.5mm Audio Jack to USB) TTL-232R-3V3-AJ 
 
 
 Docklight RS232 Terminal / RS232 Monitor
